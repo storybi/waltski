@@ -541,9 +541,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
    Away team's goal on the left, home team's on the right (matching the away-at-home order of the scores). While the game is live a ball marker sits on the
    line of scrimmage with an arrow for the direction of travel, and the end zone the offense is driving toward wears the offense's colors (the other end zone
    the defense's). Team-color footballs + abbreviations (no team logos). The whole bar links to the game on ESPN. */
-.sea-game{position:relative; isolation:isolate; display:flex; align-items:center; gap:0 12px; margin:0; padding:8px calc(6% + 6px); min-height:38px; box-sizing:border-box; overflow:hidden; white-space:nowrap; text-decoration:none; color:#fff;
+.sea-game{position:relative; isolation:isolate; display:flex; align-items:center; gap:0 12px; margin:0; padding:8px calc(3% + 6px); min-height:38px; box-sizing:border-box; overflow:hidden; white-space:nowrap; text-decoration:none; color:#fff;
   border:1px solid #1d5a26; border-bottom:0; background-color:#2f7d38;
-  background-image:linear-gradient(90deg, rgba(255,255,255,.05) 0 50%, rgba(0,0,0,.05) 50%); background-size:17.6% 100%; background-position:6% 0;
+  background-image:linear-gradient(90deg, rgba(255,255,255,.05) 0 50%, rgba(0,0,0,.05) 50%); background-size:18.8% 100%; background-position:3% 0;
   font:700 13px/20px var(--font-body); font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(0,0,0,.6);}
 .sea-game[hidden]{display:none!important;}
 .sea-game:not([hidden]) + .wxbar{border-top:0;}
@@ -551,12 +551,15 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sea-game:focus-visible{outline:2px solid #fff; outline-offset:-3px;}
 .sea-game > span:not(.sg-bg){position:relative; z-index:2;}
 .sg-bg{position:absolute; top:0; bottom:0; z-index:0; pointer-events:none;}
-.sg-yd{left:6%; right:6%; background-image:linear-gradient(90deg, rgba(255,255,255,.62) 0 1.5px, transparent 1.5px); background-size:10% 100%; border-right:1.5px solid rgba(255,255,255,.62);}
-.sg-ez{width:6%; background:var(--ez1,#235f2a); box-shadow:inset 0 0 0 2px var(--ez2,rgba(255,255,255,.25)); transition:background-color .6s ease, box-shadow .6s ease;}
+.sg-yd{left:3%; right:3%; background-image:linear-gradient(90deg, rgba(255,255,255,.62) 0 1.5px, transparent 1.5px); background-size:10% 100%; border-right:1.5px solid rgba(255,255,255,.62);}
+.sg-ez{width:3%; background:var(--ez1,#235f2a); box-shadow:inset 0 0 0 2px var(--ez2,rgba(255,255,255,.25)); transition:background-color .6s ease, box-shadow .6s ease;}
 .sg-ez.l{left:0;} .sg-ez.r{right:0;}
 .sg-ez::after{content:""; position:absolute; inset:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,.12) 0 3px, transparent 3px 8px);}
 .sg-ez.off::before{content:""; position:absolute; inset:0; background:var(--ez2); opacity:.0; animation:sg-ez 2.4s ease-in-out infinite;}
 @keyframes sg-ez{50%{opacity:.28}}
+/* Red zone: when the offense is inside the opponent's 20, the 10 yards in front of the goal line it attacks turn red */
+.sg-rz{z-index:0; width:9.4%; background:rgba(214,32,32,.62); box-shadow:inset 0 0 0 1px rgba(255,120,120,.5);}
+.sg-rz.l{left:3%;} .sg-rz.r{right:3%;}
 .sg-los{z-index:1; width:2px; margin-left:-1px; background:#3aa0ff; box-shadow:0 0 4px rgba(58,160,255,.9); transition:left .8s ease;}
 .sg-pos{position:absolute; top:50%; z-index:1; transform:translate(-50%,-50%); display:flex; align-items:center; pointer-events:none; transition:left .8s ease; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.6));}
 .sg-pos svg{display:block; width:18px; height:11px;}
@@ -580,7 +583,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sg-dd{font-weight:600; opacity:.9;}
 .sg-go{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.08em; text-transform:uppercase;}
 @media (max-width:760px){ .sg-meta{display:none;} }
-@media (max-width:560px){ .sea-game{gap:0 9px; padding:8px calc(6% + 3px); font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
+@media (max-width:560px){ .sea-game{gap:0 9px; padding:8px calc(3% + 4px); font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
 @media (max-width:380px){ .sg-lbl{display:none;} .sg-board{margin-left:0;} }
 /* Walt Ski Journal nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
 .wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(15px,6.6vw,86px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
@@ -1639,7 +1642,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
       '<span class="sg-bg sg-ez r' + (offSide === "r" ? ' off' : '') + '" style="--ez1:' + cr[1] + ';--ez2:' + cr[2] + '"></span>';
     var x = off ? spotX() : null;
     if(x != null){
-      var left = "calc(6% + " + (x * 0.88).toFixed(2) + "%)", c = col(off);
+      var left = "calc(3% + " + (x * 0.94).toFixed(2) + "%)", c = col(off);
+      if(offSide === "l" ? x <= 20 : x >= 80) h += '<span class="sg-bg sg-rz ' + offSide + '"></span>';
       h += '<span class="sg-bg sg-los" style="left:' + left + '"></span>' +
         '<span class="sg-bg sg-pos ' + (offSide === "l" ? "to-l" : "to-r") + '" style="left:' + left + '">' + ballSvg(c[1], c[2]) + '<span class="ar">' + (offSide === "l" ? "◀" : "▶") + '</span></span>';
     }
