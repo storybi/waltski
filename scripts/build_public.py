@@ -228,15 +228,17 @@ head = """<!doctype html>
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
 # Greeting by the reader's clock (Mark, Oct 26, 2026): from 10:00 a.m. MT the morning edition's "Rise and shine" becomes
-# "Happy mid-morning", whether or not a refresh has run. Checked on load and every minute; later greetings are left alone.
+# "Happy mid-morning", and from 5:00 p.m. MT any earlier greeting becomes "Good evening", whether or not a refresh has run.
+# Checked on load and every minute.
 greet_js = """<script>
 (function(){
   function fix(){
     var g = document.getElementById("wt-greet"); if(!g) return;
-    var t = g.textContent; if(!/^Rise and shine/.test(t)) return;
+    var t = g.textContent;
     var hm = new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"2-digit",minute:"2-digit",hour12:false}).split(":");
     var m = (+hm[0] % 24) * 60 + (+hm[1]);
-    if(m >= 10 * 60) g.textContent = t.replace(/^Rise and shine/, "Happy mid-morning");
+    if(m >= 17 * 60) g.textContent = t.replace(/^(Rise and shine|Happy mid-morning|Good afternoon)/, "Good evening");
+    else if(m >= 10 * 60) g.textContent = t.replace(/^Rise and shine/, "Happy mid-morning");
   }
   fix(); setInterval(fix, 60000);
 })();
