@@ -48,7 +48,7 @@ for m in reversed(scripts):
 # 3. Remove Shopping (section + nav link).
 body = re.sub(r'\s*<!-- =+ SHOPPING[^>]*-->\s*<section id="shopping">.*?</section>', "\n", body, count=1, flags=re.S)
 body = re.sub(r'<section id="shopping">.*?</section>', "", body, count=1, flags=re.S)
-body = body.replace('<a href="#shopping">Shopping</a>', "")
+body = re.sub(r'<a href="#shopping">[^<]*</a>', "", body)
 
 # 4. Hide the Ask Claude bar (its code shares a script with the weather renderer, so only the bar is hidden).
 public_css = """<style>
