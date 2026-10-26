@@ -140,7 +140,7 @@ html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
 </style>
 """
 video_js = """<script>
-/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly; it plays at quarter speed. */
+/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly; it plays at 1/16 speed. */
 (function(){
   var SRC = "%s";
   var b = document.getElementById("wt-banner"), root = document.documentElement;
@@ -155,8 +155,8 @@ video_js = """<script>
   var v = document.createElement("video");
   v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true; v.preload = "auto";
   v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
-  /* Play the time-lapse at quarter speed (Mark asked for it slower, twice). Reapplied whenever the video (re)loads. */
-  var RATE = 0.25;
+  /* Play the time-lapse at 1/16 speed, the slowest browsers allow (Mark asked for it slower three times). Reapplied whenever the video (re)loads. */
+  var RATE = 0.0625;
   function slow(){ try{ v.defaultPlaybackRate = RATE; v.playbackRate = RATE; }catch(e){} }
   v.addEventListener("loadedmetadata", slow);
   v.addEventListener("playing", function(){ slow(); root.classList.add("has-banner", "has-video"); });
