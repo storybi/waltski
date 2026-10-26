@@ -640,6 +640,20 @@ body::before{display:none;}
 /* Updated stamp: never in the header (a phone rule used to un-hide it); shown once at the very bottom of the page instead */
 .wt-greet .wt-stamp,.wt-greet .wt-stamp[hidden]{display:none!important;}
 .wt-foot-upd{margin:14px 0 0; font:500 11.5px/1.5 var(--font-body); color:var(--fg-faint); text-align:center;}
+/* Live Doppler radar under the Snow Watch cards */
+.radar{margin-top:16px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--snow);}
+.radar-head{display:flex; justify-content:space-between; align-items:baseline; gap:4px 10px; flex-wrap:wrap; padding:10px 14px;}
+.radar-head h3{font-size:15px;} .radar-head h3 span{font:500 12px var(--font-body); color:var(--fg-muted); margin-left:6px;}
+.radar-time{font:700 12px var(--font-body); color:var(--snow); font-variant-numeric:tabular-nums;}
+.radar-map{position:relative; z-index:0; height:340px; background:#dfe4e8; overflow:hidden;}
+.radar-img{display:block; width:100%; height:100%; object-fit:cover;}
+.radar-foot{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; justify-content:space-between; padding:8px 14px; font-size:11px; color:var(--fg-faint);}
+.radar-legend{display:inline-flex; align-items:center; gap:6px; font-weight:600;}
+.radar-legend i{display:inline-block; width:140px; height:8px; border-radius:2px; background:linear-gradient(90deg,#04e9e7,#019ff4,#02fd02,#01c501,#fdf802,#fd9500,#fd0000,#d40000,#f800fd);}
+.radar-src a{color:var(--accent);}
+.radar-tip{background:rgba(255,255,255,.92); border:0; box-shadow:none; color:#161513; font:700 11px var(--font-body); padding:1px 5px;}
+.radar-tip:before{display:none;}
+@media (max-width:560px){ .radar-map{height:260px;} .radar-legend i{width:90px;} }
 </style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
@@ -716,6 +730,18 @@ body::before{display:none;}
         <h3>Super El Niño favors a big Wasatch winter — mostly Jan–Mar</h3>
         <p>With a potentially record El Niño building and the ECMWF seasonal model locked onto it, OpenSnow favors above-normal snow for the Wasatch, including Snowbasin and Park City, with the best odds January–March and no clear early-season signal. Northern Utah may run warm with occasional high snow levels. Colorado's south and east are favored in Nov–Dec and spring.</p>
         <div class="src">Sources: <a href="https://opensnow.com/news/post/2026-2027-winter-forecast-preview" target="_blank" rel="noopener">OpenSnow winter preview</a> · <a href="https://www.severe-weather.eu/long-range-2/winter-2026-2027-snow-forecast-october-update-snowfall-explorer-super-el-nino-ski-season-united-states-canada-europe-fa/" target="_blank" rel="noopener">Severe Weather Europe</a></div>
+      </div>
+    </div>
+      <!-- Live Doppler radar over Mountain Green & Snowbasin (added Oct 25, 2026). Rendered by the "Live radar" script; keep as is. -->
+    <div class="radar" id="radar">
+      <div class="radar-head">
+        <h3>Live Doppler radar <span>Mountain Green &amp; Snowbasin</span></h3>
+        <span class="radar-time" id="radar-time">Loading radar…</span>
+      </div>
+      <div class="radar-map" id="radar-map" role="img" aria-label="Animated weather radar map centered on Mountain Green and Snowbasin, Utah"></div>
+      <div class="radar-foot">
+        <span class="radar-legend" aria-hidden="true"><span>Light</span><i></i><span>Heavy</span></span>
+        <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · map © OpenStreetMap contributors, © CARTO · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
   </section>
@@ -1904,6 +1930,108 @@ body::before{display:none;}
     root.style.setProperty("--ask-h", h + "px"); }
   set(); window.addEventListener("resize", set); window.addEventListener("load", set); setTimeout(set, 1500);
   try{ var a = document.getElementById("askbar"); if(a && window.ResizeObserver) new ResizeObserver(set).observe(a); }catch(e){}
+})();
+</script>
+<script>
+/* Live radar — Doppler radar over Mountain Green & Snowbasin under the Snow Watch cards (added Oct 25, 2026).
+   On waltski.com: an interactive Leaflet map (CARTO base + NWS NEXRAD composite reflectivity tiles from the Iowa Environmental
+   Mesonet), looping the last 50 minutes in 5-minute frames and reloading every 5 minutes. Inside claude.ai (which can't load
+   outside map tiles): a radar image of the same area built through the Composio connector every 10 minutes.
+   Colors are standard NWS reflectivity: blues/greens = light precipitation, yellow/orange = moderate, reds/magenta = heavy.
+   Keep this script, the #radar markup and the .radar CSS as they are during routine refreshes. */
+(function(){
+  var box = document.getElementById("radar-map"), tl = document.getElementById("radar-time");
+  if(!box || !tl) return;
+  var C = [41.18, -111.81], ZOOM = 9;
+  var PLACES = [["Mountain Green", 41.1425, -111.7869], ["Snowbasin", 41.2160, -111.8569]];
+  function hm(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+
+  /* ---- inside claude.ai: static radar image through Composio ---- */
+  if(window.claude && window.claude.use){
+    var CMD = "python3 - <<'P'\n" +
+      "import io,math,base64,urllib.request,datetime\n" +
+      "from PIL import Image,ImageDraw\n" +
+      "Z=9;LAT,LON=" + C[0] + "," + C[1] + ";W,H=760,440\n" +
+      "def px(lat,lon):\n" +
+      "  n=2**Z*256;x=(lon+180)/360*n;r=math.radians(lat);y=(1-math.log(math.tan(r)+1/math.cos(r))/math.pi)/2*n;return x,y\n" +
+      "cx,cy=px(LAT,LON);x0,y0=cx-W/2,cy-H/2\n" +
+      "def get(u):\n" +
+      "  return Image.open(io.BytesIO(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'waltski.com radar'}),timeout=20).read())).convert('RGBA')\n" +
+      "base=Image.new('RGBA',(W,H),(235,235,230,255));rad=Image.new('RGBA',(W,H),(0,0,0,0))\n" +
+      "for tx in range(int(x0//256),int((x0+W)//256)+1):\n" +
+      "  for ty in range(int(y0//256),int((y0+H)//256)+1):\n" +
+      "    ox,oy=int(tx*256-x0),int(ty*256-y0)\n" +
+      "    try: base.paste(get('https://a.basemaps.cartocdn.com/rastertiles/voyager/%d/%d/%d.png'%(Z,tx,ty)),(ox,oy))\n" +
+      "    except Exception: pass\n" +
+      "    try: t=get('https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/%d/%d/%d.png'%(Z,tx,ty)); rad.paste(t,(ox,oy),t)\n" +
+      "    except Exception: pass\n" +
+      "a=rad.split()[3].point(lambda v:int(v*0.8));rad.putalpha(a);img=Image.alpha_composite(base,rad);d=ImageDraw.Draw(img)\n" +
+      "for name,la,lo in " + JSON.stringify(PLACES) + ":\n" +
+      "  x,y=px(la,lo);x-=x0;y-=y0;d.ellipse([x-6,y-6,x+6,y+6],fill=(226,115,58,255),outline=(255,255,255,255),width=2);d.text((x+10,y-7),name,fill=(20,20,20,255),stroke_width=2,stroke_fill=(255,255,255,255))\n" +
+      "o=io.BytesIO();img.convert('RGB').save(o,'JPEG',quality=78,optimize=True)\n" +
+      "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
+      "P";
+    var img = document.createElement("img"); img.alt = "Weather radar over Mountain Green and Snowbasin"; img.className = "radar-img";
+    box.appendChild(img);
+    var KEY = "wsj-radar";
+    try{ var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if(sv && sv.img){ img.src = "data:image/jpeg;base64," + sv.img; tl.textContent = "Radar " + hm(new Date(sv.at)) + " · saved"; } }catch(e){}
+    window.claude.use("mcp").then(function(mcp){
+      if(!mcp){ if(!img.src) tl.textContent = "Radar unavailable here — open the NWS radar link below."; return; }
+      var busy = false;
+      function load(){
+        if(busy || document.hidden) return; busy = true;
+        mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+          var out = stdoutOf(r), at = null, b64 = null;
+          out.split("\n").forEach(function(L){ var i = L.indexOf("|"); if(i < 0) return; var k = L.slice(0,i), v = L.slice(i+1).trim(); if(k === "ts") at = v; if(k === "img" && v.length > 1000) b64 = v; });
+          if(b64){ img.src = "data:image/jpeg;base64," + b64; tl.textContent = "Radar " + hm(new Date(at || Date.now())); try{ localStorage.setItem(KEY, JSON.stringify({at: at, img: b64})); }catch(e){} }
+          else if(!img.src) tl.textContent = "Radar didn't load — open the NWS radar link below.";
+        }, function(){ if(!img.getAttribute("src")) tl.textContent = "Radar unavailable here — open the NWS radar link below."; }).then(function(){ busy = false; });
+      }
+      load(); setInterval(load, 10*60000);
+    }, function(){ tl.textContent = "Radar unavailable here — open the NWS radar link below."; });
+    return;
+  }
+
+  /* ---- waltski.com: interactive animated map ---- */
+  var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"; document.head.appendChild(css);
+  var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+  s.onerror = function(){ tl.textContent = "Radar map didn't load — open the NWS radar link below."; };
+  s.onload = function(){
+    var L = window.L;
+    var map = L.map(box, {zoomControl: true, scrollWheelZoom: false, attributionControl: false}).setView(C, ZOOM);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {subdomains: "abcd", maxZoom: 12, minZoom: 5}).addTo(map);
+    PLACES.forEach(function(p){
+      L.circleMarker([p[1], p[2]], {radius: 6, color: "#ffffff", weight: 2, fillColor: "#E2733A", fillOpacity: 1}).addTo(map)
+        .bindTooltip(p[0], {permanent: true, direction: "right", offset: [8, 0], className: "radar-tip"});
+    });
+    var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], idx = OFFS.length - 1, timer = null, base = null;
+    function build(){
+      layers.forEach(function(l){ map.removeLayer(l); });
+      layers = [];
+      var bust = Math.floor(Date.now() / 300000);
+      base = new Date(Math.floor(Date.now() / 300000) * 300000);
+      OFFS.forEach(function(m, i){
+        var url = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913" + (m ? "-m" + (m < 10 ? "0" : "") + m + "m" : "") + "/{z}/{x}/{y}.png?_=" + bust;
+        var l = L.tileLayer(url, {opacity: 0, maxZoom: 12, zIndex: 10 + i});
+        l.addTo(map); layers.push(l);
+      });
+      show(OFFS.length - 1);
+    }
+    function show(i){
+      layers.forEach(function(l, k){ l.setOpacity(k === i ? 0.78 : 0); });
+      var m = OFFS[i], t = new Date(base.getTime() - m * 60000);
+      tl.textContent = (m ? "−" + m + " min · " : "Now · ") + hm(t);
+    }
+    function step(){
+      idx = (idx + 1) % OFFS.length; show(idx);
+      clearTimeout(timer); timer = setTimeout(step, idx === OFFS.length - 1 ? 2200 : 550);
+    }
+    build();
+    timer = setTimeout(step, 1500);
+    setInterval(function(){ if(!document.hidden) build(); }, 5*60000);
+  };
+  document.head.appendChild(s);
 })();
 </script>
 </body>
