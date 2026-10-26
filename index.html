@@ -461,6 +461,9 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .wt-edition .wt-stake{color:inherit; text-decoration:none; white-space:nowrap;}
 .wt-edition .wt-stake:hover{text-decoration:underline;}
 .wt-edition .wt-stake b{font-weight:800;}
+/* Next photo — advances the Snowbasin photo banner by hand */
+.wt-next{font:inherit; letter-spacing:inherit; text-transform:inherit; color:inherit; text-shadow:inherit; background:none; border:0; padding:0; margin:0; cursor:pointer; white-space:nowrap;}
+.wt-next:hover,.wt-next:focus-visible{text-decoration:underline; outline:none;}
 @media (max-width:480px){ .wt-greet{font-size:12px;} .wt-greet .wt-stamp{display:block; white-space:normal;} .wt-greet .wt-sep{display:none;} }
 /* Newsprint — warm off-white stock with fine grain and soft mottling (light mode only) */
 @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) body,:root:not([data-theme="dark"]) .askbar::before{background-image:var(--paper);} }
@@ -579,7 +582,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Morgan, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a></span>
+      <span>Morgan, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo" hidden>Next photo &rsaquo;</button></span>
       <span class="wt-upd"></span>
     </div>
     
@@ -1531,7 +1534,16 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     if(timer){ clearInterval(timer); timer = null; }
     idx = 0; paint(0); size();
     if(frames.length > 1) timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
+    var nb = document.getElementById("wt-next"); if(nb) nb.hidden = frames.length < 2;
   }
+  /* Next photo button: show the next cam view now, then carry on rotating every 10 seconds from there. */
+  function nextPhoto(){
+    if(frames.length < 2) return;
+    if(timer){ clearInterval(timer); timer = null; }
+    idx = (idx + 1) % frames.length; paint(idx);
+    timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
+  }
+  (function(){ var nb = document.getElementById("wt-next"); if(nb) nb.addEventListener("click", nextPhoto); })();
   function use(list, when){
     frames = list.map(function(b){ return {k: b.k, src: b.src || ("data:image/jpeg;base64," + b.img)}; });
     at = when || null; if(frames.length) start();
