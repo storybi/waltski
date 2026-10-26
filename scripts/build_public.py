@@ -180,7 +180,7 @@ video_js = r"""<script>
     if(playing) return;
     ready = true; root.classList.add("has-banner", "has-video");
   });
-  v.addEventListener("ended", stopPlay);
+  v.addEventListener("ended", function(){ if(playing) stopPlay(); });
   v.addEventListener("error", function(){ if(!ready) root.classList.remove("has-video"); });
   btn.addEventListener("click", function(){
     if(!ready) return;
