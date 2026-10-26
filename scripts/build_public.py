@@ -87,7 +87,7 @@ live_js = r"""<script>
   load();
   setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
 })();
-/* Public site: live Seahawks score straight from ESPN's public scoreboard, every minute while the game strip shows a live game. */
+/* Public site: live Seahawks score straight from ESPN's public scoreboard, every 30 seconds while the game strip shows a live game. */
 (function(){
   var el = document.getElementById("sea-game");
   if(!el || !window.wsjSeaUpdate) return;
@@ -101,12 +101,12 @@ live_js = r"""<script>
         if(!t.home || !t.away || (t.home.team.abbreviation !== "SEA" && t.away.team.abbreviation !== "SEA")) return;
         window.wsjSeaUpdate({start: e.date, state: c.status.type.state, detail: c.status.type.shortDetail || "",
           away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
-          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score)});
+          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score), espn: e.id ? String(e.id) : ""});
       });
       if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
     }).catch(function(){});
   }
-  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 60000); }
+  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 30000); document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); }); }
 })();
 </script>
 """
