@@ -831,6 +831,19 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
   #top .wt-edition, #top .wt-edition .wt-ed-line{justify-content:flex-start!important; text-align:left;}
 }
 </style>
+<style>
+/* Public site: free Google search bar at the top of the sticky dock */
+.gbar{display:flex; align-items:center; gap:6px; margin:0; padding:5px 6px 5px 10px; background-color:var(--bg); border:1px solid var(--border); border-bottom:0;}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .gbar{background-image:var(--paper);} }
+:root[data-theme="light"] .gbar{background-image:var(--paper);}
+.gbar-g{width:16px; height:16px; flex:none; color:var(--fg-faint);}
+.gbar input{flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--fg); font:15px var(--font-body); padding:6px 2px;}
+.gbar input::placeholder{color:var(--fg-faint);}
+.gbar button{font:600 12.5px var(--font-body); border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:6px 10px; cursor:pointer; white-space:nowrap;}
+.gbar button:hover{border-color:var(--fg-muted);}
+.gbar .gbar-ai{background:var(--accent); border-color:var(--accent); color:#fff;}
+@media (max-width:420px){ .gbar button{padding:6px 7px; font-size:12px;} }
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -872,6 +885,12 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 
   <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
   <div class="wt-dock" id="wt-dock">
+  <form class="gbar" id="gbar" action="https://www.google.com/search" method="get" target="_blank" rel="noopener" role="search">
+    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <input type="search" name="q" placeholder="Search Google…" aria-label="Search Google" autocomplete="off" required>
+    <button type="submit">Search</button>
+    <button type="submit" class="gbar-ai" name="udm" value="50" title="Google AI Mode">AI Mode</button>
+  </form>
   <div class="wxbar" id="wxbar" role="group" aria-label="Current weather"></div>
   <div class="wt-ticker" id="ticker" role="region" aria-label="Stock ticker">
     <span class="tk-lbl" id="tk-asof">Markets</span>

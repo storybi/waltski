@@ -57,6 +57,34 @@ public_css = """<style>
 </style>
 """
 
+# 4b. Free Google search bar at the top of the sticky dock (Mark, Oct 26, 2026) — the public site has no Ask Claude bar, so this
+#     takes its place: "Search" opens Google results, "AI Mode" opens Google's free AI answers (udm=50), both in a new tab.
+GBAR_HTML = """
+  <form class="gbar" id="gbar" action="https://www.google.com/search" method="get" target="_blank" rel="noopener" role="search">
+    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <input type="search" name="q" placeholder="Search Google…" aria-label="Search Google" autocomplete="off" required>
+    <button type="submit">Search</button>
+    <button type="submit" class="gbar-ai" name="udm" value="50" title="Google AI Mode">AI Mode</button>
+  </form>"""
+GBAR_CSS = """<style>
+/* Public site: free Google search bar at the top of the sticky dock */
+.gbar{display:flex; align-items:center; gap:6px; margin:0; padding:5px 6px 5px 10px; background-color:var(--bg); border:1px solid var(--border); border-bottom:0;}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .gbar{background-image:var(--paper);} }
+:root[data-theme="light"] .gbar{background-image:var(--paper);}
+.gbar-g{width:16px; height:16px; flex:none; color:var(--fg-faint);}
+.gbar input{flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--fg); font:15px var(--font-body); padding:6px 2px;}
+.gbar input::placeholder{color:var(--fg-faint);}
+.gbar button{font:600 12.5px var(--font-body); border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:6px 10px; cursor:pointer; white-space:nowrap;}
+.gbar button:hover{border-color:var(--fg-muted);}
+.gbar .gbar-ai{background:var(--accent); border-color:var(--accent); color:#fff;}
+@media (max-width:420px){ .gbar button{padding:6px 7px; font-size:12px;} }
+</style>
+"""
+DOCK = '<div class="wt-dock" id="wt-dock">'
+must(body.count(DOCK) == 1, "wt-dock")
+body = body.replace(DOCK, DOCK + GBAR_HTML, 1)
+public_css += GBAR_CSS
+
 # 5. Live cams straight from the cam hosts, refreshed every 5 minutes.
 live_js = r"""<script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
