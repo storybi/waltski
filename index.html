@@ -808,6 +808,15 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
 /* HI mode (Oct 26, 2026): the ski-resort cam row under the radar is hidden while the header plays the Lanikai Beach video */
 html.cam-hi #snow .wx-cams{display:none!important;}
 </style>
+<style>
+/* Locked photo band (Mark, Oct 26, 2026): when you scroll down, the bottom third of the header photo / video stays pinned at the top
+   of the screen, with the Ask Claude bar and the weather / ticker / links dock right under it. */
+html.banner-lock #wt-banner{position:fixed; z-index:3;}
+html.banner-lock #wt-banner::after{background:linear-gradient(to bottom, rgba(0,0,0,.18), rgba(0,0,0,.05));}
+html.banner-lock #wt-banner{box-shadow:0 2px 6px rgba(0,0,0,.18);}
+html.banner-lock .askbar{top:var(--lock-h,0px);}
+html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -3019,6 +3028,28 @@ html.cam-hi #snow .wx-cams{display:none!important;}
     var mo = new MutationObserver(function(){ place(); });
     ids.forEach(function(id){ var el = document.getElementById(id); if(el) mo.observe(el, {childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"]}); });
   } else setInterval(place, 15000);
+})();
+</script>
+<script>
+/* Locked photo band (Oct 26, 2026) — once the page scrolls past two thirds of the header photo, the photo (or video) is pinned so its
+   bottom third stays at the top of the screen; the sticky bars sit just under it (via --lock-h). Keep as is. */
+(function(){
+  var b = document.getElementById("wt-banner"), root = document.documentElement;
+  if(!b) return;
+  var raf = 0;
+  function upd(){
+    raf = 0;
+    var H = parseFloat(b.style.height) || b.offsetHeight || 0, L = Math.round(H / 3);
+    var lock = H > 0 && root.classList.contains("has-banner") && window.scrollY > H - L;
+    root.classList.toggle("banner-lock", lock);
+    if(lock){ b.style.top = (L - H) + "px"; root.style.setProperty("--lock-h", L + "px"); }
+    else { b.style.top = ""; root.style.setProperty("--lock-h", "0px"); }
+  }
+  function q(){ if(!raf) raf = requestAnimationFrame(upd); }
+  window.addEventListener("scroll", q, {passive: true});
+  window.addEventListener("resize", q);
+  if(window.MutationObserver) new MutationObserver(q).observe(b, {attributes: true, attributeFilter: ["style"]});
+  upd();
 })();
 </script></body>
 </html>
