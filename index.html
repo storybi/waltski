@@ -22,6 +22,7 @@ html.has-video .wt-banner-cap{display:none;}
 html.has-video .wt-vid-cap{display:block;}
 .wt-vid-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
 html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
+html:not(.has-video) .wt-play, html:not(.has-video) .wt-play-sep{display:none;}
 </style>
 </head>
 <body>
@@ -1829,57 +1830,68 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 })();
 </script>
 <script>
-/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly.
-   Speed: RATE is the fraction of normal speed (Mark asked for 1/32). Browsers can't play slower than 1/16, so below that the
-   page pauses the video and steps it forward itself (about one frame per second at 1/32). */
+/* Public site: the header shows the LAST frame of Snowbasin's hourly time-lapse (the newest picture) instead of rotating photos.
+   Every page load fetches a fresh copy (cache-busted) and parks on its final frame; the dateline's "Play Timelapse" link plays the
+   whole time-lapse once at PLAY_RATE, then returns to the last frame. If the video can't load, the rotating cam photos stay. */
 (function(){
   var SRC = "https://storage.googleapis.com/prism-cam-00054/running/00054_timelapse_1080.mp4";
-  var RATE = 0.03125, STEP_MS = 250;
+  var PLAY_RATE = 0.25;            /* speed of the one-time play (1 = normal) */
   var b = document.getElementById("wt-banner"), root = document.documentElement;
   if(!b) return;
-  try{
-    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if(navigator.connection && navigator.connection.saveData) return;
-  }catch(e){}
   var nb = document.getElementById("wt-next");
   if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
-  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · time-lapse"; b.appendChild(cap);
+  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · latest time-lapse frame"; b.appendChild(cap);
+  /* "Play Timelapse" link where Next Photo was */
+  var sep = document.createElement("span"); sep.className = "wt-sep2 wt-play-sep"; sep.setAttribute("aria-hidden", "true"); sep.textContent = "|";
+  var btn = document.createElement("button"); btn.type = "button"; btn.className = "wt-next wt-play"; btn.textContent = "Play Timelapse";
+  btn.title = "Play today's Snowbasin time-lapse once";
+  if(nb && nb.parentNode){ nb.parentNode.insertBefore(btn, nb.nextSibling); nb.parentNode.insertBefore(sep, btn); }
   var v = document.createElement("video");
-  v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+  v.muted = true; v.defaultMuted = true; v.loop = false; v.playsInline = true; v.preload = "auto";
   v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
-  var stepper = null, seeking = false;
-  var manual = RATE < 0.0625;
-  function startStepping(){
-    if(stepper) return;
-    v.pause();
-    stepper = setInterval(function(){
-      if(seeking && Date.now() - seekAt > 3000) seeking = false;
-      if(document.hidden || seeking || !v.duration || isNaN(v.duration)) return;
-      var t = v.currentTime + (STEP_MS / 1000) * RATE;
-      if(t >= v.duration - 0.05) t = 0;
-      seeking = true; seekAt = Date.now();
-      v.currentTime = t;
-    }, STEP_MS);
-  }
-  var seekAt = 0;
-  v.addEventListener("seeked", function(){ seeking = false; });
-  v.addEventListener("loadedmetadata", function(){ if(!manual){ try{ v.defaultPlaybackRate = RATE; v.playbackRate = RATE; }catch(e){} } });
-  v.addEventListener("playing", function(){
-    root.classList.add("has-banner", "has-video");
-    if(manual) startStepping(); else { try{ v.playbackRate = RATE; }catch(e){} }
-  });
-  v.addEventListener("error", function(){ root.classList.remove("has-video"); });
-  v.src = SRC;
   b.insertBefore(v, b.firstChild);
-  function go(){ var p = v.play(); if(p && p.catch) p.catch(function(){}); }
-  go();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && !stepper && v.paused) go(); });
-  setInterval(function(){
-    if(document.hidden) return;
-    if(stepper){ clearInterval(stepper); stepper = null; }
-    seeking = false;
-    v.src = SRC + "?t=" + Date.now(); go();
-  }, 60*60000);
+  var playing = false, ready = false;
+  function when(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
+  function toLast(){
+    if(!v.duration || isNaN(v.duration)) return;
+    try{ v.pause(); v.currentTime = Math.max(0, v.duration - 0.04); }catch(e){}
+  }
+  function stopPlay(){
+    playing = false; btn.textContent = "Play Timelapse"; toLast();
+  }
+  v.addEventListener("loadedmetadata", function(){
+    if(playing) return;
+    /* iPhones only paint a frame after playback has started, so start muted and jump straight to the end. */
+    var p = null; try{ p = v.play(); }catch(e){}
+    if(p && p.then) p.then(toLast, toLast); else toLast();
+  });
+  v.addEventListener("seeked", function(){
+    if(playing) return;
+    ready = true; root.classList.add("has-banner", "has-video");
+  });
+  v.addEventListener("ended", stopPlay);
+  v.addEventListener("error", function(){ if(!ready) root.classList.remove("has-video"); });
+  btn.addEventListener("click", function(){
+    if(!ready) return;
+    if(playing){ stopPlay(); return; }
+    playing = true; btn.textContent = "Stop";
+    try{ v.currentTime = 0; v.playbackRate = PLAY_RATE; }catch(e){}
+    var p = v.play(); if(p && p.catch) p.catch(function(){ stopPlay(); });
+  });
+  function load(){
+    if(playing) return;
+    var url = SRC + "?t=" + Date.now();   /* fresh copy on every page load, so the last frame is the newest picture */
+    ready = false;
+    v.src = url; v.load();
+    try{
+      fetch(url, {method: "HEAD", cache: "no-store"}).then(function(r){
+        var lm = r.headers.get("Last-Modified");
+        if(lm) cap.textContent = "Snowbasin · latest time-lapse frame · updated " + when(new Date(lm));
+      }).catch(function(){});
+    }catch(e){}
+  }
+  load();
+  setInterval(function(){ if(!document.hidden && !playing) load(); }, 60*60000);   /* the source updates hourly */
 })();
 </script>
 </body>
