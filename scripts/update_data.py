@@ -13,6 +13,7 @@ free public sources:
   * Weather       (WX, which also drives the mini weather bar) National Weather Service API
   * Seahawks game strip (SEA_GAME)                           ESPN public scoreboard
   * Oregon Ducks game strip (ORE_GAME)                        ESPN public college scoreboard
+  * Weather With Travis latest video (TRAVIS)                 YouTube channel RSS feed
   * Snowbasin cam snapshots (SNAP, SNAP_AT)                  the cam hosts themselves
 
 Everything written by Claude (stories, briefs, devotions, snow outlook, badges, deals) is left alone.
@@ -439,6 +440,27 @@ NFL_SB = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
 NCAAF_SB = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300"
 
 
+def do_travis(s, now_mt):
+    """Weather With Travis: newest upload from the channel's RSS feed (added Oct 26, 2026)."""
+    if "TRAVIS" not in s:
+        return s
+    try:
+        x = urllib.request.urlopen(urllib.request.Request(
+            "https://www.youtube.com/feeds/videos.xml?channel_id=UCTDfJ5sk6bLV_4VOfWV1BuQ",
+            headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read().decode("utf8", "ignore")
+        m = re.search(r"<entry>.*?<yt:videoId>(.*?)</yt:videoId>.*?<title>(.*?)</title>.*?<published>(.*?)</published>", x, re.S)
+    except Exception as e:  # noqa: BLE001
+        log("  travis failed:", e)
+        return s
+    if not m:
+        return s
+    import html as _h
+    v = {"id": m.group(1), "title": _h.unescape(m.group(2)), "published": m.group(3)[:19] + "Z"}
+    s, _ = set_var(s, "TRAVIS", json.dumps(v, ensure_ascii=False, separators=(",", ":")))
+    log("  travis:", v["id"], v["title"])
+    return s
+
+
 def do_seahawks(s, now_mt):
     return do_game(s, now_mt, "SEA_GAME", "SEA", NFL_SB, "seahawks", False)
 
@@ -556,7 +578,7 @@ def main():
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_cams):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_cams):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001

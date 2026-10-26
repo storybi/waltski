@@ -694,6 +694,25 @@ html.cam-alt .wt-play, html.cam-alt .wt-play-sep{display:inline!important;}
 html.cam-alt .wt-dv-watch, html.cam-alt .wt-dv-watch-sep{display:inline;}
 a.wt-dv-watch{text-decoration:none;}
 </style>
+<style>
+/* Weather With Travis — latest video under the radar (Oct 26, 2026) */
+.wxv{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--snow);}
+.wxv-frame{position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; max-width:820px; margin:0 auto;}
+.wxv-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
+.wxv-frame a.wxv-thumb{position:absolute; inset:0; display:block; background:#111 center/cover no-repeat;}
+.wxv-frame a.wxv-thumb::after{content:""; position:absolute; left:50%; top:50%; width:68px; height:48px; margin:-24px 0 0 -34px; border-radius:12px; background:rgba(200,16,46,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 48'%3E%3Cpath d='M27 15v18l16-9z' fill='%23fff'/%3E%3C/svg%3E") center/68px 48px no-repeat;}
+.wxv-frame .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#bbb; font:600 13px var(--font-body); text-decoration:none;}
+.wxv-title{font:600 13px/1.4 var(--font-body); color:var(--fg);}
+</style>
+<style>
+/* Morning Devotion — one reading (Our Daily Bread), full width (Mark, Oct 26, 2026) */
+.word-more.one{grid-template-columns:1fr;}
+.word-more.one .wm-card{padding-inline:0; max-width:860px;}
+.word-more.one .wm-card h3{font-size:22px;}
+.word-more.one .wm-quote{font-size:18px;}
+.word-more.one .wm-sum{font-size:16px;}
+.word-more.one .wm-verse{font-size:15.5px;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -760,6 +779,12 @@ a.wt-dv-watch{text-decoration:none;}
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
+    <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
+    <div class="wxv" id="wxv">
+      <div class="radar-head"><h3>Weather With Travis</h3><span class="radar-time" id="wxv-meta">Latest video</span></div>
+      <div class="wxv-frame" id="wxv-frame"></div>
+      <div class="radar-foot"><span class="wxv-title" id="wxv-title"></span><a class="radar-src" href="https://www.youtube.com/@weatherwithtravis" target="_blank" rel="noopener">Weather With Travis on YouTube &#8599;</a></div>
+    </div>
     <div class="snow-grid">
       <div class="snow-card">
         <div class="when-row"><div class="when">This week · Oct 26–Nov 1</div><span class="fx mix">Mixed</span></div>
@@ -791,8 +816,8 @@ a.wt-dv-watch{text-decoration:none;}
   <!-- ================= DAILY WORD ================= -->
   <section id="daily-word">
     <div class="section-head"><h2>Morning Devotion</h2><div class="line"></div></div>
-    <div class="section-sub">Today’s readings from three classic devotionals, each with its key verse.</div>
-    <div class="word-more">
+    <div class="section-sub">Today’s reading from Our Daily Bread, with its key verse.</div>
+    <div class="word-more one">
       <article class="wm-card">
         <div class="wm-src">Our Daily Bread · Oct 26</div>
         <h3>God Knows Your Name</h3>
@@ -800,22 +825,6 @@ a.wt-dv-watch{text-decoration:none;}
         <p class="wm-sum">Writing to exiles in Babylon, Isaiah carried God's promise that He had called His people by name and would bring them home (Isaiah 43:1–7). The reading, which opens with a charity auction where bidders paid to have their names in a novel, reminds us that being known by God matters far more, so we need not fear an uncertain future.</p>
         <p class="wm-verse">Fear not: for I have redeemed thee, I have called thee by thy name; thou art mine.<cite>Isaiah 43:1 (KJV)</cite></p>
         <a class="w-link" href="https://www.odbm.org/en" target="_blank" rel="noopener">Our Daily Bread →</a>
-      </article>
-      <article class="wm-card">
-        <div class="wm-src">My Utmost for His Highest · Oct 26</div>
-        <h3>All Things to All People</h3>
-        <p class="wm-quote">“I have become all things to all people so that by all possible means I might save some.”</p>
-        <p class="wm-sum">Chambers writes that a Christian worker can be faithful in ordinary, difficult circumstances rather than waiting to be noble somewhere else — God makes use of people through what He has worked into them, not through their preferred setting. Real usefulness grows from truth held in both mind and heart, centered on Christ crucified.</p>
-        <p class="wm-verse">I have become all things to all men, that I might by all means save some.<cite>1 Corinthians 9:22 (KJV)</cite></p>
-        <a class="w-link" href="https://utmost.org/modern-classic/all-things-to-all-people/" target="_blank" rel="noopener">Read on Utmost.org →</a>
-      </article>
-      <article class="wm-card">
-        <div class="wm-src">Spurgeon · Morning &amp; Evening · Oct 26 a.m.</div>
-        <h3>Give First, and Lack Nothing</h3>
-        <p class="wm-quote">“Ye looked for much, and, lo, it came to little.”</p>
-        <p class="wm-sum">Spurgeon warns that holding back from God's work to protect our own interests tends to leave us poorer, just as Haggai's hearers neglected the temple while tending their own houses. In his experience the most open-handed believers were the happiest, because putting God's kingdom first is a small, faith-filled answer to His generosity.</p>
-        <p class="wm-verse">Ye looked for much, and, lo, it came to little; and when ye brought it home, I did blow upon it. Why? saith the LORD of hosts. Because of mine house that is waste, and ye run every man unto his own house.<cite>Haggai 1:9 (KJV)</cite></p>
-        <a class="w-link" href="https://www.heartlight.org/spurgeon/1026-am.html" target="_blank" rel="noopener">Read the full reading →</a>
       </article>
     </div>
   </section>
@@ -2587,5 +2596,57 @@ a.wt-dv-watch{text-decoration:none;}
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
 })();
 </script>
-</body>
+<script>
+/* Weather With Travis video (Oct 26, 2026) — the newest upload from youtube.com/@weatherwithtravis (channel UCTDfJ5sk6bLV_4VOfWV1BuQ), right under the
+   radar. TRAVIS is refreshed every run from the channel's RSS feed (step 5c) and, on waltski.com, by the live-data job. On waltski.com the video plays
+   in an embedded YouTube player; inside claude.ai (which can't embed outside video) the page fetches the newest video and its thumbnail through
+   Composio and links the thumbnail to YouTube. Keep as is. */
+(function(){
+  var TRAVIS = {"id":"QU-brJ9FXxk","title":"Is this SCREAMING Pay ATTENTION?","published":"2026-10-26T02:01:19Z"};
+  var CH = "UCTDfJ5sk6bLV_4VOfWV1BuQ", KEY = "wsj-travis";
+  var fr = document.getElementById("wxv-frame"), ti = document.getElementById("wxv-title"), me = document.getElementById("wxv-meta");
+  if(!fr) return;
+  var inClaude = !!(window.claude && window.claude.use);
+  function esc(x){ return String(x == null ? "" : x).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function when(iso){ try{ return "Posted " + new Date(iso).toLocaleString("en-US",{timeZone:"America/Denver",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return "Latest video"; } }
+  function meta(v){ if(ti) ti.textContent = v.title || ""; if(me) me.textContent = v.published ? when(v.published) : "Latest video"; }
+  var v = TRAVIS;
+  try{ var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if(sv && sv.id && sv.published > v.published) v = sv; }catch(e){}
+  meta(v);
+  if(!inClaude){
+    fr.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(v.id) + '?rel=0&modestbranding=1&playsinline=1" title="' + esc(v.title) + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+    return;
+  }
+  function thumb(vv, img){
+    var url = "https://www.youtube.com/watch?v=" + encodeURIComponent(vv.id);
+    fr.innerHTML = img ? '<a class="wxv-thumb" href="' + url + '" target="_blank" rel="noopener" title="Watch on YouTube" style="background-image:url(data:image/jpeg;base64,' + img + ')"></a>'
+                       : '<a class="ph" href="' + url + '" target="_blank" rel="noopener">▶ Watch “' + esc(vv.title) + '” on YouTube ↗</a>';
+  }
+  var saved = null; try{ saved = JSON.parse(localStorage.getItem(KEY + "-img") || "null"); }catch(e){}
+  thumb(v, saved && saved.id === v.id ? saved.img : null);
+  var CMD = "python3 - <<'P'\n" +
+    "import urllib.request,re,io,base64\n" +
+    "from PIL import Image\n" +
+    "x=urllib.request.urlopen(urllib.request.Request('https://www.youtube.com/feeds/videos.xml?channel_id=" + CH + "',headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read().decode()\n" +
+    "m=re.search(r'<entry>.*?<yt:videoId>(.*?)</yt:videoId>.*?<title>(.*?)</title>.*?<published>(.*?)</published>',x,re.S)\n" +
+    "i,t,p=m.group(1),m.group(2),m.group(3)\n" +
+    "import html;print('v|'+i+'|'+p[:19]+'Z|'+html.unescape(t).replace('|','/'))\n" +
+    "r=urllib.request.urlopen(urllib.request.Request('https://i.ytimg.com/vi/'+i+'/hqdefault.jpg',headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
+    "im=Image.open(io.BytesIO(r)).convert('RGB');w,h=im.size;c=int((h-w*9/16)/2)\n" +
+    "im=im.crop((0,c,w,h-c)) if c>0 else im\n" +
+    "o=io.BytesIO();im.save(o,'JPEG',quality=78);print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
+    "P";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp) return;
+    mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+      var nv = null, img = null;
+      stdoutOf(r).split("\n").forEach(function(l){ var f = l.split("|"); if(f[0] === "v" && f.length >= 4) nv = {id: f[1], published: f[2], title: f.slice(3).join("|")}; if(f[0] === "img" && f[1] && f[1].length > 1000) img = f[1].trim(); });
+      if(!nv) return;
+      v = nv; meta(v); thumb(v, img);
+      try{ localStorage.setItem(KEY, JSON.stringify(v)); if(img) localStorage.setItem(KEY + "-img", JSON.stringify({id: v.id, img: img})); }catch(e){}
+    }, function(){});
+  }, function(){});
+})();
+</script></body>
 </html>
