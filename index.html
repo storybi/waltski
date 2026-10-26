@@ -575,9 +575,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sg-meta{font-weight:600; letter-spacing:.04em; text-transform:none; opacity:.9; margin-left:6px;}
 .sg-board{flex:none; display:flex; align-items:center; gap:10px; margin-left:auto;}
 /* First-down line (yellow, like the TV line) across the ball lane, with a small "1st" tag */
-.sg-fd{z-index:1; top:26px!important; width:2px; margin-left:-1px; background:#ffd400; box-shadow:0 0 5px rgba(255,212,0,.9); transition:left .8s ease;}
-.sg-fd::after{content:"1st"; position:absolute; top:1px; left:4px; font:800 8.5px/1 var(--font-body); letter-spacing:.04em; color:#ffd400; text-shadow:0 1px 2px rgba(0,0,0,.85);}
-.sg-fd.l::after{left:auto; right:4px;}
+.sg-fd{z-index:1; width:3px; margin-left:-1.5px; background:#ffd400; box-shadow:0 0 6px rgba(255,212,0,.95), 0 0 0 1px rgba(0,0,0,.25); transition:left .8s ease;}
+.sg-fd::after{content:"1st"; position:absolute; bottom:4px; left:5px; font:800 8.5px/1 var(--font-body); letter-spacing:.04em; color:#ffd400; text-shadow:0 1px 2px rgba(0,0,0,.85);}
+.sg-fd.l::after{left:auto; right:5px;}
 .sg-tm{display:inline-flex; align-items:center; gap:5px; flex:none;}
 .sg-ball{display:block; width:24px; height:14px; flex:none; filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));}
 .sg-ab{font-size:12px; letter-spacing:.03em;}
@@ -1590,7 +1590,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
    Field: away team's goal on the left, home team's on the right. The end zone the offense drives toward wears the offense's colors.
    The bar links to the game on ESPN. Team-color footballs only — no team logos. */
 (function(){
-  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"0:53 - 2nd","score":{"KC":0,"SEA":10},"poss":"SEA","spot":"KC 34","dd":"2nd & 1","lp":{"team":"SEA","yds":9,"type":"Pass Reception"},"play":"S.Darnold pass short left to C.Kupp to KC 34 for 9 yards (L.Sneed). Penalty on KC-L.Sneed, Defensive Pass Interference, declined.","asof":"2026-10-26T01:41:00Z"};
+  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"Halftime","score":{"KC":0,"SEA":10},"poss":"","spot":"","dd":"","lp":null,"play":"","asof":"2026-10-26T01:45:00Z"};
   var T = {ARI:["Cardinals","#97233F","#FFB612"],ATL:["Falcons","#A71930","#000000"],BAL:["Ravens","#241773","#9E7C0C"],BUF:["Bills","#00338D","#C60C30"],CAR:["Panthers","#0085CA","#101820"],CHI:["Bears","#0B162A","#C83803"],CIN:["Bengals","#FB4F14","#000000"],CLE:["Browns","#311D00","#FF3C00"],DAL:["Cowboys","#003594","#869397"],DEN:["Broncos","#FB4F14","#002244"],DET:["Lions","#0076B6","#B0B7BC"],GB:["Packers","#203731","#FFB612"],HOU:["Texans","#03202F","#A71930"],IND:["Colts","#002C5F","#A2AAAD"],JAX:["Jaguars","#006778","#D7A22A"],KC:["Chiefs","#E31837","#FFB81C"],LV:["Raiders","#000000","#A5ACAF"],LAC:["Chargers","#0080C6","#FFC20E"],LA:["Rams","#003594","#FFA300"],LAR:["Rams","#003594","#FFA300"],MIA:["Dolphins","#008E97","#FC4C02"],MIN:["Vikings","#4F2683","#FFC62F"],NE:["Patriots","#002244","#C60C30"],NO:["Saints","#101820","#D3BC8D"],NYG:["Giants","#0B2265","#A71930"],NYJ:["Jets","#125740","#FFFFFF"],PHI:["Eagles","#004C54","#A5ACAF"],PIT:["Steelers","#101820","#FFB612"],SF:["49ers","#AA0000","#B3995D"],SEA:["Seahawks","#002244","#69BE28"],TB:["Buccaneers","#D50A0A","#34302B"],TEN:["Titans","#0C2340","#4B92DB"],WAS:["Commanders","#5A1414","#FFB612"],WSH:["Commanders","#5A1414","#FFB612"]};
   var TEAM_URL = "https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks";
   var el = document.getElementById("sea-game"), KEY = "wsj-sea-game", g = SEA_GAME, timer = null;
@@ -1693,7 +1693,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var same = g && g.away === r.away && g.home === r.home;
     var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
     g = {id: same ? g.id : "", espn: r.espn || (same ? g.espn : ""), start: r.start || g.start, away: r.away, home: r.home, title: same ? g.title : "", tv: same ? g.tv : "",
-         status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: r.detail || "", score: sc,
+         status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: /end of half|halftime/i.test(r.lpType || "") ? "Halftime" : (r.detail || ""), score: sc,
          poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", lp: keepPlay(r), play: (r.lpText || "").replace(/^\s*(\([^)]*\)\s*)+/, "").replace(/\s+/g, " ").trim() || (same && g.play) || "", asof: new Date().toISOString()};
     try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
     if(!render() && timer){ clearInterval(timer); timer = null; }
