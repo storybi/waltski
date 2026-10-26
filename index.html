@@ -2717,5 +2717,17 @@ a.wt-dv-watch{text-decoration:none;}
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
 })();
 </script>
+<script>
+(function(){
+  function fix(){
+    var g = document.getElementById("wt-greet"); if(!g) return;
+    var t = g.textContent; if(!/^Rise and shine/.test(t)) return;
+    var hm = new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"2-digit",minute:"2-digit",hour12:false}).split(":");
+    var m = (+hm[0] % 24) * 60 + (+hm[1]);
+    if(m >= 10 * 60) g.textContent = t.replace(/^Rise and shine/, "Happy mid-morning");
+  }
+  fix(); setInterval(fix, 60000);
+})();
+</script>
 </body>
 </html>

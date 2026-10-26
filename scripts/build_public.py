@@ -227,7 +227,22 @@ head = """<!doctype html>
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
-page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + "</body>\n</html>\n"
+# Greeting by the reader's clock (Mark, Oct 26, 2026): from 10:00 a.m. MT the morning edition's "Rise and shine" becomes
+# "Happy mid-morning", whether or not a refresh has run. Checked on load and every minute; later greetings are left alone.
+greet_js = """<script>
+(function(){
+  function fix(){
+    var g = document.getElementById("wt-greet"); if(!g) return;
+    var t = g.textContent; if(!/^Rise and shine/.test(t)) return;
+    var hm = new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"2-digit",minute:"2-digit",hour12:false}).split(":");
+    var m = (+hm[0] % 24) * 60 + (+hm[1]);
+    if(m >= 10 * 60) g.textContent = t.replace(/^Rise and shine/, "Happy mid-morning");
+  }
+  fix(); setInterval(fix, 60000);
+})();
+</script>
+"""
+page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + "</body>\n</html>\n"
 
 open(out, "w", encoding="utf-8").write(page)
 print("build_public: wrote", out, len(page), "bytes")
