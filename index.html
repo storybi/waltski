@@ -27,23 +27,21 @@ a.wt-play{text-decoration:none;}
 a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 </style>
 <style>
-/* Header cam switch (SB / DV), added Oct 25, 2026 */
-.wt-camsw{white-space:nowrap;}
-@media (max-width:520px){ .wt-edition{font-size:10px; letter-spacing:.03em;} .wt-edition .wt-sep2{margin:0 4px;} .wt-camsw-lbl{display:none;} }
-.wt-camsw button{opacity:.62;}
-.wt-camsw button[aria-pressed="true"]{opacity:1; font-weight:800; text-decoration:underline; text-underline-offset:3px;}
-.wt-camsw > span[aria-hidden]{margin:0 2px; opacity:.6;}
+/* Header cam switch (SB / DV / SV stake labels), Oct 25, 2026 */
+@media (max-width:520px){ .wt-edition{font-size:10px; letter-spacing:.03em;} .wt-edition .wt-sep2{margin:0 4px;} }
+.wt-edition a.wt-stake[data-cam]{cursor:pointer; opacity:.78;}
+.wt-edition a.wt-stake[data-cam][aria-pressed="true"]{opacity:1; text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:3px;}
 #wt-banner .dv-layer{position:absolute; inset:0; overflow:hidden; background:#1d2630 center 45%/cover no-repeat; opacity:0; transition:opacity 1s ease; z-index:0;}
 #wt-banner .dv-layer iframe{position:absolute; top:50%; left:50%; border:0; transform:translate(-50%,-50%); pointer-events:none;}
-html.cam-dv #wt-banner .dv-layer{opacity:1;}
-html.cam-dv #wt-banner .bl, html.cam-dv #wt-banner img.wt-live{opacity:0!important;}
-html.cam-dv .wt-banner-cap, html.cam-dv .wt-vid-cap{display:none!important;}
+html.cam-alt #wt-banner .dv-layer{opacity:1;}
+html.cam-alt #wt-banner .bl, html.cam-alt #wt-banner img.wt-live{opacity:0!important;}
+html.cam-alt .wt-banner-cap, html.cam-alt .wt-vid-cap{display:none!important;}
 .wt-dv-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
-html.cam-dv .wt-dv-cap{display:block;}
-html.cam-dv #wt-next, html.cam-dv .wt-next-sep{display:none;}
-html.cam-dv .wt-play, html.cam-dv .wt-play-sep{display:inline!important;}
+html.cam-alt .wt-dv-cap{display:block;}
+html.cam-alt #wt-next, html.cam-alt .wt-next-sep{display:none;}
+html.cam-alt .wt-play, html.cam-alt .wt-play-sep{display:inline!important;}
 .wt-dv-watch, .wt-dv-watch-sep{display:none;}
-html.cam-dv .wt-dv-watch, html.cam-dv .wt-dv-watch-sep{display:inline;}
+html.cam-alt .wt-dv-watch, html.cam-alt .wt-dv-watch-sep{display:inline;}
 a.wt-dv-watch{text-decoration:none;}
 </style>
 </head>
@@ -701,7 +699,7 @@ body::before{display:none;}
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="SB = Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">SB <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" href="#dv-cams" title="DV = Deer Valley Ontario snow stake, read Oct 25, 2026 10:05 p.m. MT">DV <b id="wt-stake-dv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button><span class="wt-sep2" aria-hidden="true">|</span><span class="wt-camsw" role="group" aria-label="Header cam"><span class="wt-camsw-lbl">Cam </span><button type="button" class="wt-next" data-cam="sb" aria-pressed="true" title="Snowbasin cams behind the header">SB</button><span aria-hidden="true">/</span><button type="button" class="wt-next" data-cam="dv" aria-pressed="false" title="Deer Valley Hoodoo Express live cam behind the header">DV</button></span></span>
+      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" data-cam="sb" href="#weather" aria-pressed="true" title="SB = Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT. Click to show Snowbasin behind the header.">SB <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" data-cam="dv" href="#dv-cams" aria-pressed="false" title="DV = Deer Valley Ontario snow stake, read Oct 25, 2026 10:05 p.m. MT. Click to show Deer Valley live behind the header.">DV <b id="wt-stake-dv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-sv" data-cam="sv" href="https://www.sunvalley.com/the-mountain/web-cams/" aria-pressed="false" title="SV = Sun Valley snow stake, read Oct 25, 2026 10:40 p.m. MT. Click to show Sun Valley live behind the header.">SV <b id="wt-stake-sv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button></span>
       <span class="wt-upd"></span>
     </div>
     
@@ -752,7 +750,7 @@ body::before{display:none;}
     <!-- Live Doppler radar over Mountain Green & Snowbasin (added Oct 25, 2026). Rendered by the "Live radar" script; keep as is. -->
     <div class="radar" id="radar">
       <div class="radar-head">
-        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Mountain Green &amp; Snowbasin</option><option value="dv">Deer Valley Resort</option></select>
+        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Mountain Green &amp; Snowbasin</option><option value="dv">Deer Valley Resort</option><option value="sv">Sun Valley Resort</option></select>
         <span class="radar-time" id="radar-time">Loading radar…</span>
         <span class="radar-now" id="radar-now"></span>
       </div>
@@ -2194,10 +2192,11 @@ body::before{display:none;}
   var box = document.getElementById("radar-map"), tl = document.getElementById("radar-time");
   if(!box || !tl) return;
   var C = [41.18, -111.81], ZOOM = 9;
-  var PLACES = [["Mountain Green", 41.1425, -111.7869], ["Snowbasin", 41.2160, -111.8569], ["Deer Valley", 40.6375, -111.4783]];
+  var PLACES = [["Mountain Green", 41.1425, -111.7869], ["Snowbasin", 41.2160, -111.8569], ["Deer Valley", 40.6375, -111.4783], ["Sun Valley", 43.6710, -114.3640]];
   /* Radar location menu (Oct 25, 2026): jump between Mountain Green & Snowbasin and Deer Valley Resort; the choice is remembered on this device. */
   var VIEWS = {sb: {c: [41.18, -111.81], z: 9, fc: [41.2160, -111.8569], fcName: "Snowbasin", alt: "Mountain Green and Snowbasin"},
-               dv: {c: [40.630, -111.495], z: 10, fc: [40.6375, -111.4783], fcName: "Deer Valley", alt: "Deer Valley Resort"}};
+               dv: {c: [40.630, -111.495], z: 10, fc: [40.6375, -111.4783], fcName: "Deer Valley", alt: "Deer Valley Resort"},
+               sv: {c: [43.672, -114.375], z: 10, fc: [43.6710, -114.3640], fcName: "Sun Valley", alt: "Sun Valley Resort"}};
   var view = "sb"; try{ var vv = localStorage.getItem("wsj-radar-view"); if(VIEWS[vv]) view = vv; }catch(e){}
   /* Linked to the header cam switch (Oct 25, 2026): the radar starts on, and follows, the header's SB / DV choice. */
   try{ var hc = localStorage.getItem("wsj-head-cam"); if(VIEWS[hc]) view = hc; }catch(e){}
@@ -2435,29 +2434,34 @@ body::before{display:none;}
 })();
 </script>
 <script>
-/* Header cam switch (added Oct 25, 2026) — the dateline's "Cam SB / DV" buttons choose what plays behind the header.
-   SB: the Snowbasin views as before (rotating cam photos in claude.ai; the live Needles picture on waltski.com).
-   DV: Deer Valley's Hoodoo Express live cam (YouTube live stream RaX_MhXETq4). On waltski.com the live video itself plays,
-   muted, behind the header; inside claude.ai (which can't embed outside video) the newest frame of that stream is fetched through
-   Composio every 10 minutes. In DV mode "Next Photo" becomes "Watch Live", which opens the stream on YouTube.
-   The choice is remembered on this device. Keep as is during routine refreshes. */
+/* Header cam switch (Oct 25, 2026) — the dateline's stake readings SB / DV / SV are also the switch for what shows behind the header
+   (the active one is underlined). SB: the Snowbasin views as before (rotating cam photos in claude.ai; the live Needles picture on
+   waltski.com). DV: Deer Valley's Hoodoo Express live cam (YouTube live stream RaX_MhXETq4) — on waltski.com the live video plays muted;
+   inside claude.ai the newest frame is fetched through Composio every 10 minutes. SV: Sun Valley's live cam picture (HD Relay snapshot
+   4c82abd4…) — loaded straight from the cam host every minute on waltski.com, through Composio every 10 minutes inside claude.ai.
+   In DV / SV mode "Next Photo" becomes "Watch Live" (the stream on YouTube / Sun Valley's web-cam page). Linked both ways with the
+   radar location menu (events "wsj-cam" / "wsj-radar"). The choice is remembered on this device. Keep as is during routine refreshes. */
 (function(){
-  var YT = "RaX_MhXETq4", WATCH = "https://www.youtube.com/live/" + YT, THUMB = "https://i.ytimg.com/vi/" + YT + "/maxresdefault_live.jpg";
-  var KEY = "wsj-head-cam", SKEY = "wsj-dv-frame", REFRESH = 10*60000;
-  var root = document.documentElement, b = document.getElementById("wt-banner"), sw = document.querySelector(".wt-camsw");
-  if(!b || !sw) return;
+  var CAMS = {
+    dv: {name: "Deer Valley · Hoodoo Express live cam", yt: "RaX_MhXETq4", watch: "https://www.youtube.com/live/RaX_MhXETq4",
+         img: "https://i.ytimg.com/vi/RaX_MhXETq4/maxresdefault_live.jpg", title: "Watch Deer Valley's Hoodoo Express cam live on YouTube", every: 10*60000},
+    sv: {name: "Sun Valley · live cam", watch: "https://www.sunvalley.com/the-mountain/web-cams/",
+         img: "https://b16.hdrelay.com/camera/4c82abd4-5ef5-4b16-870f-548c2885d3f0/snapshot", title: "Watch Sun Valley's web cams live", every: 60000}
+  };
+  var KEY = "wsj-head-cam", REFRESH_CLAUDE = 10*60000;
+  var root = document.documentElement, b = document.getElementById("wt-banner");
+  var links = document.querySelectorAll(".wt-edition a.wt-stake[data-cam]");
+  if(!b || !links.length) return;
   var inClaude = !!(window.claude && window.claude.use);
   var lay = document.createElement("div"); lay.className = "dv-layer"; b.insertBefore(lay, b.firstChild);
-  var cap = document.createElement("span"); cap.className = "wt-dv-cap"; cap.textContent = "Deer Valley · Hoodoo Express live cam"; b.appendChild(cap);
-  /* "Watch Live" link: waltski.com already has one (for the Needles cam) — point it at YouTube in DV mode; claude.ai gets its own. */
-  var play = document.querySelector("a.wt-play"), playHref = play ? play.href : "", playTitle = play ? play.title : "";
-  var own = null;
+  var cap = document.createElement("span"); cap.className = "wt-dv-cap"; b.appendChild(cap);
+  /* "Watch Live" link: waltski.com already has one (for the Needles cam) — repoint it; claude.ai gets its own, shown only in DV / SV mode. */
+  var play = document.querySelector("a.wt-play"), playHref = play ? play.href : "", playTitle = play ? play.title : "", own = null;
   if(!play){
     var nb = document.getElementById("wt-next");
     if(nb && nb.parentNode){
       var sp = document.createElement("span"); sp.className = "wt-sep2 wt-dv-watch-sep"; sp.setAttribute("aria-hidden", "true"); sp.textContent = "|";
-      own = document.createElement("a"); own.className = "wt-next wt-dv-watch"; own.textContent = "Watch Live";
-      own.href = WATCH; own.target = "_blank"; own.rel = "noopener"; own.title = "Watch Deer Valley's Hoodoo Express cam live on YouTube";
+      own = document.createElement("a"); own.className = "wt-next wt-dv-watch"; own.textContent = "Watch Live"; own.target = "_blank"; own.rel = "noopener";
       nb.parentNode.insertBefore(own, nb.nextSibling); nb.parentNode.insertBefore(sp, own);
     }
   }
@@ -2468,63 +2472,74 @@ body::before{display:none;}
     var W = Math.max(w, h * 16 / 9), H = W * 9 / 16; if(H < h){ H = h; W = H * 16 / 9; }
     f.style.width = Math.ceil(W) + "px"; f.style.height = Math.ceil(H) + "px";
   }
-  /* claude.ai: newest frame of the stream through Composio */
+  function show(src, at, m){ if(m !== mode) return; lay.style.backgroundImage = 'url("' + src + '")'; cap.textContent = CAMS[m].name + (at ? " · " + hm(new Date(at)) : ""); root.classList.add("has-banner"); }
+  /* claude.ai: the newest frame through Composio */
   var mcp = null, timer = null, busy = false;
-  var CMD = "python3 - <<'P'\n" +
+  function cmd(u){ return "python3 - <<'P'\n" +
     "import io,base64,urllib.request,datetime\n" +
     "from PIL import Image\n" +
-    "r=urllib.request.urlopen(urllib.request.Request('" + THUMB + "?t='+str(int(datetime.datetime.now().timestamp())),headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
+    "r=urllib.request.urlopen(urllib.request.Request('" + u + "?t='+str(int(datetime.datetime.now().timestamp())),headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
     "im=Image.open(io.BytesIO(r)).convert('RGB')\n" +
     "if im.width>1280: im=im.resize((1280,int(im.height*1280/im.width)))\n" +
     "o=io.BytesIO();im.save(o,'JPEG',quality=72,optimize=True)\n" +
     "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
-    "P";
+    "P"; }
   function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
-  function showFrame(src, at){ lay.style.backgroundImage = 'url("' + src + '")'; cap.textContent = "Deer Valley · Hoodoo Express live cam" + (at ? " · " + hm(new Date(at)) : ""); root.classList.add("has-banner"); }
   function fetchFrame(){
-    if(!mcp || busy || mode !== "dv") return; busy = true;
-    mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+    var m = mode; if(!mcp || busy || !CAMS[m]) return; busy = true;
+    mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: cmd(CAMS[m].img)}, {cache:false}).then(function(r){
       busy = false; var at = null, img = null;
       stdoutOf(r).split("\n").forEach(function(l){ var i = l.indexOf("|"); if(i < 0) return; var k = l.slice(0, i), v = l.slice(i + 1).trim(); if(k === "ts") at = v; if(k === "img" && v.length > 1000) img = v; });
       if(!img) return;
-      showFrame("data:image/jpeg;base64," + img, at);
-      try{ localStorage.setItem(SKEY, JSON.stringify({at: at, img: img})); }catch(e){}
+      show("data:image/jpeg;base64," + img, at, m);
+      try{ localStorage.setItem("wsj-" + m + "-frame", JSON.stringify({at: at, img: img})); }catch(e){}
     }, function(){ busy = false; });
+  }
+  /* waltski.com: Sun Valley picture straight from the cam host, preloaded so it swaps without a blank */
+  var webTimer = null;
+  function webLoad(){
+    var m = mode, c = CAMS[m]; if(!c || c.yt) return;
+    var u = c.img + "?t=" + Date.now(), probe = new Image();
+    probe.onload = function(){ if(probe.naturalWidth > 40) show(u, new Date().toISOString(), m); };
+    probe.src = u;
   }
   var mode = "sb";
   function set(m, save){
-    mode = m === "dv" ? "dv" : "sb";
-    root.classList.toggle("cam-dv", mode === "dv");
-    sw.querySelectorAll("button[data-cam]").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
+    mode = CAMS[m] ? m : "sb";
+    var c = CAMS[mode];
+    root.classList.toggle("cam-alt", !!c); root.classList.toggle("cam-dv", mode === "dv"); root.classList.toggle("cam-sv", mode === "sv");
+    links.forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
     if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
-    if(play){ play.href = mode === "dv" ? WATCH : playHref; play.title = mode === "dv" ? "Watch Deer Valley's Hoodoo Express cam live on YouTube" : playTitle; }
-    if(mode === "dv"){
-      root.classList.add("has-banner");
-      if(inClaude){
-        try{ var sv = JSON.parse(localStorage.getItem(SKEY) || "null"); if(sv && sv.img && !lay.style.backgroundImage) showFrame("data:image/jpeg;base64," + sv.img, sv.at); }catch(e){}
-        fetchFrame(); if(!timer) timer = setInterval(function(){ if(!document.hidden) fetchFrame(); }, REFRESH);
-      } else {
-        lay.style.backgroundImage = 'url("' + THUMB + '?t=' + Date.now() + '")';
-        if(!lay.querySelector("iframe")){
-          var f = document.createElement("iframe");
-          f.src = "https://www.youtube.com/embed/" + YT + "?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=" + YT + "&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1";
-          f.title = "Deer Valley Hoodoo Express live cam"; f.allow = "autoplay; encrypted-media; picture-in-picture"; f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true");
-          lay.appendChild(f);
-        }
-        fit(); setTimeout(fit, 600); setTimeout(fit, 2500);
+    if(play){ play.href = c ? c.watch : playHref; play.title = c ? c.title : playTitle; }
+    if(own && c){ own.href = c.watch; own.title = c.title; }
+    if(webTimer){ clearInterval(webTimer); webTimer = null; }
+    var f0 = lay.querySelector("iframe");
+    if(f0 && mode !== "dv") setTimeout(function(){ if(mode !== "dv" && f0.parentNode) f0.parentNode.removeChild(f0); }, mode === "sb" ? 1100 : 0);
+    if(!c) return;
+    root.classList.add("has-banner");
+    lay.style.backgroundImage = ""; cap.textContent = c.name;
+    if(inClaude){
+      try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-frame") || "null"); if(sv && sv.img) show("data:image/jpeg;base64," + sv.img, sv.at, mode); }catch(e){}
+      fetchFrame(); if(!timer) timer = setInterval(function(){ if(!document.hidden) fetchFrame(); }, REFRESH_CLAUDE);
+    } else if(c.yt){
+      lay.style.backgroundImage = 'url("' + c.img + '?t=' + Date.now() + '")';
+      if(!lay.querySelector("iframe")){
+        var f = document.createElement("iframe");
+        f.src = "https://www.youtube.com/embed/" + c.yt + "?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=" + c.yt + "&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1";
+        f.title = c.name; f.allow = "autoplay; encrypted-media; picture-in-picture"; f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true");
+        lay.appendChild(f);
       }
+      fit(); setTimeout(fit, 600); setTimeout(fit, 2500);
     } else {
-      var f2 = lay.querySelector("iframe"); if(f2) setTimeout(function(){ if(mode === "sb" && f2.parentNode) f2.parentNode.removeChild(f2); }, 1100);
+      webLoad(); webTimer = setInterval(function(){ if(!document.hidden) webLoad(); }, c.every);
     }
   }
-  sw.addEventListener("click", function(e){ var t = e.target.closest ? e.target.closest("button[data-cam]") : null; if(t) set(t.getAttribute("data-cam"), true); });
+  links.forEach(function(x){ x.addEventListener("click", function(e){ e.preventDefault(); set(x.getAttribute("data-cam"), true); }); });
   window.addEventListener("resize", fit);
-  /* Linked to the radar location menu: choosing Deer Valley (or Snowbasin) there switches the header too. */
-  document.addEventListener("wsj-radar", function(e){ var v = e.detail === "dv" ? "dv" : "sb"; if(v !== mode) set(v, true); });
-  var start = "sb"; try{ if(localStorage.getItem(KEY) === "dv") start = "dv"; }catch(e){}
-  if(inClaude){
-    window.claude.use("mcp").then(function(m){ mcp = m || null; if(mode === "dv") fetchFrame(); }, function(){});
-  }
+  /* Linked to the radar location menu: choosing a resort there switches the header too. */
+  document.addEventListener("wsj-radar", function(e){ var v = CAMS[e.detail] ? e.detail : "sb"; if(v !== mode) set(v, true); });
+  var start = "sb"; try{ var st = localStorage.getItem(KEY); if(CAMS[st]) start = st; }catch(e){}
+  if(inClaude) window.claude.use("mcp").then(function(m){ mcp = m || null; if(CAMS[mode]) fetchFrame(); }, function(){});
   set(start, false);
 })();
 </script>
