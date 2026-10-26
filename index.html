@@ -534,9 +534,31 @@ html.has-banner:not(.banner-past) .wt-ticker .tk-it{border-right-color:rgba(255,
 html.has-banner:not(.banner-past) .wt-ticker .tk-it .px{color:#fff;}
 html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));}
 .wt-banner-cap{z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
+/* Seahawks game strip — shows from kickoff through the day after the game (Mountain Time); team-color badges, no logos */
+.sea-game{display:flex; align-items:center; flex-wrap:wrap; gap:6px 14px; margin:0 0 10px; padding:9px 12px; background:var(--surface); border:1px solid var(--border); border-top:3px solid #69BE28; font:600 13px var(--font-body); font-variant-numeric:tabular-nums;}
+.sea-game[hidden]{display:none!important;}
+.sg-lbl{font:800 10.5px var(--font-body); letter-spacing:.1em; text-transform:uppercase; color:var(--fg-muted);}
+.sg-lbl small{font-weight:600; letter-spacing:.04em; text-transform:none; color:var(--fg-faint); margin-left:6px;}
+.sg-board{display:flex; align-items:center; gap:10px; flex:1; justify-content:center; min-width:0;}
+.sg-tm{display:inline-flex; align-items:center; gap:7px; min-width:0;}
+.sg-tm.home{flex-direction:row-reverse;}
+.sg-bdg{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; background:var(--c1); color:#fff; border:2.5px solid var(--c2); font:800 11px var(--font-body); letter-spacing:.02em; flex:none;}
+.sg-nm{font:700 15px var(--font-display); white-space:nowrap;}
+.sg-sc{font:800 24px/1 var(--font-body); min-width:1.4em; text-align:center;}
+.sg-tm.win .sg-sc{color:var(--fg);} .sg-tm.lose .sg-sc{color:var(--fg-faint);}
+.sg-dash{color:var(--fg-faint); font-weight:400;}
+.sg-st{font:800 10.5px var(--font-body); letter-spacing:.08em; text-transform:uppercase; padding:3px 8px; border:1px solid var(--border); color:var(--fg-muted); white-space:nowrap;}
+.sg-st.live{color:#fff; background:var(--bad); border-color:var(--bad);}
+.sg-st.live::before{content:"\25CF "; animation:sg-blink 1.6s ease-in-out infinite;}
+@keyframes sg-blink{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){ .sg-st.live::before{animation:none;} }
+@media (max-width:560px){ .sg-nm{display:none;} .sg-board{justify-content:flex-start;} .sg-bdg{width:30px; height:30px; font-size:10px;} .sg-sc{font-size:21px;} }
 /* Walt Ski Journal nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
-.wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(30px,8vw,92px); line-height:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
+.wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(15px,6.6vw,86px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
 .wt-peak{width:.68em; height:.42em; flex:none;}
+/* Custom J (Oct 25, 2026): Fraunces stem and top serif with a straight, flat foot instead of the curled hook */
+.wt-j{display:inline-block; width:.359em; height:.7em; margin-right:.02em; vertical-align:baseline; fill:currentColor; overflow:visible;}
+html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0 1px 1.5px rgba(0,0,0,.8));}
 .wt-greet{font-family:"Newsreader",Georgia,serif; font-style:italic; font-size:17px;}
 @media (max-width:480px){ .wt-greet{font-size:14px;} }
 </style>
@@ -545,11 +567,11 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Mountain Green, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a></span>
+      <span>Morgan, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a></span>
       <span class="wt-upd"></span>
     </div>
     
-    <h1 class="wt-name"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/><path d="M36 15 L42 6 L48 15 L44 13 L42 16 L39 13 Z" fill="#F4EFE3"/></svg><span>The Walt Ski Journal</span></h1>
+    <h1 class="wt-name" aria-label="The Walt Ski Journal"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/><path d="M36 15 L42 6 L48 15 L44 13 L42 16 L39 13 Z" fill="#F4EFE3"/></svg><span aria-hidden="true">The Walt Ski <svg class="wt-j" viewBox="0 -1400 718 1400"><path transform="scale(1 -1)" d="M506 0H64V30L300 130V1348Q300.0 1359.6 291.5 1365.9Q283.0 1372.2 264.8 1374.4L171.6 1388.0Q161.6 1388.9 161.6 1394.4Q161.6 1396.8 163.6 1398.4Q165.7 1400 170.0 1400H636.0Q640.3 1400 642.4 1398.4Q644.4 1396.8 644.4 1394.4Q644.4 1388.9 634.4 1388.0L541.2 1374.4Q523.4 1372.2 514.7 1365.9Q506.0 1359.6 506.0 1348.0Z"/></svg>ournal</span></h1>
     <p class="wt-greet"><span id="wt-greet">Good evening, it&rsquo;s Sunday, October 25, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Oct. 25, 2026 6:03 p.m. MT</span><span id="wt-ago"></span></span></p>
   </header>
 
@@ -578,6 +600,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
       <div class="ask-hint">Answers use what’s on this page plus Claude’s general knowledge, and use your own Claude usage.</div>
     </div>
   </div>
+
+  <!-- ================= SEAHAWKS GAME STRIP (game day + next day) ================= -->
+  <div class="sea-game" id="sea-game" role="region" aria-label="Seahawks game" aria-live="polite" hidden></div>
 
   <a class="wxbar" id="wxbar" href="#weather" aria-label="Midday weather"></a>
 
@@ -1516,6 +1541,82 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
   setTimeout(size, 800); setTimeout(size, 2500);
 })();
 </script>
+
+<script>
+/* Seahawks game strip — refresh SEA_GAME every run from the sports data tool (step 3d). Shows from kickoff through the end of the
+   next day in Mountain Time, then hides itself. While the game is live the page polls ESPN's public scoreboard every minute
+   (through the Composio connector inside claude.ai; directly on waltski.com). Team-color badges only — no team logos. */
+(function(){
+  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"8:31 - 1st","score":{"KC":0,"SEA":0},"asof":"2026-10-26T00:47:00Z"};
+  var T = {ARI:["Cardinals","#97233F","#FFB612"],ATL:["Falcons","#A71930","#000000"],BAL:["Ravens","#241773","#9E7C0C"],BUF:["Bills","#00338D","#C60C30"],CAR:["Panthers","#0085CA","#101820"],CHI:["Bears","#0B162A","#C83803"],CIN:["Bengals","#FB4F14","#000000"],CLE:["Browns","#311D00","#FF3C00"],DAL:["Cowboys","#003594","#869397"],DEN:["Broncos","#FB4F14","#002244"],DET:["Lions","#0076B6","#B0B7BC"],GB:["Packers","#203731","#FFB612"],HOU:["Texans","#03202F","#A71930"],IND:["Colts","#002C5F","#A2AAAD"],JAX:["Jaguars","#006778","#D7A22A"],KC:["Chiefs","#E31837","#FFB81C"],LV:["Raiders","#000000","#A5ACAF"],LAC:["Chargers","#0080C6","#FFC20E"],LA:["Rams","#003594","#FFA300"],LAR:["Rams","#003594","#FFA300"],MIA:["Dolphins","#008E97","#FC4C02"],MIN:["Vikings","#4F2683","#FFC62F"],NE:["Patriots","#002244","#C60C30"],NO:["Saints","#101820","#D3BC8D"],NYG:["Giants","#0B2265","#A71930"],NYJ:["Jets","#125740","#FFFFFF"],PHI:["Eagles","#004C54","#A5ACAF"],PIT:["Steelers","#101820","#FFB612"],SF:["49ers","#AA0000","#B3995D"],SEA:["Seahawks","#002244","#69BE28"],TB:["Buccaneers","#D50A0A","#34302B"],TEN:["Titans","#0C2340","#4B92DB"],WAS:["Commanders","#5A1414","#FFB612"],WSH:["Commanders","#5A1414","#FFB612"]};
+  var el = document.getElementById("sea-game"), KEY = "wsj-sea-game", g = SEA_GAME, timer = null;
+  if(!el) return;
+  try{ var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if(sv && sv.start === g.start && sv.asof > g.asof) g = sv; }catch(e){}
+  function mtDate(ms){ return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/Denver"}); }
+  function inWindow(){
+    if(!g || !g.start) return false;
+    var ks = Date.parse(g.start), now = Date.now();
+    if(isNaN(ks) || now < ks) return false;
+    var k = mtDate(ks), next = new Date(Date.parse(k + "T12:00:00Z") + 86400000).toISOString().slice(0,10), t = mtDate(now);
+    return t === k || t === next;
+  }
+  function esc(x){ return String(x == null ? "" : x).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function team(ab, side, cls){
+    var t = T[ab] || [ab, "#444444", "#999999"], sc = g.score && g.score[ab] != null ? g.score[ab] : "–";
+    return '<span class="sg-tm ' + side + ' ' + cls + '"><span class="sg-bdg" style="--c1:' + t[1] + ';--c2:' + t[2] + '">' + esc(ab) + '</span><span class="sg-nm">' + esc(t[0]) + '</span><span class="sg-sc">' + esc(sc) + '</span></span>';
+  }
+  function render(){
+    if(!inWindow()){ el.hidden = true; el.innerHTML = ""; return false; }
+    var live = g.status === "inprogress", fin = g.status === "closed" || g.status === "complete";
+    var a = g.score ? +g.score[g.away] : NaN, h = g.score ? +g.score[g.home] : NaN;
+    var ca = "", ch = "";
+    if(fin && !isNaN(a) && !isNaN(h) && a !== h){ ca = a > h ? "win" : "lose"; ch = h > a ? "win" : "lose"; }
+    var st = live ? (g.detail || "Live") : fin ? (/final/i.test(g.detail || "") ? g.detail : "Final") : (g.detail || "Kickoff");
+    var day = new Date(Date.parse(g.start)).toLocaleDateString("en-US",{timeZone:"America/Denver",weekday:"short",month:"short",day:"numeric"});
+    el.innerHTML = '<span class="sg-lbl">Seahawks<small>' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</small></span>' +
+      '<span class="sg-board">' + team(g.away, "away", ca) + '<span class="sg-dash">at</span>' + team(g.home, "home", ch) + '</span>' +
+      '<span class="sg-st' + (live ? ' live' : '') + '">' + esc(st) + '</span>';
+    el.hidden = false;
+    return live;
+  }
+  /* Feed one scoreboard reading: state pre|in|post, ESPN-style short detail, abbreviations and scores. */
+  window.wsjSeaUpdate = function(r){
+    if(!r || !r.away || !r.home) return;
+    if(r.away !== "SEA" && r.home !== "SEA") return;
+    if(r.start && g && g.start && Math.abs(Date.parse(r.start) - Date.parse(g.start)) > 6*3600000 && Date.parse(r.start) < Date.parse(g.start)) return;
+    var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
+    g = {id: g && g.id, start: r.start || g.start, away: r.away, home: r.home, title: (g && g.away === r.away && g.home === r.home) ? g.title : "", tv: (g && g.away === r.away && g.home === r.home) ? g.tv : "",
+         status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: r.detail || "", score: sc, asof: new Date().toISOString()};
+    try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
+    if(!render() && timer){ clearInterval(timer); timer = null; }
+  };
+  var live = render();
+  /* Inside claude.ai: poll through the Composio connector while the game is live. */
+  var CMD = "python3 - <<'P'\n" +
+    "import urllib.request,json\n" +
+    "j=json.load(urllib.request.urlopen(urllib.request.Request('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',headers={'User-Agent':'Mozilla/5.0'}),timeout=20))\n" +
+    "for e in j.get('events',[]):\n" +
+    "  c=e['competitions'][0];t={x['homeAway']:x for x in c['competitors']}\n" +
+    "  if 'SEA' not in [x['team']['abbreviation'] for x in c['competitors']]: continue\n" +
+    "  s=c['status'];print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score','')))\n" +
+    "P";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  if(!live || !(window.claude && window.claude.use)) return;
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp) return;
+    function poll(){
+      if(document.hidden) return;
+      mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+        stdoutOf(r).split("\n").forEach(function(L){
+          var f = L.split("|"); if(f[0] !== "g" || f.length < 8) return;
+          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7]});
+        });
+      }, function(e){ if(e && {not_granted:1, capability_disabled:1, capability_removed:1, user_changed:1}[e.code] && timer){ clearInterval(timer); timer = null; } });
+    }
+    poll(); timer = setInterval(poll, 60000);
+  }, function(){});
+})();
+</script>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
@@ -1549,6 +1650,27 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
   if(btn){ btn.hidden = false; btn.addEventListener("click", load); }
   load();
   setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
+})();
+/* Public site: live Seahawks score straight from ESPN's public scoreboard, every minute while the game strip shows a live game. */
+(function(){
+  var el = document.getElementById("sea-game");
+  if(!el || !window.wsjSeaUpdate) return;
+  var timer = null;
+  function poll(){
+    if(document.hidden) return;
+    fetch("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard", {cache:"no-store"}).then(function(r){ return r.json(); }).then(function(j){
+      (j.events || []).forEach(function(e){
+        var c = e.competitions && e.competitions[0]; if(!c) return;
+        var t = {}; (c.competitors || []).forEach(function(x){ t[x.homeAway] = x; });
+        if(!t.home || !t.away || (t.home.team.abbreviation !== "SEA" && t.away.team.abbreviation !== "SEA")) return;
+        window.wsjSeaUpdate({start: e.date, state: c.status.type.state, detail: c.status.type.shortDetail || "",
+          away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
+          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score)});
+      });
+      if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
+    }).catch(function(){});
+  }
+  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 60000); }
 })();
 </script>
 </body>

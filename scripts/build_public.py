@@ -87,6 +87,27 @@ live_js = r"""<script>
   load();
   setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
 })();
+/* Public site: live Seahawks score straight from ESPN's public scoreboard, every minute while the game strip shows a live game. */
+(function(){
+  var el = document.getElementById("sea-game");
+  if(!el || !window.wsjSeaUpdate) return;
+  var timer = null;
+  function poll(){
+    if(document.hidden) return;
+    fetch("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard", {cache:"no-store"}).then(function(r){ return r.json(); }).then(function(j){
+      (j.events || []).forEach(function(e){
+        var c = e.competitions && e.competitions[0]; if(!c) return;
+        var t = {}; (c.competitors || []).forEach(function(x){ t[x.homeAway] = x; });
+        if(!t.home || !t.away || (t.home.team.abbreviation !== "SEA" && t.away.team.abbreviation !== "SEA")) return;
+        window.wsjSeaUpdate({start: e.date, state: c.status.type.state, detail: c.status.type.shortDetail || "",
+          away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
+          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score)});
+      });
+      if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
+    }).catch(function(){});
+  }
+  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 60000); }
+})();
 </script>
 """
 must(body.count("</style>") >= 1, "</style>")
