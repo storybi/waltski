@@ -622,13 +622,19 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0 1px 1.5px rgba(0,0,0,.8));}
 .wt-greet{font-family:"Newsreader",Georgia,serif; font-style:italic; font-size:17px;}
 @media (max-width:480px){ .wt-greet{font-size:14px;} }
-/* Ticker moved just above Top Stories (Oct 25, 2026): a solid strip in the page, no longer pinned or see-through over the photo */
-.wt-ticker,html.has-banner .wt-ticker,html.has-banner:not(.banner-past) .wt-ticker{position:relative; top:auto; background:var(--mast-bg)!important; text-shadow:none!important; margin:30px 0 0; border-top:0;}
-html.has-banner:not(.banner-past) .wt-ticker .tk-lbl{color:#bdbdbd; border-right-color:#333;}
-html.has-banner:not(.banner-past) .wt-ticker .tk-it{border-right-color:#2a2a2a;}
-html.has-banner:not(.banner-past) .wt-ticker .tk-it .px{color:#e6e6e6;}
+/* Weather bar + stock ticker dock (Oct 25, 2026): the ticker hangs off the bottom of the mini weather bar in the same light
+   surface, and the pair stays locked to the top of the screen (just under the Ask Claude bar, when it shows) while scrolling. */
+.wt-dock{position:sticky; top:var(--ask-h,0px); z-index:55; margin:0 0 18px;}
+.wt-dock .wxbar{margin-bottom:0;}
+.sea-game:not([hidden]) + .wt-dock .wxbar{border-top:0;}
+.wt-ticker,html.has-banner .wt-ticker,html.has-banner:not(.banner-past) .wt-ticker{position:relative; top:auto; margin:0; background:var(--surface)!important; color:var(--fg); text-shadow:none!important; border:1px solid var(--border); border-top:1px solid var(--border); font-weight:600;}
+.wt-ticker .tk-lbl,html.has-banner:not(.banner-past) .wt-ticker .tk-lbl{color:var(--fg-faint); border-right:1px solid var(--border);}
+.wt-ticker .tk-it,html.has-banner:not(.banner-past) .wt-ticker .tk-it{border-right:1px solid var(--border);}
+.wt-ticker .tk-it b{color:var(--fg);}
+.wt-ticker .tk-it .px,html.has-banner:not(.banner-past) .wt-ticker .tk-it .px{color:var(--fg-muted);}
+.wt-ticker .tk-it .up{color:var(--good);} .wt-ticker .tk-it .down{color:var(--bad);} .wt-ticker .tk-it .flat{color:var(--fg-faint);}
+.wt-ticker .tk-sp.up polyline{stroke:var(--good);} .wt-ticker .tk-sp.down polyline{stroke:var(--bad);}
 html.has-banner:not(.banner-past) .tk-sp{filter:none;}
-.wt-ticker + section > .section-head{margin-top:12px;}
 .askbar{top:env(safe-area-inset-top,0px);}
 body::before{display:none;}
 </style>
@@ -669,7 +675,15 @@ body::before{display:none;}
   <!-- ================= SEAHAWKS GAME STRIP (game day + next day) ================= -->
   <a class="sea-game" id="sea-game" href="https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
 
+  <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
+  <div class="wt-dock" id="wt-dock">
   <a class="wxbar" id="wxbar" href="#weather" aria-label="Midday weather"></a>
+  <div class="wt-ticker" id="ticker" role="region" aria-label="Stock ticker">
+    <span class="tk-lbl" id="tk-asof">Markets</span>
+    <div class="tk-view"><div class="tk-track" id="tk-track"></div></div>
+  </div>
+  </div>
+  <div id="wt-dock-end" aria-hidden="true"></div>
 
   <!-- ================= DAILY WORD ================= -->
   <section id="daily-word">
@@ -704,11 +718,6 @@ body::before{display:none;}
   </section>
 
 
-  <!-- ================= STOCK TICKER (just above Top Stories) ================= -->
-  <div class="wt-ticker" id="ticker" role="region" aria-label="Stock ticker">
-    <span class="tk-lbl" id="tk-asof">Markets</span>
-    <div class="tk-view"><div class="tk-track" id="tk-track"></div></div>
-  </div>
 
   <!-- ================= TOP STORIES ================= -->
   <section id="stories">
@@ -1541,7 +1550,7 @@ body::before{display:none;}
   var cap = document.createElement("span"); cap.className = "wt-banner-cap"; el.appendChild(cap);
   var frames = [], at = null, idx = 0, front = 0, timer = null;
   function size(){
-    var w = document.getElementById("wxbar") || document.getElementById("askbar"); if(!w) return;
+    var w = document.getElementById("wt-dock-end") || document.getElementById("wxbar") || document.getElementById("askbar"); if(!w) return;
     var b = w.getBoundingClientRect().bottom + window.scrollY;
     el.style.height = Math.max(0, Math.round(b + 16)) + "px"; past();
   }
@@ -1877,6 +1886,17 @@ body::before{display:none;}
   load();
   setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
+})();
+</script>
+<script>
+/* Weather bar + ticker dock: pin just below the sticky Ask Claude bar (or at the very top when that bar is hidden). */
+(function(){
+  var root = document.documentElement;
+  function set(){ var a = document.getElementById("askbar"), h = 0;
+    try{ if(a && getComputedStyle(a).display !== "none") h = Math.round(a.getBoundingClientRect().height); }catch(e){}
+    root.style.setProperty("--ask-h", h + "px"); }
+  set(); window.addEventListener("resize", set); window.addEventListener("load", set); setTimeout(set, 1500);
+  try{ var a = document.getElementById("askbar"); if(a && window.ResizeObserver) new ResizeObserver(set).observe(a); }catch(e){}
 })();
 </script>
 </body>
