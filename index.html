@@ -785,6 +785,11 @@ a.wt-dv-watch{text-decoration:none;}
 html.cam-dv #snow .dv-cams, html.cam-sv #snow .sv-cams{display:block;}
 html.cam-dv #snow .wx-cams:not(.dv-cams), html.cam-sv #snow .wx-cams:not(.sv-cams){display:none;}
 </style>
+<style>
+/* Header photo changes: 1-second fade out, then 1-second fade in (Mark, Oct 26, 2026) */
+#wt-banner .bl, #wt-banner img.wt-live, #wt-banner .dv-layer{transition:opacity 1s ease;}
+html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -1843,7 +1848,7 @@ html.cam-dv #snow .wx-cams:not(.dv-cams), html.cam-sv #snow .wx-cams:not(.sv-cam
     var next = 1 - front, img = new Image();
     img.onload = function(){
       L[next].style.backgroundImage = 'url("' + f.src + '")';
-      L[next].classList.add("on"); L[front].classList.remove("on"); front = next;
+      var old = L[front], had = old.classList.contains("on"), nl = L[next]; old.classList.remove("on"); front = next; setTimeout(function(){ nl.classList.add("on"); }, had ? 1000 : 0);
       label(f.k); root.classList.add("has-banner");
     };
     img.src = f.src;
@@ -2650,7 +2655,8 @@ html.cam-dv #snow .wx-cams:not(.dv-cams), html.cam-sv #snow .wx-cams:not(.sv-cam
   function linkTo(f){ var c = CAMS[mode]; if(!c || !f) return; var play = getPlay(); if(play){ play.href = f.watch; play.title = c.title; } if(own){ own.href = f.watch; own.title = c.title; } }
   function show(src, f, at, m){
     if(m !== mode) return;
-    lay.style.backgroundImage = 'url("' + src + '")';
+    if(lay.style.backgroundImage && lay.style.backgroundImage !== "none"){ lay.classList.add("fading"); setTimeout(function(){ if(m !== mode) return; lay.style.backgroundImage = 'url("' + src + '")'; lay.classList.remove("fading"); }, 1000); }
+    else lay.style.backgroundImage = 'url("' + src + '")';
     cap.textContent = CAMS[m].resort + " · " + f.name + " live cam" + (at ? " · " + hm(new Date(at)) : "");
     root.classList.add("has-banner"); linkTo(f);
   }
@@ -2905,7 +2911,7 @@ html.cam-dv #snow .wx-cams:not(.dv-cams), html.cam-sv #snow .wx-cams:not(.sv-cam
       if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
       fails = 0;
       img.src = probe.src;
-      img.classList.add("on"); L[front].classList.remove("on"); front = next;
+      var old = L[front], had = old.classList.contains("on"); old.classList.remove("on"); front = next; setTimeout(function(){ img.classList.add("on"); }, had ? 1000 : 0);
       root.classList.add("has-banner", "has-video");
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
