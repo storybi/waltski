@@ -1787,11 +1787,11 @@ a.wt-dv-watch{text-decoration:none;}
 })();
 </script>
 <script>
-/* Snowbasin photo banner — fills the area behind the header elements with current Snowbasin cam views, rotating every 10 seconds
+/* Snowbasin photo banner — fills the area behind the header elements with current Snowbasin cam views, rotating every 20 seconds
    with a crossfade. The cams script returns one large frame per daylight cam (snow stake skipped, best-looking first) and hands them
    to wsjSetBanners; until then the newest set this browser has seen, or the built-in cam snapshots, are used. Keep as is during routine refreshes. */
 (function(){
-  var el = document.getElementById("wt-banner"), root = document.documentElement, KEY = "wsj-banner-set", ROTATE = 10000;
+  var el = document.getElementById("wt-banner"), root = document.documentElement, KEY = "wsj-banner-set", ROTATE = 20000;
   if(!el) return;
   var NAMES = {ogden:"Mt. Ogden", jp:"John Paul Lodge", wildcat:"Base of Wildcat", stake:"Snow stake"};
   var L = [document.createElement("div"), document.createElement("div")];
@@ -1831,7 +1831,7 @@ a.wt-dv-watch{text-decoration:none;}
     idx = 0; paint(0); size();
     if(frames.length > 1) timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
   }
-  /* Next photo button: show the next cam view now, then carry on rotating every 10 seconds from there. */
+  /* Next photo button: show the next cam view now, then carry on rotating every 20 seconds from there. */
   function nextPhoto(){
     /* At night the banner set can hold a single cam (dark frames are skipped), so borrow the other cam views shown in the Weather section. */
     if(frames.length < 2){
@@ -2577,30 +2577,38 @@ a.wt-dv-watch{text-decoration:none;}
 })();
 </script>
 <script>
-/* Header cam switch (Oct 25, 2026) — the dateline's stake readings SB / DV / SV are also the switch for what shows behind the header
-   (the active one is underlined). SB: the Snowbasin views as before (rotating cam photos in claude.ai; the live Needles picture on
-   waltski.com). DV: Deer Valley's Hoodoo Express live cam (YouTube live stream RaX_MhXETq4) — on waltski.com the live video plays muted;
-   inside claude.ai the newest frame is fetched through Composio every 10 minutes. SV: Sun Valley's live cam picture (HD Relay snapshot
-   4c82abd4…) — loaded straight from the cam host every minute on waltski.com, through Composio every 10 minutes inside claude.ai.
-   In DV / SV mode "Next Photo" becomes "Watch Live" (the stream on YouTube / Sun Valley's web-cam page). Linked both ways with the
-   radar location menu (events "wsj-cam" / "wsj-radar"). The choice is remembered on this device. Keep as is during routine refreshes. */
+/* Header cam switch (Oct 25–26, 2026) — the dateline's SB / DV / SV snow labels are also the switch for what shows behind the header
+   (the active one is underlined). Every resort ROTATES through its live cam pictures every 20 seconds (Mark, Oct 26, 2026):
+   SB — the Snowbasin views (the photo banner in claude.ai; Needles + the other live cams on waltski.com).
+   DV — Deer Valley's live YouTube cams (newest frame of each stream; Ontario snow stake left out), starting with Hoodoo Express.
+   SV — Sun Valley's HD Relay cams (snow stake left out), starting with River Run.
+   On waltski.com each picture loads straight from the cam host when its turn comes; inside claude.ai the whole set comes through
+   Composio every 10 minutes (very dark night frames are skipped). In DV / SV mode "Next Photo" becomes "Watch Live" for the cam
+   showing. Linked both ways with the radar location menu (events "wsj-cam" / "wsj-radar"). The choice is remembered on this device.
+   Keep as is during routine refreshes. */
 (function(){
+  function yt(id, name){ return {name: name, img: "https://i.ytimg.com/vi/" + id + "/maxresdefault_live.jpg", watch: "https://www.youtube.com/live/" + id}; }
+  function hd(id, name, host){ return {name: name, img: "https://" + (host || "img") + ".hdrelay.com/camera/" + id + "/snapshot", watch: "https://www.sunvalley.com/the-mountain/web-cams/"}; }
   var CAMS = {
-    dv: {name: "Deer Valley · Hoodoo Express live cam", yt: "RaX_MhXETq4", watch: "https://www.youtube.com/live/RaX_MhXETq4",
-         img: "https://i.ytimg.com/vi/RaX_MhXETq4/maxresdefault_live.jpg", title: "Watch Deer Valley's Hoodoo Express cam live on YouTube", every: 10*60000},
-    sv: {name: "Sun Valley · live cam", watch: "https://www.sunvalley.com/the-mountain/web-cams/",
-         img: "https://b16.hdrelay.com/camera/4c82abd4-5ef5-4b16-870f-548c2885d3f0/snapshot", title: "Watch Sun Valley's web cams live", every: 60000}
+    dv: {resort: "Deer Valley", title: "Watch this Deer Valley cam live on YouTube", frames: [
+      yt("RaX_MhXETq4", "Hoodoo Express"), yt("QozKoFs-hL0", "Snow Park Lodge"), yt("uE_ent5rC3Y", "Silver Lake Lodge"), yt("r8qiPv9XCOM", "Empire Express"),
+      yt("iNdfTLilLlU", "Sterling Express"), yt("0shWeR7Fvpg", "Galena Express"), yt("XZjubaPbamE", "Revelator Express"), yt("sAjdqw-lzgI", "Sultan Express")]},
+    sv: {resort: "Sun Valley", title: "Watch Sun Valley's web cams live", frames: [
+      hd("4c82abd4-5ef5-4b16-870f-548c2885d3f0", "River Run", "b16"), hd("390488dd-a758-4dd3-ae95-91c408abbff0", "The Bowls"),
+      hd("5f27e4b8-7c51-4451-bcf5-3ab843f56bc6", "Warm Springs"), hd("b4e43d2a-4ba6-4f25-8753-1055f95230cb", "Quarter Dollar"),
+      hd("22429e23-e586-4934-b19b-beb1e20a54a7", "Sun Valley Club"), hd("32f27fbc-fa53-4194-8aeb-596e921468ef", "Ice Rink")]}
   };
-  var KEY = "wsj-head-cam", REFRESH_CLAUDE = 10*60000;
+  var KEY = "wsj-head-cam", ROTATE = 20000, REFRESH_CLAUDE = 10*60000;
   var root = document.documentElement, b = document.getElementById("wt-banner");
   var links = document.querySelectorAll(".wt-edition a.wt-stake[data-cam]");
   if(!b || !links.length) return;
   var inClaude = !!(window.claude && window.claude.use);
   var lay = document.createElement("div"); lay.className = "dv-layer"; b.insertBefore(lay, b.firstChild);
   var cap = document.createElement("span"); cap.className = "wt-dv-cap"; b.appendChild(cap);
-  /* "Watch Live" link: waltski.com already has one (for the Needles cam) — repoint it; claude.ai gets its own, shown only in DV / SV mode. */
-  var play = document.querySelector("a.wt-play"), playHref = play ? play.href : "", playTitle = play ? play.title : "", own = null;
-  if(!play){
+  /* "Watch Live" link: waltski.com adds its own (a.wt-play, created by a later script), so look it up when needed; claude.ai gets one here. */
+  function getPlay(){ var a = document.querySelector("a.wt-play"); if(a && !a.hasAttribute("data-sb-href")){ a.setAttribute("data-sb-href", a.href); a.setAttribute("data-sb-title", a.title); } return a; }
+  var own = null;
+  if(!(window.claude && window.claude.use) ? false : true){
     var nb = document.getElementById("wt-next");
     if(nb && nb.parentNode){
       var sp = document.createElement("span"); sp.className = "wt-sep2 wt-dv-watch-sep"; sp.setAttribute("aria-hidden", "true"); sp.textContent = "|";
@@ -2609,80 +2617,82 @@ a.wt-dv-watch{text-decoration:none;}
     }
   }
   function hm(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
-  function fit(){
-    var f = lay.querySelector("iframe"); if(!f) return;
-    var w = b.offsetWidth || window.innerWidth, h = b.offsetHeight || 300;
-    var W = Math.max(w, h * 16 / 9), H = W * 9 / 16; if(H < h){ H = h; W = H * 16 / 9; }
-    f.style.width = Math.ceil(W) + "px"; f.style.height = Math.ceil(H) + "px";
+  var mode = "sb", idx = -1, timer = null, set_ = {}, setAt = {};
+  function linkTo(f){ var c = CAMS[mode]; if(!c || !f) return; var play = getPlay(); if(play){ play.href = f.watch; play.title = c.title; } if(own){ own.href = f.watch; own.title = c.title; } }
+  function show(src, f, at, m){
+    if(m !== mode) return;
+    lay.style.backgroundImage = 'url("' + src + '")';
+    cap.textContent = CAMS[m].resort + " · " + f.name + " live cam" + (at ? " · " + hm(new Date(at)) : "");
+    root.classList.add("has-banner"); linkTo(f);
   }
-  function show(src, at, m){ if(m !== mode) return; lay.style.backgroundImage = 'url("' + src + '")'; cap.textContent = CAMS[m].name + (at ? " · " + hm(new Date(at)) : ""); root.classList.add("has-banner"); }
-  /* claude.ai: the newest frame through Composio */
-  var mcp = null, timer = null, busy = false;
-  function cmd(u){ return "python3 - <<'P'\n" +
-    "import io,base64,urllib.request,datetime\n" +
-    "from PIL import Image\n" +
-    "r=urllib.request.urlopen(urllib.request.Request('" + u + "?t='+str(int(datetime.datetime.now().timestamp())),headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
-    "im=Image.open(io.BytesIO(r)).convert('RGB')\n" +
-    "if im.width>1280: im=im.resize((1280,int(im.height*1280/im.width)))\n" +
-    "o=io.BytesIO();im.save(o,'JPEG',quality=72,optimize=True)\n" +
-    "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
-    "P"; }
-  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
-  function fetchFrame(){
-    var m = mode; if(!mcp || busy || !CAMS[m]) return; busy = true;
-    mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: cmd(CAMS[m].img)}, {cache:false}).then(function(r){
-      busy = false; var at = null, img = null;
-      stdoutOf(r).split("\n").forEach(function(l){ var i = l.indexOf("|"); if(i < 0) return; var k = l.slice(0, i), v = l.slice(i + 1).trim(); if(k === "ts") at = v; if(k === "img" && v.length > 1000) img = v; });
-      if(!img) return;
-      show("data:image/jpeg;base64," + img, at, m);
-      try{ localStorage.setItem("wsj-" + m + "-frame", JSON.stringify({at: at, img: img})); }catch(e){}
-    }, function(){ busy = false; });
-  }
-  /* waltski.com: Sun Valley picture straight from the cam host, preloaded so it swaps without a blank */
-  var webTimer = null;
-  function webLoad(){
-    var m = mode, c = CAMS[m]; if(!c || c.yt) return;
-    var u = c.img + "?t=" + Date.now(), probe = new Image();
-    probe.onload = function(){ if(probe.naturalWidth > 40) show(u, new Date().toISOString(), m); };
+  /* waltski.com: load the next cam's current picture; skip cams that don't answer */
+  function webNext(tries){
+    var m = mode, c = CAMS[m]; if(!c) return;
+    tries = tries || 0; if(tries >= c.frames.length) return;
+    idx = (idx + 1) % c.frames.length; var f = c.frames[idx];
+    var u = f.img + "?t=" + Date.now(), probe = new Image();
+    probe.onload = function(){ if(probe.naturalWidth > 200) show(u, f, new Date().toISOString(), m); else webNext(tries + 1); };
+    probe.onerror = function(){ webNext(tries + 1); };
     probe.src = u;
   }
-  var mode = "sb";
+  /* claude.ai: the whole set through Composio, then rotate locally */
+  var mcp = null, busy = false;
+  function cmd(m){
+    var list = CAMS[m].frames.map(function(f, i){ return [String(i), f.img]; });
+    return "python3 - <<'P'\n" +
+      "import io,base64,urllib.request,datetime\n" +
+      "from PIL import Image,ImageStat\n" +
+      "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))\n" +
+      "for k,u in " + JSON.stringify(list) + ":\n" +
+      "  try:\n" +
+      "    r=urllib.request.urlopen(urllib.request.Request(u+'?t='+str(int(datetime.datetime.now().timestamp())),headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
+      "    im=Image.open(io.BytesIO(r)).convert('RGB')\n" +
+      "    if im.width<200: continue\n" +
+      "    lum=ImageStat.Stat(im.convert('L')).mean[0]\n" +
+      "    im.thumbnail((800,800));o=io.BytesIO();im.save(o,'JPEG',quality=60,optimize=True)\n" +
+      "    print(k+'|'+str(int(lum))+'|'+base64.b64encode(o.getvalue()).decode())\n" +
+      "  except Exception as e: pass\n" +
+      "P";
+  }
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  function usable(m){ var all = set_[m] || [], lit = all.filter(function(x){ return x.lum >= 35; }); return lit.length ? lit : all; }
+  function claudeNext(){
+    var m = mode, l = usable(m); if(!l.length) return;
+    idx = (idx + 1) % l.length; var x = l[idx];
+    show("data:image/jpeg;base64," + x.img, CAMS[m].frames[x.i], setAt[m], m);
+  }
+  function fetchSet(){
+    var m = mode; if(!mcp || busy || !CAMS[m]) return; busy = true;
+    mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: cmd(m)}, {cache:false}).then(function(r){
+      busy = false; var at = null, got = [];
+      stdoutOf(r).split("\n").forEach(function(l){ var f = l.split("|"); if(f[0] === "ts") at = f[1]; else if(f.length === 3 && f[2].length > 1000) got.push({i: +f[0], lum: +f[1], img: f[2].trim()}); });
+      if(!got.length) return;
+      var had = (set_[m] || []).length; set_[m] = got; setAt[m] = at;
+      try{ localStorage.setItem("wsj-" + m + "-set", JSON.stringify({at: at, set: got})); }catch(e){}
+      if(!had && m === mode){ idx = -1; claudeNext(); }
+    }, function(){ busy = false; });
+  }
+  function tick(){ if(document.hidden || !CAMS[mode]) return; if(inClaude) claudeNext(); else webNext(0); }
   function set(m, save){
     mode = CAMS[m] ? m : "sb";
     var c = CAMS[mode];
     root.classList.toggle("cam-alt", !!c); root.classList.toggle("cam-dv", mode === "dv"); root.classList.toggle("cam-sv", mode === "sv");
     links.forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
     if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
-    if(play){ play.href = c ? c.watch : playHref; play.title = c ? c.title : playTitle; }
-    if(own && c){ own.href = c.watch; own.title = c.title; }
-    if(webTimer){ clearInterval(webTimer); webTimer = null; }
-    var f0 = lay.querySelector("iframe");
-    if(f0 && mode !== "dv") setTimeout(function(){ if(mode !== "dv" && f0.parentNode) f0.parentNode.removeChild(f0); }, mode === "sb" ? 1100 : 0);
-    if(!c) return;
-    root.classList.add("has-banner");
-    lay.style.backgroundImage = ""; cap.textContent = c.name;
+    if(timer){ clearInterval(timer); timer = null; }
+    idx = -1;
+    if(!c){ var play = getPlay(); if(play && play.hasAttribute("data-sb-href")){ play.href = play.getAttribute("data-sb-href"); play.title = play.getAttribute("data-sb-title"); } return; }
+    root.classList.add("has-banner"); lay.style.backgroundImage = ""; cap.textContent = c.resort + " live cams"; linkTo(c.frames[0]);
     if(inClaude){
-      try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-frame") || "null"); if(sv && sv.img) show("data:image/jpeg;base64," + sv.img, sv.at, mode); }catch(e){}
-      fetchFrame(); if(!timer) timer = setInterval(function(){ if(!document.hidden) fetchFrame(); }, REFRESH_CLAUDE);
-    } else if(c.yt){
-      lay.style.backgroundImage = 'url("' + c.img + '?t=' + Date.now() + '")';
-      if(!lay.querySelector("iframe")){
-        var f = document.createElement("iframe");
-        f.src = "https://www.youtube.com/embed/" + c.yt + "?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=" + c.yt + "&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1";
-        f.title = c.name; f.allow = "autoplay; encrypted-media; picture-in-picture"; f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true");
-        lay.appendChild(f);
-      }
-      fit(); setTimeout(fit, 600); setTimeout(fit, 2500);
-    } else {
-      webLoad(); webTimer = setInterval(function(){ if(!document.hidden) webLoad(); }, c.every);
-    }
+      if(!set_[mode]){ try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-set") || "null"); if(sv && sv.set && sv.set.length){ set_[mode] = sv.set; setAt[mode] = sv.at; } }catch(e){} }
+      claudeNext(); fetchSet();
+    } else webNext(0);
+    timer = setInterval(tick, ROTATE);
   }
   links.forEach(function(x){ x.addEventListener("click", function(e){ e.preventDefault(); set(x.getAttribute("data-cam"), true); }); });
-  window.addEventListener("resize", fit);
-  /* Linked to the radar location menu: choosing a resort there switches the header too. */
   document.addEventListener("wsj-radar", function(e){ var v = CAMS[e.detail] ? e.detail : "sb"; if(v !== mode) set(v, true); });
   var start = "sb"; try{ var st = localStorage.getItem(KEY); if(CAMS[st]) start = st; }catch(e){}
-  if(inClaude) window.claude.use("mcp").then(function(m){ mcp = m || null; if(CAMS[mode]) fetchFrame(); }, function(){});
+  if(inClaude) window.claude.use("mcp").then(function(m){ mcp = m || null; if(CAMS[mode]) fetchSet(); setInterval(function(){ if(!document.hidden && CAMS[mode]) fetchSet(); }, REFRESH_CLAUDE); }, function(){});
   set(start, false);
 })();
 </script>
@@ -2832,12 +2842,13 @@ a.wt-dv-watch{text-decoration:none;}
 })();
 </script>
 <script>
-/* Public site: the header shows the LIVE Needles cam picture (HD Relay snapshot, 1920x1080) instead of rotating photos.
-   It loads fresh on every page load and refreshes every minute with a crossfade. The dateline's "Watch Live" link (where
-   Next Photo was) opens Snowbasin's webcam page, where the real-time Needles video plays in Snowbasin's own player — the
-   live video itself can't be embedded here. If the snapshot can't load, the rotating cam photos stay. */
+/* Public site: the header rotates through Snowbasin's LIVE cam pictures every 20 seconds (Mark, Oct 26, 2026) — the Needles cam
+   (HD Relay snapshot) plus the Mt. Ogden, John Paul Lodge and Base of Wildcat cams, each freshly loaded when its turn comes, with a
+   crossfade. The dateline's "Watch Live" link (where Next Photo was) opens Snowbasin's webcam page, where the real-time video plays in
+   Snowbasin's own player. If no live picture loads, the rotating cam photos stay. */
 (function(){
-  var SNAP = "https://b15.hdrelay.com/camera/1b6ed87c-f919-4e59-b9cc-7480e3ca31c3/snapshot", LIVE = "https://www.snowbasin.com/the-mountain/web-cams/", REFRESH = 60000;
+  var SNAP = "https://b15.hdrelay.com/camera/1b6ed87c-f919-4e59-b9cc-7480e3ca31c3/snapshot", LIVE = "https://www.snowbasin.com/the-mountain/web-cams/", ROTATE = 20000;
+  var NAMES = {ogden: "Mt. Ogden", jp: "John Paul Lodge", wildcat: "Base of Wildcat"};
   var b = document.getElementById("wt-banner"), root = document.documentElement;
   if(!b) return;
   var nb = document.getElementById("wt-next");
@@ -2845,28 +2856,35 @@ a.wt-dv-watch{text-decoration:none;}
   var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · Needles live cam"; b.appendChild(cap);
   var sep = document.createElement("span"); sep.className = "wt-sep2 wt-play-sep"; sep.setAttribute("aria-hidden", "true"); sep.textContent = "|";
   var link = document.createElement("a"); link.className = "wt-next wt-play"; link.textContent = "Watch Live";
-  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch the Needles cam live on Snowbasin's webcam page";
+  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch Snowbasin's cams live on Snowbasin's webcam page";
   if(nb && nb.parentNode){ nb.parentNode.insertBefore(link, nb.nextSibling); nb.parentNode.insertBefore(sep, link); }
-  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false;
+  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false, idx = -1, fails = 0;
   L.forEach(function(i){ i.className = "wt-live"; i.alt = ""; i.setAttribute("aria-hidden", "true"); i.decoding = "async"; b.insertBefore(i, b.firstChild); });
   function when(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
+  function list(){
+    var l = [{src: SNAP, name: "Needles"}];
+    ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
+    return l;
+  }
   function load(){
-    if(busy) return; busy = true;
+    if(busy) return;
+    var l = list(); idx = (idx + 1) % l.length; var f = l[idx];
+    busy = true;
     var next = 1 - front, img = L[next], probe = new Image();
     probe.onload = function(){
       busy = false;
-      if(probe.naturalWidth < 40) return;
+      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
+      fails = 0;
       img.src = probe.src;
       img.classList.add("on"); L[front].classList.remove("on"); front = next;
       root.classList.add("has-banner", "has-video");
-      cap.textContent = "Snowbasin · Needles live cam · " + when();
+      cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
-    probe.onerror = function(){ busy = false; };
-    probe.src = SNAP + "?t=" + Date.now();
+    probe.onerror = function(){ busy = false; if(++fails < l.length) load(); };
+    probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
   }
   load();
-  setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
+  setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
 })();
 </script>
 <script>

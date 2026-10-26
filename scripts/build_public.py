@@ -153,8 +153,8 @@ live_js = r"""<script>
 """
 must(body.count("</style>") >= 1, "</style>")
 
-# 6. Header live cam (Mark's pick, Oct 25, 2026): the header shows the live Needles cam picture (HD Relay snapshot),
-#    refreshed every minute; a "Watch Live" link in the dateline (where Next Photo was) opens Snowbasin's webcam page, where the
+# 6. Header live cams (Oct 26, 2026): the header rotates through Snowbasin's live cam pictures (Needles + Mt. Ogden, John Paul Lodge,
+#    Base of Wildcat) every 20 seconds; a "Watch Live" link in the dateline (where Next Photo was) opens Snowbasin's webcam page, where the
 #    real-time Needles video plays in their own player (that stream needs a per-viewer token, so it can't be embedded here).
 #    If the snapshot can't load, the rotating cam photos stay as they are.
 NEEDLES_SNAP = "https://b15.hdrelay.com/camera/1b6ed87c-f919-4e59-b9cc-7480e3ca31c3/snapshot"
@@ -174,12 +174,13 @@ a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 </style>
 """
 video_js = r"""<script>
-/* Public site: the header shows the LIVE Needles cam picture (HD Relay snapshot, 1920x1080) instead of rotating photos.
-   It loads fresh on every page load and refreshes every minute with a crossfade. The dateline's "Watch Live" link (where
-   Next Photo was) opens Snowbasin's webcam page, where the real-time Needles video plays in Snowbasin's own player — the
-   live video itself can't be embedded here. If the snapshot can't load, the rotating cam photos stay. */
+/* Public site: the header rotates through Snowbasin's LIVE cam pictures every 20 seconds (Mark, Oct 26, 2026) — the Needles cam
+   (HD Relay snapshot) plus the Mt. Ogden, John Paul Lodge and Base of Wildcat cams, each freshly loaded when its turn comes, with a
+   crossfade. The dateline's "Watch Live" link (where Next Photo was) opens Snowbasin's webcam page, where the real-time video plays in
+   Snowbasin's own player. If no live picture loads, the rotating cam photos stay. */
 (function(){
-  var SNAP = "@@SNAP@@", LIVE = "@@LIVE@@", REFRESH = 60000;
+  var SNAP = "@@SNAP@@", LIVE = "@@LIVE@@", ROTATE = 20000;
+  var NAMES = {ogden: "Mt. Ogden", jp: "John Paul Lodge", wildcat: "Base of Wildcat"};
   var b = document.getElementById("wt-banner"), root = document.documentElement;
   if(!b) return;
   var nb = document.getElementById("wt-next");
@@ -187,28 +188,35 @@ video_js = r"""<script>
   var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · Needles live cam"; b.appendChild(cap);
   var sep = document.createElement("span"); sep.className = "wt-sep2 wt-play-sep"; sep.setAttribute("aria-hidden", "true"); sep.textContent = "|";
   var link = document.createElement("a"); link.className = "wt-next wt-play"; link.textContent = "Watch Live";
-  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch the Needles cam live on Snowbasin's webcam page";
+  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch Snowbasin's cams live on Snowbasin's webcam page";
   if(nb && nb.parentNode){ nb.parentNode.insertBefore(link, nb.nextSibling); nb.parentNode.insertBefore(sep, link); }
-  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false;
+  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false, idx = -1, fails = 0;
   L.forEach(function(i){ i.className = "wt-live"; i.alt = ""; i.setAttribute("aria-hidden", "true"); i.decoding = "async"; b.insertBefore(i, b.firstChild); });
   function when(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
+  function list(){
+    var l = [{src: SNAP, name: "Needles"}];
+    ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
+    return l;
+  }
   function load(){
-    if(busy) return; busy = true;
+    if(busy) return;
+    var l = list(); idx = (idx + 1) % l.length; var f = l[idx];
+    busy = true;
     var next = 1 - front, img = L[next], probe = new Image();
     probe.onload = function(){
       busy = false;
-      if(probe.naturalWidth < 40) return;
+      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
+      fails = 0;
       img.src = probe.src;
       img.classList.add("on"); L[front].classList.remove("on"); front = next;
       root.classList.add("has-banner", "has-video");
-      cap.textContent = "Snowbasin · Needles live cam · " + when();
+      cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
-    probe.onerror = function(){ busy = false; };
-    probe.src = SNAP + "?t=" + Date.now();
+    probe.onerror = function(){ busy = false; if(++fails < l.length) load(); };
+    probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
   }
   load();
-  setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
+  setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
 })();
 </script>
 """.replace("@@SNAP@@", NEEDLES_SNAP).replace("@@LIVE@@", NEEDLES_LIVE)
