@@ -1320,12 +1320,12 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var t=d.toLocaleTimeString("en-US",{timeZone:tz,hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.");
     var abbr=/^(May|June|July)$/.test(mon)?mon:mon+".";
     var wd=document.getElementById("wt-date"); if(wd) wd.textContent=day;
-    /* Greeting follows the refresh time: 4 a.m. run = Rise and shine, 10 a.m. = Happy mid-morning, 4 p.m. = Good afternoon, 6 p.m. = Good evening. */
+    /* Greeting follows the refresh time: the 5 a.m. run = Rise and shine, before 11:30 = Happy mid-morning, the noon run = Good afternoon, after 5:30 p.m. = Good evening. */
     var hm=d.toLocaleTimeString("en-US",{timeZone:tz,hour:"2-digit",minute:"2-digit",hour12:false}).split(":"), tod=(+hm[0]%24)*60+(+hm[1]);
-    var hello = tod<8*60 ? "Rise and shine" : tod<12*60 ? "Happy mid-morning" : tod<17*60+30 ? "Good afternoon" : "Good evening";
+    var hello = tod<8*60 ? "Rise and shine" : tod<11*60+30 ? "Happy mid-morning" : tod<17*60+30 ? "Good afternoon" : "Good evening";
     var wg=document.getElementById("wt-greet"); if(wg) wg.textContent=hello+", it\u2019s "+day;
-    /* Morning Devotion appears only on morning editions: a refresh at or after noon MT hides the section and its nav link. */
-    if(tod>=12*60){ var dw=document.getElementById("daily-word"); if(dw) dw.hidden=true; var dl=document.querySelector('.wt-nav a[href="#daily-word"]'); if(dl) dl.hidden=true; }
+    /* Morning Devotion appears only on the morning edition: a refresh at or after 11:30 a.m. MT (the noon run and later) hides the section and its nav link. */
+    if(tod>=11*60+30){ var dw=document.getElementById("daily-word"); if(dw) dw.hidden=true; var dl=document.querySelector('.wt-nav a[href="#daily-word"]'); if(dl) dl.hidden=true; }
     document.getElementById("wt-upd").textContent=abbr+" "+dd+" "+t+" MT";
     var mins=Math.round((Date.now()-d.getTime())/60000), ago="";
     if(mins>=0){ ago = mins<60 ? mins+" min ago" : mins<1440 ? Math.round(mins/60)+" hr ago" : Math.round(mins/1440)+" days ago"; }
@@ -1510,7 +1510,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
   (window.claude && window.claude.use ? window.claude.use("mcp") : Promise.resolve(null)).then(function(m){
     mcp = m || null; if(!mcp) return;
     btn.hidden = false; load();
-    timer = setInterval(function(){ if(!document.hidden) load(); }, 15*60000);
+    timer = setInterval(function(){ if(!document.hidden) load(); }, 10*60000);
   }, function(){});
 })();
 </script>
@@ -1760,7 +1760,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
-  var REFRESH = 10*60000, BANNER = ["ogden","jp","wildcat"];
+  var REFRESH = 5*60000, BANNER = ["ogden","jp","wildcat"];
   function now(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.")+" MT"; }catch(e){ return ""; } }
   function load(){
     var figs = document.querySelectorAll("#cams figure.cam"), live = [], pending = figs.length;

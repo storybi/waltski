@@ -9,8 +9,12 @@ The output is a standalone page for GitHub Pages. Changes from the private page:
   * the Ask Claude bar is hidden (it only works inside claude.ai)
   * the "Update now" button, its status line and its script are removed
   * the Shopping · Deal Watch section and its nav link are removed
-  * the Snowbasin cams and the photo banner load the live cam images directly,
+  * the Snowbasin cams and the photo banner load the live cam images directly every 5 minutes,
     falling back to the snapshot baked into the page if a cam doesn't load
+  * the Seahawks game strip polls ESPN's public scoreboard directly while a game is live
+
+Between Claude's twice-daily refreshes, .github/workflows/update-data.yml runs scripts/update_data.py
+(no Claude) to refresh the ticker, Markets cards, SpaceX chart, weather, game strip and cam snapshots.
 """
 import re
 import sys
@@ -52,11 +56,11 @@ public_css = """<style>
 </style>
 """
 
-# 5. Live cams straight from the cam hosts, refreshed every 10 minutes.
+# 5. Live cams straight from the cam hosts, refreshed every 5 minutes.
 live_js = r"""<script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
-  var REFRESH = 10*60000, BANNER = ["ogden","jp","wildcat"];
+  var REFRESH = 5*60000, BANNER = ["ogden","jp","wildcat"];
   function now(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.")+" MT"; }catch(e){ return ""; } }
   function load(){
     var figs = document.querySelectorAll("#cams figure.cam"), live = [], pending = figs.length;

@@ -1,0 +1,67 @@
+name: Refresh live data
+
+# Free, Claude-free refresh of the mechanical data on www.waltski.com:
+# stock ticker, Markets cards, SpaceX chart, weather, Seahawks game strip and cam snapshots.
+# Claude's twice-daily refresh (5 a.m. and noon MT) still writes the stories and briefs.
+
+on:
+  schedule:
+    - cron: "*/15 13-21 * * 1-5"   # every 15 min during US market hours (UTC)
+    - cron: "7 * * * *"            # hourly the rest of the time
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/update_data.py
+      - .github/workflows/update-data.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-live-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow (for cam snapshots)
+        run: pip install --quiet pillow
+
+      - name: Refresh data in index.html
+        run: python3 scripts/update_data.py index.html
+
+      - name: Check the page's scripts still parse
+        run: |
+          python3 - <<'PY'
+          import re, subprocess, sys, tempfile, os
+          s = open("index.html", encoding="utf-8").read()
+          bad = 0
+          for i, m in enumerate(re.findall(r"<script(?![^>]*src)[^>]*>(.*?)</script>", s, re.S)):
+              f = os.path.join(tempfile.gettempdir(), "s%d.js" % i)
+              open(f, "w", encoding="utf-8").write(m)
+              if subprocess.run(["node", "--check", f]).returncode:
+                  bad += 1
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Commit and push if anything changed
+        run: |
+          if git diff --quiet; then echo "No changes"; exit 0; fi
+          git config user.name "waltski-data-bot"
+          git config user.email "waltski-data-bot@users.noreply.github.com"
+          git add index.html
+          git commit -m "Live data refresh $(TZ=America/Denver date '+%a %b %-d, %-I:%M %p MT')"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1
