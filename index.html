@@ -1236,6 +1236,11 @@ a.wt-dv-watch{text-decoration:none;}
       <div class="cams-head"><h4>Deer Valley Cams</h4><span class="cams-status" id="dv-status">Live video from Deer Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.deervalley.com/explore-the-mountain/webcams" target="_blank" rel="noopener">deervalley.com</a></div>
       <div class="cams" id="dv-grid"></div>
     </div>
+    <!-- Sun Valley cams (added Oct 26, 2026): the HD Relay cams from sunvalley.com/the-mountain/web-cams, in that page's order. Rendered by the "Sun Valley cams" script; keep as is. -->
+    <div class="wx-cams sv-cams" id="sv-cams">
+      <div class="cams-head"><h4>Sun Valley Cams</h4><span class="cams-status" id="sv-status">Current pictures from Sun Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.sunvalley.com/the-mountain/web-cams/" target="_blank" rel="noopener">sunvalley.com</a></div>
+      <div class="cams" id="sv-grid"></div>
+    </div>
   </section>
 
   <!-- ================= MORE WEATHER (other cities) ================= -->
@@ -2422,6 +2427,88 @@ a.wt-dv-watch{text-decoration:none;}
     var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ load(e.target); io.unobserve(e.target); } }); }, {rootMargin: "200px"});
     frames.forEach(function(f){ io.observe(f); });
   } else frames.forEach(load);
+})();
+</script>
+<script>
+/* Sun Valley cams (added Oct 26, 2026) — current pictures from the HD Relay cams on sunvalley.com/the-mountain/web-cams (camera ids from
+   manage.hdrelay.com/player/<player id>). On waltski.com the pictures load straight from img.hdrelay.com and refresh every 5 minutes.
+   Inside claude.ai (which can't load outside images) they come through the Composio connector every 10 minutes, and the last set is kept
+   on this device. Roundhouse and White Clouds use a different cam service, so those tiles link to Sun Valley's page. Tapping a picture opens
+   Sun Valley's live cam page. Keep as is during routine refreshes. */
+(function(){
+  var PAGE = "https://www.sunvalley.com/the-mountain/web-cams/";
+  var CAMS = [
+    {k:"roundhouse", name:"Roundhouse",      elev:"7,710 ft", id:null},
+    {k:"whiteclouds",name:"White Clouds",    elev:"",         id:null},
+    {k:"stake",      name:"Snow Stake",      elev:"8,900 ft", id:"9d9a56b7-bf9e-4162-be9c-06c42ca208ff"},
+    {k:"bowls",      name:"The Bowls",       elev:"8,996 ft", id:"390488dd-a758-4dd3-ae95-91c408abbff0"},
+    {k:"riverrun",   name:"River Run",       elev:"5,755 ft", id:"4c82abd4-5ef5-4b16-870f-548c2885d3f0"},
+    {k:"warmsprings",name:"Warm Springs",    elev:"5,868 ft", id:"5f27e4b8-7c51-4451-bcf5-3ab843f56bc6"},
+    {k:"quarter",    name:"Quarter Dollar",  elev:"5,951 ft", id:"b4e43d2a-4ba6-4f25-8753-1055f95230cb"},
+    {k:"club",       name:"Sun Valley Club", elev:"",         id:"22429e23-e586-4934-b19b-beb1e20a54a7"},
+    {k:"rink",       name:"Ice Rink",        elev:"",         id:"32f27fbc-fa53-4194-8aeb-596e921468ef"}
+  ];
+  var grid = document.getElementById("sv-grid"), st = document.getElementById("sv-status");
+  if(!grid) return;
+  var inClaude = !!(window.claude && window.claude.use), KEY = "wsj-sv-cams";
+  function snap(c){ return "https://img.hdrelay.com/camera/" + c.id + "/snapshot"; }
+  function hm(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
+  function say(t, err){ if(st){ st.textContent = t; st.classList.toggle("err", !!err); } }
+  grid.innerHTML = CAMS.map(function(c){
+    return '<figure class="cam" id="svc-' + c.k + '"><a class="frame" href="' + PAGE + '" target="_blank" rel="noopener" aria-label="Open Sun Valley’s ' + c.name + ' cam">' +
+      (c.id ? '<span class="cam-tag">Loading…</span><span class="ph">Loading ' + c.name + '…</span>' : '<span class="ph">Watch ' + c.name + ' on sunvalley.com ↗</span>') +
+      '</a><figcaption><span>' + c.name + '</span><span class="elev">' + (c.elev || (c.id ? "" : "Link")) + '</span></figcaption></figure>';
+  }).join("");
+  function put(k, src, at){
+    var f = document.getElementById("svc-" + k); if(!f) return;
+    var a = f.querySelector(".frame"), img = a.querySelector("img"), tag = a.querySelector(".cam-tag"), ph = a.querySelector(".ph");
+    if(!img){ img = document.createElement("img"); img.alt = f.querySelector("figcaption span").textContent + ", Sun Valley"; a.appendChild(img); }
+    img.src = src; if(ph) ph.remove();
+    if(tag){ tag.className = "cam-tag live"; tag.textContent = at ? hm(new Date(at)) : "Live"; }
+  }
+  if(!inClaude){
+    function webLoad(){
+      var t = Date.now(), ok = 0, n = 0;
+      CAMS.forEach(function(c){
+        if(!c.id) return; n++;
+        var u = snap(c) + "?t=" + t, probe = new Image();
+        probe.onload = function(){ if(probe.naturalWidth > 40){ put(c.k, u, new Date(t).toISOString()); ok++; say("Current pictures · " + hm(new Date(t)) + " · tap a picture for live video"); } };
+        probe.onerror = function(){ var f = document.getElementById("svc-" + c.k), tg = f && f.querySelector(".cam-tag"); if(tg && !f.querySelector("img")){ tg.textContent = "Offline"; var ph = f.querySelector(".ph"); if(ph) ph.textContent = "Tap to watch " + c.name + " live \u2197"; } };
+        probe.src = u;
+      });
+    }
+    webLoad(); setInterval(function(){ if(!document.hidden) webLoad(); }, 5*60000);
+    return;
+  }
+  try{ var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if(sv && sv.img){ for(var k in sv.img) put(k, "data:image/jpeg;base64," + sv.img[k], sv.at); say("Saved pictures · " + hm(new Date(sv.at))); } }catch(e){}
+  var CMD = "python3 - <<'P'\n" +
+    "import urllib.request,base64,io,datetime\n" +
+    "from PIL import Image\n" +
+    "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))\n" +
+    "for k,i in " + JSON.stringify(CAMS.filter(function(c){ return c.id; }).map(function(c){ return [c.k, c.id]; })) + ":\n" +
+    "  try:\n" +
+    "    b=urllib.request.urlopen(urllib.request.Request('https://img.hdrelay.com/camera/%s/snapshot'%i,headers={'User-Agent':'Mozilla/5.0'}),timeout=20).read()\n" +
+    "    im=Image.open(io.BytesIO(b)).convert('RGB');im.thumbnail((640,640));o=io.BytesIO();im.save(o,'JPEG',quality=66,optimize=True)\n" +
+    "    print(k+'|'+base64.b64encode(o.getvalue()).decode())\n" +
+    "  except Exception as e: print(k+'|ERR '+type(e).__name__)\n" +
+    "P";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp){ say("Tap a tile to watch Sun Valley’s cams on sunvalley.com."); return; }
+    var busy = false;
+    function load(){
+      if(busy || document.hidden) return; busy = true;
+      mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+        var at = null, got = {}, n = 0;
+        stdoutOf(r).split("\n").forEach(function(L){ var i = L.indexOf("|"); if(i < 0) return; var k = L.slice(0, i), v = L.slice(i + 1).trim();
+          if(k === "ts"){ at = v; return; } if(/^[A-Za-z0-9+\/=]{200,}$/.test(v)){ got[k] = v; n++; } });
+        for(var k in got) put(k, "data:image/jpeg;base64," + got[k], at);
+        if(n){ say("Current pictures · " + hm(new Date(at || Date.now())) + " · tap a picture for live video"); try{ localStorage.setItem(KEY, JSON.stringify({at: at, img: got})); }catch(e){} }
+        else say("Sun Valley’s cams didn’t respond — tap a tile to open them live.", true);
+      }, function(){ say("Sun Valley’s cams aren’t reachable here right now — tap a tile to open them live.", true); }).then(function(){ busy = false; });
+    }
+    load(); setInterval(load, 10*60000);
+  }, function(){});
 })();
 </script>
 <script>
