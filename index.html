@@ -17,7 +17,7 @@
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,600&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
 /* Layout concept: a financial broadsheet in the Journal tradition — white paper, black ink,
    a centered nameplate over a dateline, hairline column rules, small-caps section labels. */
@@ -534,8 +534,8 @@ html.has-banner:not(.banner-past) .wt-ticker .tk-it{border-right-color:rgba(255,
 html.has-banner:not(.banner-past) .wt-ticker .tk-it .px{color:#fff;}
 html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));}
 .wt-banner-cap{z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
-/* Walt Ski Journal nameplate (Alpine Modern, Oct 25, 2026) — condensed sans caps with the orange peak mark; forest-green backing only when no photo shows */
-.wt-name{font-family:"Archivo Narrow","Arial Narrow",Arial,sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(32px,8.4vw,96px); line-height:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
+/* Walt Ski Journal nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 600 caps "WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
+.wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:600; text-transform:uppercase; letter-spacing:.01em; font-size:clamp(30px,8vw,92px); line-height:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
 .wt-peak{width:.68em; height:.42em; flex:none;}
 .wt-greet{font-family:"Newsreader",Georgia,serif; font-style:italic; font-size:17px;}
 @media (max-width:480px){ .wt-greet{font-size:14px;} }
@@ -545,12 +545,12 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Mountain Green, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 4:17 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a></span>
+      <span>Mountain Green, Utah Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake Cam <b id="wt-stake-in">0&quot;</b></a></span>
       <span class="wt-upd"></span>
     </div>
     
-    <h1 class="wt-name"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/><path d="M36 15 L42 6 L48 15 L44 13 L42 16 L39 13 Z" fill="#F4EFE3"/></svg><span>The Walt Ski Journal</span></h1>
-    <p class="wt-greet"><span id="wt-greet">Rise and shine, it&rsquo;s Sunday, October 25, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Oct. 22, 2026 9:03 a.m. MT</span><span id="wt-ago"></span></span></p>
+    <h1 class="wt-name"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/><path d="M36 15 L42 6 L48 15 L44 13 L42 16 L39 13 Z" fill="#F4EFE3"/></svg><span>Walt Ski Journal</span></h1>
+    <p class="wt-greet"><span id="wt-greet">Good evening, it&rsquo;s Sunday, October 25, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Oct. 25, 2026 6:03 p.m. MT</span><span id="wt-ago"></span></span></p>
   </header>
 
   <!-- ================= STOCK TICKER (sticky) ================= -->
@@ -604,11 +604,11 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
     </div>
     <div class="word-more">
       <article class="wm-card">
-        <div class="wm-src">Our Daily Bread · Oct 22</div>
-        <h3>In Step with God</h3>
-        <p class="wm-quote">“It should look like one person running.”</p>
-        <p class="wm-sum">Paralympic guide runners stay tethered to blind athletes, matching them stride for stride so the pair moves as one. Galatians 5 pictures the Holy Spirit guiding us the same way — keeping close step with Him is how we resist the flesh and grow His fruit.</p>
-        <p class="wm-verse">If we live in the Spirit, let us also walk in the Spirit.<cite>Galatians 5:25 (KJV)</cite></p>
+        <div class="wm-src">Our Daily Bread · Oct 25</div>
+        <h3>God’s Portrait of You</h3>
+        <p class="wm-quote">“How is God ‘painting’ your life?”</p>
+        <p class="wm-sum">Like an artist slowly bringing a portrait to life, God was shaping Moses from a hidden basket on the Nile to a rescue by Pharaoh’s own daughter (Exodus 2:1–10). The reading invites us to trust that He is bringing good out of our own humble or uncertain beginnings, stroke by stroke.</p>
+        <p class="wm-verse">And the woman conceived, and bare a son: and when she saw him that he was a goodly child, she hid him three months.<cite>Exodus 2:2 (KJV)</cite></p>
         <a class="w-link" href="https://www.odbm.org/en" target="_blank" rel="noopener">Our Daily Bread →</a>
       </article>
       <article class="wm-card">
@@ -785,24 +785,25 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
         </div>
       </a>
 
-      <a class="story-card" href="https://cappnotes.substack.com/p/closing-look-friday-october-23-2026" target="_blank" rel="noopener">
+      <a class="story-card" href="https://tradersunion.com/news/stocks/show/3961685-us-stock-futures-fed-decision/" target="_blank" rel="noopener">
         <div class="story-art">
-          <span class="story-source">Economy · Closing Look</span>
-          <svg viewBox="0 0 320 200" role="img" aria-label="Illustration: a factory gauge needle pegged high beside a rising inflation-expectations line, representing a 53-month-high factory PMI alongside rising inflation expectations">
-            <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f2747"/><stop offset="1" stop-color="#2a6fa8"/></linearGradient></defs>
+          <span class="story-source">Markets · Week Ahead</span>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Illustration: a calendar page marked Wednesday beside a rising futures arrow and a Fed column building, representing stock futures rising into a Fed decision week">
+            <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2731"/><stop offset="1" stop-color="#3d5566"/></linearGradient></defs>
             <rect width="320" height="200" fill="url(#g4)"/>
-            <g transform="translate(90 100)"><circle r="54" fill="none" stroke="#dbe6f3" stroke-width="3" stroke-dasharray="4 6"/><line x1="0" y1="0" x2="34" y2="-40" stroke="#ffd166" stroke-width="4" stroke-linecap="round"/><circle r="5" fill="#ffd166"/></g>
-            <polyline points="190,150 214,128 236,134 258,104 284,88" fill="none" stroke="#ff9f7a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M284,88 l16,-5 l-8,16 z" fill="#ff9f7a"/>
-            <text x="20" y="30" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="#ffffff">PMI 56.0 · 53-MO HIGH</text>
-            <text x="20" y="186" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#c7d0d8">1-YR INFLATION EXP. 4.7%</text>
+            <g transform="translate(34 52)"><rect width="92" height="98" rx="6" fill="#eef2f5"/><rect width="92" height="24" rx="6" fill="#c8102e"/><rect y="16" width="92" height="8" fill="#c8102e"/><text x="46" y="17" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#fff">OCT</text><text x="46" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="40" font-weight="700" fill="#1c2731">28</text><text x="46" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#4a5a66">FOMC</text></g>
+            <g transform="translate(160 64)" fill="#c9d4dc"><rect x="0" y="12" width="96" height="8"/><path d="M-4,12 L48,-8 L100,12z"/><rect x="8" y="24" width="10" height="50"/><rect x="30" y="24" width="10" height="50"/><rect x="56" y="24" width="10" height="50"/><rect x="78" y="24" width="10" height="50"/><rect x="-2" y="76" width="100" height="8"/></g>
+            <polyline points="172,170 204,160 232,164 262,146 290,132" fill="none" stroke="#3ddc84" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M290,132 l15,-3 l-8,13 z" fill="#3ddc84"/>
+            <text x="20" y="32" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="#ffffff">S&amp;P FUT +0.4% · NDX +0.6%</text>
+            <text x="20" y="188" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#c9d4dc">90% ODDS OF A HOLD · MSFT, GOOGL, AMZN REPORT</text>
           </svg>
         </div>
         <div class="story-body">
           <span class="fx mix">Mixed</span>
-          <h3>Factories Hum at a 53-Month High, but Inflation Fears Creep Back</h3>
-          <p>The S&amp;P Global flash manufacturing PMI hit 56.0 Friday, its best reading in nearly four and a half years, and consumer sentiment beat expectations at 48.0. But one-year inflation expectations rose to 4.7% and five-year to 3.5%, and markets still price roughly 71% odds of a December Fed rate hike, up sharply from a month ago, despite the firmer growth signal.</p>
-          <span class="story-cta">Read the closing recap →</span>
+          <h3>Futures Bounce Into a Fed Week Packed With Big Tech Earnings</h3>
+          <p>S&amp;P 500 futures rose about 0.4% Sunday evening, Dow futures 154 points and Nasdaq-100 futures 0.6%, after a losing week driven by $116 Brent. Fed funds futures put a hold at 3.75–4.00% on Wednesday at about 90%, but traders still see better than 70% odds of a December hike; Microsoft, Alphabet and Amazon report, and Q3 GDP and core PCE land late in the week.</p>
+          <span class="story-cta">Read the preview →</span>
         </div>
       </a>
 
@@ -988,16 +989,16 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
     <div class="section-sub">What the forecast models are saying about snow for the Wasatch and the wider Rockies.</div>
     <div class="snow-grid">
       <div class="snow-card">
-        <div class="when-row"><div class="when">This week · Oct 26–Nov 1</div><span class="fx fav">Favorable</span></div>
-        <h3>Dry, mild stretch — no new snow expected</h3>
-        <p>With this week's storm cleared out, NWS Salt Lake City has the Wasatch Back sunny and mild through midweek, highs in the mid-60s at Morgan with only a slim shower chance Tuesday and Friday. CPC's 8–14 day guidance (above-normal temps, below-normal precipitation) points to a quiet pattern persisting into early November — good biking/hiking weather, but a pause for snow lovers.</p>
-        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://www.cpc.ncep.noaa.gov/products/predictions/814day/index.php" target="_blank" rel="noopener">NOAA CPC</a></div>
+        <div class="when-row"><div class="when">This week · Oct 26–Nov 1</div><span class="fx mix">Mixed</span></div>
+        <h3>Quiet start, then a wetter, colder turn by the weekend</h3>
+        <p>NWS Salt Lake City keeps Morgan mostly sunny through Thursday apart from a quick round of valley rain late Monday night. Rain and a few thunderstorms move in Friday into Saturday, turning to a rain-snow mix Saturday night and Sunday. OpenSnow shows 0" at Snowbasin through Thursday and about 4" for Oct 30–Nov 3, with stronger, colder storms possible in early November.</p>
+        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://opensnow.com/location/snowbasin/snow-summary" target="_blank" rel="noopener">OpenSnow Snowbasin</a></div>
       </div>
       <div class="snow-card">
-        <div class="when-row"><div class="when">Recap · Oct 22–25</div><span class="fx fav">Favorable</span></div>
+        <div class="when-row"><div class="when">Recap · Oct 22–25</div><span class="fx mix">Mixed</span></div>
         <h3>Second storm of the season drops a few more inches up high</h3>
-        <p>A soaking round of rain and mountain snow moved through Thursday night into Friday — on top of the season's first real snow from Tropical Storm Rachel's remnants Oct 12–15, which buried Little Cottonwood Canyon (18 inches at Snowbird, 16 at Alta) while leaving northern Utah resorts comparatively bare. This week's round added 2–6 inches above 9,000 feet in the Wasatch and Uintas before clearing and colder air moved in for the weekend.</p>
-        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://www.kpcw.org/ski-resorts/2026-10-14/tropical-storm-rachel-dumped-more-than-a-foot-of-snow-on-parts-of-utah-left-others-bare" target="_blank" rel="noopener">KPCW</a></div>
+        <p>A soaking round of rain and mountain snow moved through Thursday night into Friday — on top of the season's first real snow from Tropical Storm Rachel's remnants Oct 12–15, which buried Little Cottonwood Canyon (18 inches at Snowbird, 16 at Alta) while leaving northern Utah resorts comparatively bare. This week's round added 2–6 inches above 9,000 feet in the Wasatch and Uintas before clearing. October has been wet, but most of the water soaked into the ground: no Wasatch SNOTEL site holds more than an inch of snow-water equivalent.</p>
+        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://www.kpcw.org/ski-resorts/2026-10-14/tropical-storm-rachel-dumped-more-than-a-foot-of-snow-on-parts-of-utah-left-others-bare" target="_blank" rel="noopener">KPCW</a> · <a href="https://wasatchweatherweenies.blogspot.com/" target="_blank" rel="noopener">Wasatch Weather Weenies</a></div>
       </div>
       <div class="snow-card">
         <div class="when-row"><div class="when">8–14 days · Nov 1–7</div><span class="fx mix">Mixed</span></div>
@@ -1099,9 +1100,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
   // ---------------- Summary table data ----------------
   // latest / priorMonth / priorYear / twoYears: [value, period]
   var US = [
-    {label:"Gas Price (AAA National Avg.)", latest:["$4.27","Oct 22, 2026"], pm:["~$4.48","late Sep 2026"], py:["~$3.04","Oct 2025"], p2:["~$3.16","Oct 2024"], t:"up", chg:"−$0.21", why:"Direct cost to households and transport; feeds straight into headline CPI."},
+    {label:"Gas Price (AAA National Avg.)", latest:["$4.29","Oct 25, 2026"], pm:["$4.49","Sep 25, 2026"], py:["$3.06","Oct 25, 2025"], p2:["~$3.16","Oct 2024"], t:"up", chg:"−$0.20", why:"Direct cost to households and transport; feeds straight into headline CPI."},
     {label:"Fed Funds Rate (target)", latest:["3.75–4.00%","FOMC Sep 16, 2026 · eff. 3.88%"], pm:["3.50–3.75%","FOMC Jul 29, 2026"], py:["4.00–4.25%","FOMC Sep 17, 2025"], p2:["4.75–5.00%","FOMC Sep 18, 2024"], t:"down", chg:"+25 bp", why:"Sets the economy-wide cost of borrowing; signals the Fed's inflation stance."},
-    {label:"10-Year Treasury Yield", latest:["5.13%","Oct 21, 2026"], pm:["4.96%","Sep 21, 2026"], py:["3.98%","Oct 21, 2025"], p2:["4.19%","Oct 21, 2024"], t:"down", chg:"+17 bp", why:"Benchmark for mortgages and corporate debt; highest since 2007."},
+    {label:"10-Year Treasury Yield", latest:["4.99%","Oct 23, 2026 close"], pm:["~4.96%","late Sep 2026"], py:["~4.00%","Oct 23, 2025"], p2:["~4.24%","Oct 23, 2024"], t:"down", chg:"+3 bp", why:"Benchmark for mortgages and corporate debt; slipped back under 5% after touching its highest since 2007 last week."},
     {label:"30-Year Mortgage Rate", latest:["7.40%","Week of Oct 15, 2026"], pm:["6.95%","Week of Sep 17, 2026"], py:["6.27%","Week of Oct 16, 2025"], p2:["6.44%","Week of Oct 17, 2024"], t:"down", chg:"+45 bp", why:"Drives home-buying affordability and housing demand."},
     {label:"Housing Starts (SAAR)", latest:["1,221K","Sep 2026"], pm:["1,288K","Aug 2026, rev."], py:["1,319K","Sep 2025"], p2:["1,354K","Sep 2024"], t:"down", chg:"−67K", why:"Leading gauge of residential construction activity; lowest pace in over a year."},
     {label:"Building Permits (SAAR)", latest:["1,400K","Sep 2026"], pm:["1,403K","Aug 2026, rev."], py:["1,444K","Sep 2025"], p2:["1,428K","Sep 2024"], t:"down", chg:"−3K", why:"Forward-looking signal for future housing supply."},
@@ -1136,15 +1137,15 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
     fog:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="20" cy="11" r="5" fill="#f2b632"/><g stroke="#a9b4bf" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="17" x2="24" y2="17"/><line x1="8" y1="22" x2="27" y2="22"/><line x1="5" y1="27" x2="22" y2="27"/></g></svg>'
   };
   var WX = [
-    {city:"Morgan, Utah", home:true, abbr:"Mor", mid:63, where:"Morgan County · Wasatch Back", now:"58°", cond:"Mostly sunny",
-     note:"Clearing and mild behind this week's storm, with highs climbing into the mid-60s through midweek — in line with CPC's above-normal-temperature, below-normal-precipitation tilt heading into November. A weak disturbance brings a slim shower chance Tuesday and Friday; otherwise dry.",
-     days:[["Sun","sun",61,32,""],["Mon","sun",64,33,""],["Tue","partly",66,36,"20%"],["Wed","sun",67,35,""],["Thu","sun",65,34,""],["Fri","partly",63,33,"20%"],["Sat","sun",64,null,""]]},
+    {city:"Morgan, Utah", home:true, abbr:"Mor", mid:58, where:"Morgan County · Wasatch Back", now:"52°", cond:"Clear, cooling off",
+     note:"Clear and near freezing tonight, then a mostly sunny Monday in the low 60s. A quick system brings rain after midnight Monday night, and a wetter pattern sets up Friday into the weekend with rain, a few thunderstorms and a rain-snow mix by Saturday night and Sunday.",
+     days:[["Sun","sun",61,32,""],["Mon","partly",63,34,"60%"],["Tue","sun",57,32,""],["Wed","sun",59,34,""],["Thu","partly",63,37,"20%"],["Fri","rain",59,35,"60%"],["Sat","rain",58,null,"60%"]]},
     {city:"Eugene, Oregon", abbr:"Eug", mid:56, where:"Willamette Valley", now:"58°", cond:"Showers, turning to rain",
      note:"Afternoon showers build into steady rain overnight (around a quarter inch), with more light rain Monday as the front stalls. Partial clearing Tuesday, then quieter, cooler weather through the weekend.",
      days:[["Sun","rain",60,43,"70%"],["Mon","rain",55,42,"60%"],["Tue","cloud",59,40,"30%"],["Wed","partly",58,38,"20%"],["Thu","partly",57,37,""],["Fri","sun",58,36,""],["Sat","partly",59,null,"20%"]]},
-    {city:"Redmond, Washington", abbr:"Red", mid:53, where:"King County · Eastside", now:"54°", cond:"Rain developing",
-     note:"The same Pacific front soaking Oregon moves through Puget Sound today into Monday, the wettest stretch in weeks, before showers taper and skies dry out by Friday.",
-     days:[["Sun","rain",56,46,"70%"],["Mon","rain",54,45,"60%"],["Tue","cloud",55,44,"40%"],["Wed","partly",56,42,"20%"],["Thu","partly",55,41,""],["Fri","sun",57,40,""],["Sat","partly",57,null,"20%"]]},
+    {city:"Redmond, Washington", abbr:"Red", mid:55, where:"King County · Eastside", now:"55°", cond:"Partly sunny",
+     note:"Scattered showers ease to a mostly cloudy Monday. The next front brings soaking rain Tuesday night through Thursday (a tenth to a quarter inch Tuesday night alone, with a possible thunderstorm Wednesday), then drier, chillier air with lows in the mid-30s by the weekend.",
+     days:[["Sun","partly",57,44,"50%"],["Mon","cloud",57,45,"30%"],["Tue","rain",57,43,"90%"],["Wed","rain",54,39,"90%"],["Thu","rain",53,35,"60%"],["Fri","partly",53,34,"20%"],["Sat","partly",55,null,""]]},
     {city:"Honolulu, Hawaii", abbr:"Hon", mid:84, where:"Oʻahu · Honolulu metro", now:"85°", cond:"Breezy, gusty trades",
      note:"Strengthening trade winds and dropping humidity are raising leeward fire-weather concern this weekend, with spotty windward showers continuing. A wetter, showery pattern looks more likely by midweek.",
      days:[["Sun","partly",86,74,"20%"],["Mon","partly",86,75,"20%"],["Tue","partly",85,75,"30%"],["Wed","partly",85,74,"30%"],["Thu","rain",84,73,"50%"],["Fri","cloud",83,73,"40%"],["Sat","partly",84,null,"30%"]]},
@@ -1255,7 +1256,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 <script>
 /* Waltmark Times dateline — set UPDATED_AT on every refresh (ISO with offset). */
 (function(){
-  var UPDATED_AT = "2026-10-25T07:19:30-06:00";
+  var UPDATED_AT = "2026-10-25T18:03:00-06:00";
   try{
     var d=new Date(UPDATED_AT), tz="America/Denver";
     var day=d.toLocaleDateString("en-US",{timeZone:tz,weekday:"long",month:"long",day:"numeric",year:"numeric"});
@@ -1286,7 +1287,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
     ["AAPL",347.72,348.22],["NVDA",211.00,212.21],["AMZN",248.05,250.38],
     ["GOOGL",320.27,324.22],["META",642.26,648.85],["JPM",331.54,336.54],
     ["PPG",110.60,113.09],["SHW",337.10,345.63],["AXTA",34.14,35.05],["BA",188.29,187.55],
-    ["GLD",366.61,369.00],["USO",169.54,162.51],["BTC",80368.99,80761.79],["ETH",2334.16,2360.07]
+    ["GLD",366.61,369.00],["USO",169.54,162.51],["BTC",80072.39,80503.07],["ETH",2327.83,2350.87]
   ];
   /* 90-day sparklines: SYMBOL:[90-day % change, closes scaled 0–99 oldest→newest]. As of Oct 23, 2026 close. */
   var SPARK_ASOF = "90 days to Oct 23, 2026";
