@@ -1539,6 +1539,13 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
   }
   function start(){
     if(timer){ clearInterval(timer); timer = null; }
+    /* Always rotate: if the live set has fewer than two usable (daylight) frames, add the other cam views from the Weather section. */
+    if(frames.length < 2){
+      ["ogden","jp","wildcat"].forEach(function(k){
+        if(frames.some(function(f){ return f.k === k; })) return;
+        var i = document.querySelector("#cam-" + k + " img"); if(i && i.src) frames.push({k: k, src: i.src});
+      });
+    }
     idx = 0; paint(0); size();
     if(frames.length > 1) timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
   }
