@@ -27,7 +27,7 @@ html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,400&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,400&family=Montserrat:wght@800&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
 /* Layout concept: a financial broadsheet in the Journal tradition — white paper, black ink,
    a centered nameplate over a dateline, hairline column rules, small-caps section labels. */
@@ -610,8 +610,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 @media (max-width:760px){ .sg-meta{display:none;} .sg-play{font-size:11px;} }
 @media (max-width:560px){ .sea-game{gap:0 9px; padding:4px calc(3% + 4px) 0; font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
 @media (max-width:380px){ .sg-lbl .sg-t{display:none;} .sg-play{margin-left:0;} }
-/* Walt Ski News nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
-.wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(15px,6.6vw,86px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
+/* Walt Ski News nameplate (Summit: Montserrat 800, wide-tracked caps, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
+.wt-name{font-family:"Montserrat","Helvetica Neue",Arial,sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:.2em; font-size:clamp(15px,6.8vw,80px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.35em; color:#F4EFE3;}
+.wt-name > span{margin-right:-.2em;}
 .wt-peak{width:.68em; height:.42em; flex:none;}
 /* Custom J (Oct 25, 2026): Fraunces stem and top serif with a straight, flat foot instead of the curled hook */
 .wt-j{display:inline-block; width:.359em; height:.7em; margin-right:.02em; vertical-align:baseline; fill:currentColor; overflow:visible;}
@@ -628,7 +629,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
       <span class="wt-upd"></span>
     </div>
     
-    <h1 class="wt-name" aria-label="Walt Ski News"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/><path d="M36 15 L42 6 L48 15 L44 13 L42 16 L39 13 Z" fill="#F4EFE3"/></svg><span>Walt Ski News</span></h1>
+    <h1 class="wt-name" aria-label="Walt Ski News"><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/></svg><span>Walt Ski News</span></h1>
     <p class="wt-greet"><span id="wt-greet">Good evening, it&rsquo;s Sunday, October 25, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Oct. 25, 2026 6:03 p.m. MT</span><span id="wt-ago"></span></span></p>
   </header>
 
