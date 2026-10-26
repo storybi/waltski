@@ -817,16 +817,21 @@ html.banner-lock #wt-banner{box-shadow:0 2px 6px rgba(0,0,0,.18);}
 html.banner-lock .askbar{top:var(--lock-h,0px);}
 html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 </style>
+<style>
+/* Waltski title + peak logo at the very top of the page, above the dateline (Mark, Oct 26, 2026) */
+#top > .wt-name{margin-top:0; padding-top:4px; padding-bottom:6px;}
+#top > .wt-edition{margin-top:2px;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
   <header class="wt-mast" id="top">
+    <h1 class="wt-name" aria-label="Waltski News"><span>Waltski</span><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/></svg><span>News</span></h1>
     <div class="wt-edition">
       <span class="wt-ed-line"><span class="wt-ed-nm">Morgan Edition</span><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" data-cam="sb" href="#weather" aria-pressed="true" title="SB = Snowbasin: new snow on the snow stake (read Oct 26, 2026 5:05 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 26, 2026). Click to show Snowbasin behind the header.">SB <span class="wt-lab">Day:</span> <b id="wt-stake-in">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-sb">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" data-cam="dv" href="#dv-cams" aria-pressed="false" title="DV = Deer Valley: new snow on the Ontario snow stake (read Oct 26, 2026 5:05 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 26, 2026). Click to show Deer Valley live behind the header.">DV <span class="wt-lab">Day:</span> <b id="wt-stake-dv">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-dv">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-sv" data-cam="sv" href="https://www.sunvalley.com/the-mountain/web-cams/" aria-pressed="false" title="SV = Sun Valley: new snow on the snow stake (read Oct 26, 2026 5:05 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 23, 2026). Click to show Sun Valley live behind the header.">SV <span class="wt-lab">Day:</span> <b id="wt-stake-sv">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-sv">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-hi" data-cam="hi" href="https://www.youtube.com/watch?v=hqfrUk7xUaA&amp;list=PLghrnJ1LqKYmVFZFSlkAqJ-xk-WVW_QCB&amp;index=1" aria-pressed="false" title="HI = Lanikai Beach, Oahu. Click to play it behind the header.">HI</a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next wt-radio" id="wt-radio" aria-pressed="false" title="Play Classical KING FM 98.1 live">Classical King</button></span>
       <span class="wt-upd"></span>
     </div>
     
-    <h1 class="wt-name" aria-label="Waltski News"><span>Waltski</span><svg class="wt-peak" viewBox="0 0 64 40" aria-hidden="true"><path d="M2 38 L22 10 L32 22 L42 6 L62 38 Z" fill="none" stroke="#E2733A" stroke-width="3" stroke-linejoin="round"/></svg><span>News</span></h1>
     <p class="wt-greet"><span id="wt-greet">Rise and shine, it&rsquo;s Monday, October 26, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Oct. 26, 2026 5:15 a.m. MT</span><span id="wt-ago"></span></span></p>
   </header>
 
