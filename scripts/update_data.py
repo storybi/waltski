@@ -418,8 +418,18 @@ def do_weather(s, now_mt):
             card = {"city": c["city"]}
             if c.get("home"):
                 card["home"] = True
-            card.update({"abbr": c["abbr"], "mid": mid, "where": c["where"], "now": "%d°" % now_h["temperature"],
-                         "cond": now_h["shortForecast"][:1].upper() + now_h["shortForecast"][1:].lower(), "note": " ".join(parts), "days": days})
+            # Current conditions (Oct 26, 2026): the latest station observation, not the hourly forecast; the mini weather bar shows these.
+            now_t, now_c = now_h["temperature"], now_h["shortForecast"]
+            try:
+                stn = get(pt["observationStations"], headers=NWS)["features"][0]["id"]
+                ob = get(stn + "/observations/latest", headers=NWS)["properties"]
+                if ob.get("temperature", {}).get("value") is not None:
+                    now_t = round(ob["temperature"]["value"] * 9 / 5 + 32)
+                    now_c = ob.get("textDescription") or now_c
+            except Exception as e:  # noqa: BLE001
+                log("  weather obs", c["city"], "failed:", e)
+            card.update({"lat": c["lat"], "lon": c["lon"], "abbr": c["abbr"], "mid": mid, "where": c["where"], "now": "%d°" % now_t,
+                         "cond": now_c[:1].upper() + now_c[1:].lower(), "note": " ".join(parts), "days": days})
             cards.append("    " + json.dumps(card, ensure_ascii=False, separators=(",", ":")))
             got += 1
         except Exception as e:  # noqa: BLE001
