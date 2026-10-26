@@ -200,9 +200,9 @@ head = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Walt Ski Journal</title>
-<meta name="description" content="The Walt Ski Journal — markets, economy, top stories, Wasatch snow and weather, refreshed four times a day.">
-<meta property="og:title" content="The Walt Ski Journal">
+<title>Walt Ski News</title>
+<meta name="description" content="Walt Ski News — markets, economy, top stories, Wasatch snow and weather, refreshed four times a day.">
+<meta property="og:title" content="Walt Ski News">
 <meta property="og:description" content="Markets, economy, top stories, Wasatch snow and weather — refreshed four times a day.">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M2 38 L22 10 L32 22 L42 6 L62 38 Z' fill='%23E2733A'/%3E%3C/svg%3E">
