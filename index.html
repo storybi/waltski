@@ -804,6 +804,10 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
 .wxbar.no-hl .wb-hl{display:none;}
 @media (max-width:560px){ .wxbar{gap:0 4px;} }
 </style>
+<style>
+/* HI mode (Oct 26, 2026): the ski-resort cam row under the radar is hidden while the header plays the Lanikai Beach video */
+html.cam-hi #snow .wx-cams{display:none!important;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -866,7 +870,7 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
     <!-- Live Doppler radar over Mountain Green & Snowbasin (added Oct 25, 2026). Rendered by the "Live radar" script; keep as is. -->
     <div class="radar" id="radar">
       <div class="radar-head">
-        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Mountain Green &amp; Snowbasin</option><option value="dv">Deer Valley Resort</option><option value="sv">Sun Valley Resort</option></select>
+        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Mountain Green &amp; Snowbasin</option><option value="dv">Deer Valley Resort</option><option value="sv">Sun Valley Resort</option><option value="hi">Kaneohe &amp; Kailua, Oahu</option></select>
         <span class="radar-time" id="radar-time">Loading radar…</span>
         <span class="radar-now" id="radar-now"></span>
       </div>
@@ -2284,11 +2288,15 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
   var box = document.getElementById("radar-map"), tl = document.getElementById("radar-time");
   if(!box || !tl) return;
   var C = [41.18, -111.81], ZOOM = 9;
-  var PLACES = [["Mountain Green", 41.1425, -111.7869], ["Snowbasin", 41.2160, -111.8569], ["Deer Valley", 40.6375, -111.4783], ["Sun Valley", 43.6710, -114.3640]];
+  var PLACES = [["Mountain Green", 41.1425, -111.7869], ["Snowbasin", 41.2160, -111.8569], ["Deer Valley", 40.6375, -111.4783], ["Sun Valley", 43.6710, -114.3640], ["Kaneohe", 21.4181, -157.8036], ["Kailua", 21.4022, -157.7394]];
   /* Radar location menu (Oct 25, 2026): jump between Mountain Green & Snowbasin and Deer Valley Resort; the choice is remembered on this device. */
   var VIEWS = {sb: {c: [41.18, -111.81], z: 9, fc: [41.2160, -111.8569], fcName: "Snowbasin", alt: "Mountain Green and Snowbasin"},
                dv: {c: [40.630, -111.495], z: 10, fc: [40.6375, -111.4783], fcName: "Deer Valley", alt: "Deer Valley Resort"},
-               sv: {c: [43.672, -114.375], z: 10, fc: [43.6710, -114.3640], fcName: "Sun Valley", alt: "Sun Valley Resort"}};
+               sv: {c: [43.672, -114.375], z: 10, fc: [43.6710, -114.3640], fcName: "Sun Valley", alt: "Sun Valley Resort"},
+               /* HI (Oct 26, 2026): Kaneohe and Kailua, Oahu in one view. The CONUS radar mosaic stops at the mainland, so this view uses the
+                  Molokai NWS radar (HMO, latest scan only, refreshed every 5 minutes) instead of the 50-minute loop. */
+               hi: {c: [21.408, -157.772], z: 11, fc: [21.4022, -157.7394], fcName: "Kailua", alt: "Kaneohe and Kailua, Oahu", ridge: "HMO"}};
+  function radTiles(){ var r = V().ridge; return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + (r ? "ridge::" + r + "-N0Q-0" : "nexrad-n0q-900913"); }
   var view = "sb"; try{ var vv = localStorage.getItem("wsj-radar-view"); if(VIEWS[vv]) view = vv; }catch(e){}
   /* Linked to the header cam switch (Oct 25, 2026): the radar starts on, and follows, the header's SB / DV choice. */
   try{ var hc = localStorage.getItem("wsj-head-cam"); if(VIEWS[hc]) view = hc; }catch(e){}
@@ -2322,7 +2330,7 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
       "    except Exception: pass\n" +
       "    try: t=get('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/%d/%d/%d'%(Z,ty,tx)); lab.paste(t,(ox,oy),t)\n" +
       "    except Exception: pass\n" +
-      "    try: t=get('https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/%d/%d/%d.png'%(Z,tx,ty)); rad.paste(t,(ox,oy),t)\n" +
+      "    try: t=get('" + radTiles() + "/%d/%d/%d.png'%(Z,tx,ty)); rad.paste(t,(ox,oy),t)\n" +
       "    except Exception: pass\n" +
       "A=rad.split()[3]\n" +
       "kind=None;fc=''\n" +
@@ -2457,14 +2465,14 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
             var im = new Image(); im.crossOrigin = "anonymous";
             im.onload = function(){ try{ ctx.drawImage(im, (tx - tx0) * 256, (ty - ty0) * 256); }catch(e){ failed = true; } done(); };
             im.onerror = function(){ failed = true; done(); };
-            im.src = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/" + z + "/" + tx + "/" + ty + ".png?_=" + bust;
+            im.src = radTiles() + "/" + z + "/" + tx + "/" + ty + ".png?_=" + bust;
           })(tx, ty);
         }
       });
     }
     updateFx();
     map.on("moveend zoomend", function(){ fx.innerHTML = ""; updateFx(); });
-    if(pick) pick.addEventListener("change", function(){ setView(pick.value); kind = null; var nw = document.getElementById("radar-now"); if(nw) nw.textContent = ""; map.setView(V().c, V().z); });
+    if(pick) pick.addEventListener("change", function(){ setView(pick.value); kind = null; var nw = document.getElementById("radar-now"); if(nw) nw.textContent = ""; map.setView(V().c, V().z); idx = OFFS.length - 1; build(); });
     setInterval(function(){ if(!document.hidden){ kind = null; updateFx(); } }, 5*60000);
     var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], idx = OFFS.length - 1, timer = null, base = null;
     function build(){
@@ -2472,6 +2480,10 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
       layers = [];
       var bust = Math.floor(Date.now() / 300000);
       base = new Date(Math.floor(Date.now() / 300000) * 300000);
+      if(V().ridge){
+        var lr = L.tileLayer(radTiles() + "/{z}/{x}/{y}.png?_=" + bust, {opacity: 0.85, maxZoom: 13, zIndex: 10, pane: "radar"});
+        lr.addTo(map); layers.push(lr); tl.textContent = "Latest scan · NWS Molokai radar"; return;
+      }
       OFFS.forEach(function(m, i){
         var url = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913" + (m ? "-m" + (m < 10 ? "0" : "") + m + "m" : "") + "/{z}/{x}/{y}.png?_=" + bust;
         var l = L.tileLayer(url, {opacity: 0, maxZoom: 13, zIndex: 10 + i, pane: "radar"});
@@ -2485,6 +2497,7 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
       tl.textContent = (m ? "−" + m + " min · " : "Now · ") + hm(t);
     }
     function step(){
+      if(V().ridge || layers.length < OFFS.length){ clearTimeout(timer); timer = setTimeout(step, 3000); return; }
       idx = (idx + 1) % OFFS.length; show(idx);
       clearTimeout(timer); timer = setTimeout(step, idx === OFFS.length - 1 ? 2200 : 550);
     }
