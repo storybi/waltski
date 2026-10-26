@@ -797,6 +797,13 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
 .wt-greet{padding-left:12px; padding-right:12px;}
 .wt-name .wt-peak{width:1.05em; height:.66em;}
 </style>
+<style>
+/* Weather bar: cities evenly spaced on one row; today's low/high when they fit (Mark, Oct 26, 2026) */
+.wxbar{justify-content:space-between; gap:0 10px;}
+.wxbar .wb-hl{font-style:normal; font-weight:500; font-size:.85em; color:var(--fg-faint); margin-left:3px; white-space:nowrap; font-variant-numeric:tabular-nums;}
+.wxbar.no-hl .wb-hl{display:none;}
+@media (max-width:560px){ .wxbar{gap:0 4px;} }
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -1498,10 +1505,14 @@ html.cam-alt #wt-banner .dv-layer.fading{opacity:0;}
     function link(c){ return 'https://forecast.weather.gov/MapClick.php?lat=' + c.lat + '&lon=' + c.lon; }
     function cell(c, temp, cond){
       return '<a class="wb" href="' + link(c) + '" target="_blank" rel="noopener" title="' + esc(c.city + ' · now: ' + (cond||'') + ' — National Weather Service') + '">' +
-        '<b>' + esc(c.abbr) + '</b>' + (ICON[condIcon(cond)] || ICON.partly) + '<span>' + (temp==null ? '—' : temp + '°') + '</span></a>';
+        '<b>' + esc(c.abbr) + '</b>' + (ICON[condIcon(cond)] || ICON.partly) + '<span>' + (temp==null ? '—' : temp + '°') + '</span>' +
+        (c.days && c.days[0] && c.days[0][2] != null ? '<i class="wb-hl" title="Today\u2019s low / high">' + (c.days[0][3] != null ? c.days[0][3] + '\u00b0/' : '') + c.days[0][2] + '\u00b0</i>' : '') + '</a>';
     }
     var state = WX.map(function(c){ var n = parseInt(c.now,10); return {t: isNaN(n) ? null : n, cond: c.cond || ''}; });
-    function draw(){ bar.innerHTML = WX.map(function(c,i){ return cell(c, state[i].t, state[i].cond); }).join('') + '<span class="wb-lbl">Now</span>'; }
+    /* Evenly spaced, one row. Today's low/high show only when they fit on that one row (Mark, Oct 26, 2026). */
+    function fit(){ bar.classList.remove('no-hl'); if(bar.scrollWidth > bar.clientWidth + 1) bar.classList.add('no-hl'); }
+    function draw(){ bar.innerHTML = WX.map(function(c,i){ return cell(c, state[i].t, state[i].cond); }).join(''); fit(); }
+    window.addEventListener('resize', fit); if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     draw();
     // Inside claude.ai the page can't reach other sites, so the latest observations come through the Composio connector (like the radar).
     if(window.claude && window.claude.use){
