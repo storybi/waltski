@@ -14,6 +14,7 @@ free public sources:
   * Seahawks game strip (SEA_GAME)                           ESPN public scoreboard
   * Oregon Ducks game strip (ORE_GAME)                        ESPN public college scoreboard
   * Weather With Travis latest video (TRAVIS)                 YouTube channel RSS feed
+  * Sunday's sermon, Washington Heights Church (SERMON)      YouTube channel RSS feed (scripts/sermon.py)
   * Snowbasin cam snapshots (SNAP, SNAP_AT)                  the cam hosts themselves
 
 Everything written by Claude (stories, briefs, devotions, snow outlook, badges, deals) is left alone.
@@ -471,6 +472,27 @@ def do_travis(s, now_mt):
     return s
 
 
+def do_sermon(s, now_mt):
+    """Sunday's sermon at the top of Morning Devotion (added Oct 26, 2026); never steps back to an older Sunday."""
+    if "var SERMON = " not in s:
+        return s
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import sermon
+    try:
+        x = urllib.request.urlopen(urllib.request.Request(sermon.FEED, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read().decode("utf8", "ignore")
+        v = sermon.pick(x)
+    except Exception as e:  # noqa: BLE001
+        log("  sermon failed:", e)
+        return s
+    cur = sermon.current(s) or {}
+    if not v or v.get("date", "") < cur.get("date", ""):
+        return s
+    s, _ = set_var(s, "SERMON", json.dumps(v, ensure_ascii=False, separators=(",", ":")))
+    log("  sermon:", v["id"], v["date"], v["title"])
+    return s
+
+
 def do_seahawks(s, now_mt):
     return do_game(s, now_mt, "SEA_GAME", "SEA", NFL_SB, "seahawks", False)
 
@@ -588,7 +610,7 @@ def main():
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_cams):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001

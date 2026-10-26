@@ -12,6 +12,7 @@ The output is a standalone page for GitHub Pages. Changes from the private page:
   * the Snowbasin cams and the photo banner load the live cam images directly every 5 minutes,
     falling back to the snapshot baked into the page if a cam doesn't load
   * the Seahawks game strip polls ESPN's public scoreboard directly while a game is live
+  * Sunday's sermon from Washington Heights Church plays at the top of Morning Devotion (scripts/sermon.py)
   * the header shows the live Needles cam picture (refreshed every minute) with a Watch Live link (photos remain the fallback)
 
 Between Claude's twice-daily refreshes, .github/workflows/update-data.yml runs scripts/update_data.py
@@ -281,6 +282,19 @@ greet_js = """<script>
 </script>
 """
 page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + "</body>\n</html>\n"
+
+# 7. Sunday's sermon (Mark, Oct 26, 2026): Washington Heights Church's latest Sunday sermon plays in an embedded YouTube player at the
+#    top of Morning Devotion (scripts/sermon.py). Keeps the sermon already on the live page so a rebuild never steps back to an older one;
+#    the live-data job (update_data.py) moves it forward when a new Sunday's sermon is posted.
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sermon as _sermon
+_prev = None
+if os.path.exists(out):
+    _prev = _sermon.current(open(out, encoding="utf-8").read())
+if not _prev or _prev.get("date", "") < _sermon.DEFAULT["date"]:
+    _prev = _sermon.DEFAULT
+page = _sermon.inject(page, _prev)
 
 open(out, "w", encoding="utf-8").write(page)
 print("build_public: wrote", out, len(page), "bytes")
