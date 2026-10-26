@@ -637,6 +637,9 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 html.has-banner:not(.banner-past) .tk-sp{filter:none;}
 .askbar{top:env(safe-area-inset-top,0px);}
 body::before{display:none;}
+/* Updated stamp: never in the header (a phone rule used to un-hide it); shown once at the very bottom of the page instead */
+.wt-greet .wt-stamp,.wt-greet .wt-stamp[hidden]{display:none!important;}
+.wt-foot-upd{margin:14px 0 0; font:500 11.5px/1.5 var(--font-body); color:var(--fg-faint); text-align:center;}
 </style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
@@ -1143,6 +1146,7 @@ body::before{display:none;}
       <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>
     </div>
     <div style="margin-top:6px;">Published automatically each morning. Story artwork is original illustration, not news photography. wsj.com and economist.com could not be reached directly, so those stories link through wire coverage that credits the original reports. Prior-year columns show each release as first reported one and two years earlier; "~" marks a mid-month approximation.</div>
+    <p class="wt-foot-upd">Updated <span id="wt-upd2"></span><span id="wt-ago2"></span></p>
   </footer>
 
 </div>
@@ -1353,6 +1357,9 @@ body::before{display:none;}
     var mins=Math.round((Date.now()-d.getTime())/60000), ago="";
     if(mins>=0){ ago = mins<60 ? mins+" min ago" : mins<1440 ? Math.round(mins/60)+" hr ago" : Math.round(mins/1440)+" days ago"; }
     document.getElementById("wt-ago").textContent=ago?" · "+ago:"";
+    /* The Updated stamp shows only at the very bottom of the page (Mark, Oct 25, 2026); the header copy stays hidden. */
+    var fu=document.getElementById("wt-upd2"); if(fu) fu.textContent=day.replace(/^(\w+), /,"$1, ")+" at "+t+" MT";
+    var fa=document.getElementById("wt-ago2"); if(fa) fa.textContent=ago?" · "+ago:"";
   }catch(e){}
 })();
 </script>
