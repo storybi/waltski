@@ -372,7 +372,7 @@ td.indicator{font-family:var(--font-body);}
 .wl-sum{font:16px/1.6 var(--font-serif);}
 .wl-reflect{border-radius:0; border-left:3px solid var(--accent);}
 .wl-v{font-family:var(--font-serif);}
-.word-more{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:1px solid var(--border);}
+.word-more{border-top:1px solid var(--border); display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-bottom:1px solid var(--border);}
 @media (max-width:860px){ .word-more{grid-template-columns:1fr;} }
 .wm-card{padding:18px 18px 16px; border-right:1px solid var(--border); min-width:0; display:flex; flex-direction:column; gap:8px;}
 .wm-card:last-child{border-right:0;}
@@ -541,7 +541,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
    Away team's goal on the left, home team's on the right (matching the away-at-home order of the scores). While the game is live a ball marker sits on the
    line of scrimmage with an arrow for the direction of travel, and the end zone the offense is driving toward wears the offense's colors (the other end zone
    the defense's). Team-color footballs + abbreviations (no team logos). The whole bar links to the game on ESPN. */
-.sea-game{position:relative; isolation:isolate; display:flex; align-items:center; gap:0 12px; margin:0; padding:8px calc(3% + 6px); min-height:38px; box-sizing:border-box; overflow:hidden; white-space:nowrap; text-decoration:none; color:#fff;
+.sea-game{position:relative; isolation:isolate; display:flex; align-items:flex-start; gap:0 12px; margin:0; padding:4px calc(3% + 6px) 0; min-height:52px; height:52px; box-sizing:border-box; overflow:hidden; white-space:nowrap; text-decoration:none; color:#fff;
   border:1px solid #1d5a26; border-bottom:0; background-color:#2f7d38;
   background-image:linear-gradient(90deg, rgba(255,255,255,.05) 0 50%, rgba(0,0,0,.05) 50%); background-size:18.8% 100%; background-position:3% 0;
   font:700 13px/20px var(--font-body); font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(0,0,0,.6);}
@@ -560,11 +560,15 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 /* Red zone: when the offense is inside the opponent's 20, the field from the 20 to the goal line it attacks turns red */
 .sg-rz{z-index:0; width:18.8%; background:rgba(214,32,32,.62); box-shadow:inset 0 0 0 1px rgba(255,120,120,.5);}
 .sg-rz.l{left:3%;} .sg-rz.r{right:3%;}
-.sg-los{z-index:1; width:2px; margin-left:-1px; background:#3aa0ff; box-shadow:0 0 4px rgba(58,160,255,.9); transition:left .8s ease;}
-.sg-pos{position:absolute; top:50%; z-index:1; transform:translate(-50%,-50%); display:flex; align-items:center; pointer-events:none; transition:left .8s ease; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.6));}
+.sg-los{z-index:1; top:26px!important; width:2px; margin-left:-1px; background:#3aa0ff; box-shadow:0 0 4px rgba(58,160,255,.9); transition:left .8s ease;}
+.sg-pos{position:absolute; top:auto; bottom:6px; z-index:1; transform:translateX(-50%); display:flex; align-items:center; pointer-events:none; transition:left .8s ease; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.6));}
 .sg-pos svg{display:block; width:18px; height:11px;}
 .sg-pos .ar{display:block; font:900 13px/1 var(--font-body); color:#ffe14d; text-shadow:0 1px 2px rgba(0,0,0,.7);}
 .sg-pos.to-l{flex-direction:row-reverse;}
+.sg-pos .yd{font:800 10px/1 var(--font-body); color:#ffe14d; margin:0 3px; text-shadow:0 1px 2px rgba(0,0,0,.8);}
+/* Last-play bar: the yards the last snap gained (yellow) or lost (orange), drawn in the ball lane behind the ball */
+.sg-gain{z-index:1; top:auto!important; bottom:9.5px!important; height:4px; border-radius:2px; background:#ffe14d; box-shadow:0 0 4px rgba(255,225,77,.7); transition:left .8s ease, width .8s ease;}
+.sg-gain.loss{background:#ff8a3d; box-shadow:0 0 4px rgba(255,138,61,.7);}
 @media (prefers-reduced-motion: reduce){ .sg-ez.off::before{animation:none; opacity:.2;} .sg-los,.sg-pos{transition:none;} }
 .sg-lbl{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.1em; text-transform:uppercase;}
 .sg-meta{font-weight:600; letter-spacing:.04em; text-transform:none; opacity:.9; margin-left:6px;}
@@ -583,7 +587,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sg-dd{font-weight:600; opacity:.9;}
 .sg-go{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.08em; text-transform:uppercase;}
 @media (max-width:760px){ .sg-meta{display:none;} }
-@media (max-width:560px){ .sea-game{gap:0 9px; padding:8px calc(3% + 4px); font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
+@media (max-width:560px){ .sea-game{gap:0 9px; padding:4px calc(3% + 4px) 0; font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
 @media (max-width:380px){ .sg-lbl{display:none;} .sg-board{margin-left:0;} }
 /* Walt Ski Journal nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
 .wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(15px,6.6vw,86px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
@@ -615,7 +619,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 
   <div class="wt-mast wt-mast-2">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#daily-word">Daily Word</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#stories">Top Stories</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#snow">Snow</a>
+      <a href="#daily-word">Morning Devotion</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#stories">Top Stories</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#snow">Snow</a>
     </nav>
   </div>
 
@@ -640,25 +644,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 
   <!-- ================= DAILY WORD ================= -->
   <section id="daily-word">
-    <div class="section-head"><h2>Daily Word</h2><div class="line"></div></div>
-    <div class="section-sub">Today’s readings from four devotionals, each with the Scripture behind it.</div>
-    <div class="word-lg">
-      <div class="wl-evans">
-        <div class="w-lbl">Dr. Tony Evans · Today’s Devotional · Oct 24</div>
-        <h3 class="wl-title">The Difference Between Seeing and Knowing Jesus</h3>
-        <p class="wl-quote">“Some of us are walking around with a law book in our hands when what we really need is a Lawyer by our side.”</p>
-        <p class="wl-sum">The Bible is true and authoritative, but Scripture's purpose is to lead us to Jesus — the living Word — not to stop at information about Him. Dr. Evans points to the Emmaus road, where two disciples knew every fact about the crucifixion and resurrection yet didn't recognize the risen Christ walking beside them until they invited Him to stay. Scripture is the menu; Jesus is the meal, and communion is where He moves us from merely knowing about Him to truly knowing Him. That shift changes how we see, feel and act, not just what we know.</p>
-        <div class="wl-reflect"><b>Reflect today:</b> Are you studying the menu, or have you invited Jesus to sit down and stay with you today?</div>
-        <a class="w-link" href="https://sermons-online.org/tony-evans/devo/discovering-your-true-purpose-through-gods-plan" target="_blank" rel="noopener">Read the full devotional →</a>
-      </div>
-      <div class="wl-verses">
-        <div class="w-lbl">Scripture · John 5 &amp; Luke 24 (KJV)</div>
-        <p class="wl-v"><sup>5:39</sup> Search the scriptures; for in them ye think ye have eternal life: and they are they which testify of me.</p>
-        <p class="wl-v"><sup>5:40</sup> And ye will not come to me, that ye might have life.</p>
-        <p class="wl-v wl-key"><sup>24:31</sup> And their eyes were opened, and they knew him; and he vanished out of their sight.</p>
-        <div class="w-ref">Verse of the Day: Luke 24:31</div>
-      </div>
-    </div>
+    <div class="section-head"><h2>Morning Devotion</h2><div class="line"></div></div>
+    <div class="section-sub">Today’s readings from three classic devotionals, each with its key verse.</div>
     <div class="word-more">
       <article class="wm-card">
         <div class="wm-src">Our Daily Bread · Oct 25</div>
@@ -1326,6 +1313,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var hm=d.toLocaleTimeString("en-US",{timeZone:tz,hour:"2-digit",minute:"2-digit",hour12:false}).split(":"), tod=(+hm[0]%24)*60+(+hm[1]);
     var hello = tod<8*60 ? "Rise and shine" : tod<12*60 ? "Happy mid-morning" : tod<17*60+30 ? "Good afternoon" : "Good evening";
     var wg=document.getElementById("wt-greet"); if(wg) wg.textContent=hello+", it\u2019s "+day;
+    /* Morning Devotion appears only on morning editions: a refresh at or after noon MT hides the section and its nav link. */
+    if(tod>=12*60){ var dw=document.getElementById("daily-word"); if(dw) dw.hidden=true; var dl=document.querySelector('.wt-nav a[href="#daily-word"]'); if(dl) dl.hidden=true; }
     document.getElementById("wt-upd").textContent=abbr+" "+dd+" "+t+" MT";
     var mins=Math.round((Date.now()-d.getTime())/60000), ago="";
     if(mins>=0){ ago = mins<60 ? mins+" min ago" : mins<1440 ? Math.round(mins/60)+" hr ago" : Math.round(mins/1440)+" days ago"; }
@@ -1596,7 +1585,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
    Field: away team's goal on the left, home team's on the right. The end zone the offense drives toward wears the offense's colors.
    The bar links to the game on ESPN. Team-color footballs only — no team logos. */
 (function(){
-  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"2:23 - 2nd","score":{"KC":0,"SEA":3},"poss":"SEA","spot":"KC 36","dd":"3rd & 6","asof":"2026-10-26T01:24:00Z"};
+  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"1:16 - 2nd","score":{"KC":0,"SEA":10},"poss":"SEA","spot":"SEA 36","dd":"1st & 10","lp":null,"asof":"2026-10-26T01:37:00Z"};
   var T = {ARI:["Cardinals","#97233F","#FFB612"],ATL:["Falcons","#A71930","#000000"],BAL:["Ravens","#241773","#9E7C0C"],BUF:["Bills","#00338D","#C60C30"],CAR:["Panthers","#0085CA","#101820"],CHI:["Bears","#0B162A","#C83803"],CIN:["Bengals","#FB4F14","#000000"],CLE:["Browns","#311D00","#FF3C00"],DAL:["Cowboys","#003594","#869397"],DEN:["Broncos","#FB4F14","#002244"],DET:["Lions","#0076B6","#B0B7BC"],GB:["Packers","#203731","#FFB612"],HOU:["Texans","#03202F","#A71930"],IND:["Colts","#002C5F","#A2AAAD"],JAX:["Jaguars","#006778","#D7A22A"],KC:["Chiefs","#E31837","#FFB81C"],LV:["Raiders","#000000","#A5ACAF"],LAC:["Chargers","#0080C6","#FFC20E"],LA:["Rams","#003594","#FFA300"],LAR:["Rams","#003594","#FFA300"],MIA:["Dolphins","#008E97","#FC4C02"],MIN:["Vikings","#4F2683","#FFC62F"],NE:["Patriots","#002244","#C60C30"],NO:["Saints","#101820","#D3BC8D"],NYG:["Giants","#0B2265","#A71930"],NYJ:["Jets","#125740","#FFFFFF"],PHI:["Eagles","#004C54","#A5ACAF"],PIT:["Steelers","#101820","#FFB612"],SF:["49ers","#AA0000","#B3995D"],SEA:["Seahawks","#002244","#69BE28"],TB:["Buccaneers","#D50A0A","#34302B"],TEN:["Titans","#0C2340","#4B92DB"],WAS:["Commanders","#5A1414","#FFB612"],WSH:["Commanders","#5A1414","#FFB612"]};
   var TEAM_URL = "https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks";
   var el = document.getElementById("sea-game"), KEY = "wsj-sea-game", g = SEA_GAME, timer = null;
@@ -1644,8 +1633,17 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     if(x != null){
       var left = "calc(3% + " + (x * 0.94).toFixed(2) + "%)", c = col(off);
       if(offSide === "l" ? x <= 20 : x >= 80) h += '<span class="sg-bg sg-rz ' + offSide + '"></span>';
+      /* Last-play bar: from where the ball was snapped to where it is now, in the direction of travel. */
+      var yds = g.lp && g.lp.team === off ? +g.lp.yds : 0, gainTxt = "";
+      if(yds && !isNaN(yds)){
+        var dir = offSide === "r" ? 1 : -1, from = Math.max(0, Math.min(100, x - dir * yds)), lo = Math.min(from, x), w = Math.abs(x - from);
+        if(w > 0){
+          h += '<span class="sg-bg sg-gain' + (yds < 0 ? ' loss' : '') + '" style="left:calc(3% + ' + (lo * 0.94).toFixed(2) + '%);width:' + (w * 0.94).toFixed(2) + '%"></span>';
+          gainTxt = '<span class="yd">' + (yds > 0 ? "+" : "") + yds + '</span>';
+        }
+      }
       h += '<span class="sg-bg sg-los" style="left:' + left + '"></span>' +
-        '<span class="sg-bg sg-pos ' + (offSide === "l" ? "to-l" : "to-r") + '" style="left:' + left + '">' + ballSvg(c[1], c[2]) + '<span class="ar">' + (offSide === "l" ? "◀" : "▶") + '</span></span>';
+        '<span class="sg-bg sg-pos ' + (offSide === "l" ? "to-l" : "to-r") + '" style="left:' + left + '">' + ballSvg(c[1], c[2]) + '<span class="ar">' + (offSide === "l" ? "◀" : "▶") + '</span>' + gainTxt + '</span>';
     }
     return h;
   }
@@ -1660,7 +1658,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     el.href = g.espn ? "https://www.espn.com/nfl/game/_/gameId/" + encodeURIComponent(g.espn) : TEAM_URL;
     var ta = col(g.away)[0], th = col(g.home)[0];
     el.setAttribute("aria-label", ta + " " + (g.score ? g.score[g.away] : "") + " at " + th + " " + (g.score ? g.score[g.home] : "") + ", " + st +
-      (live && g.poss ? ", " + col(g.poss)[0] + " ball" + (g.dd ? ", " + g.dd : "") + (g.spot ? " at the " + g.spot : "") : "") + ". Open the game on ESPN.");
+      (live && g.poss ? ", " + col(g.poss)[0] + " ball" + (g.dd ? ", " + g.dd : "") + (g.spot ? " at the " + g.spot : "") + (g.lp && g.lp.team === g.poss && +g.lp.yds ? ", last play " + (g.lp.yds > 0 ? "+" : "") + g.lp.yds + " yards" : "") : "") + ". Open the game on ESPN.");
     el.innerHTML = field(live) +
       '<span class="sg-lbl">Seahawks<span class="sg-meta">' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</span></span>' +
       '<span class="sg-board">' + team(g.away, ca) + '<span class="sg-at">at</span>' + team(g.home, ch) + '</span>' +
@@ -1670,6 +1668,13 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     return live;
   }
   /* Feed one scoreboard reading: state pre|in|post, ESPN short detail, abbreviations, scores, ESPN game id, possession abbreviation, spot ("SEA 45") and down & distance. */
+  /* Last scrimmage play {team, yds, type}. Timeouts, kicks and other non-snaps don't replace it, so the bar survives a timeout. */
+  function keepPlay(r){
+    var snap = r.lpTeam && r.lpType && !/timeout|kick|punt|field goal|extra point|two-minute|end of|end period|coin|official/i.test(r.lpType);
+    if(snap) return {team: r.lpTeam, yds: +r.lpYds || 0, type: r.lpType};
+    if(/kick|punt|field goal|extra point/i.test(r.lpType || "")) return null;
+    return g && g.lp && g.lp.team === r.poss ? g.lp : null;
+  }
   window.wsjSeaUpdate = function(r){
     if(!r || !r.away || !r.home || (r.away !== "SEA" && r.home !== "SEA")) return;
     if(r.start && g && g.start && Date.parse(r.start) < Date.parse(g.start) - 6*3600000) return;
@@ -1677,7 +1682,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
     g = {id: same ? g.id : "", espn: r.espn || (same ? g.espn : ""), start: r.start || g.start, away: r.away, home: r.home, title: same ? g.title : "", tv: same ? g.tv : "",
          status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: r.detail || "", score: sc,
-         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", asof: new Date().toISOString()};
+         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", lp: keepPlay(r), asof: new Date().toISOString()};
     try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
     if(!render() && timer){ clearInterval(timer); timer = null; }
   };
@@ -1690,7 +1695,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     "  c=e['competitions'][0];t={x['homeAway']:x for x in c['competitors']}\n" +
     "  if 'SEA' not in [x['team']['abbreviation'] for x in c['competitors']]: continue\n" +
     "  ids={x['team']['id']:x['team']['abbreviation'] for x in c['competitors']};si=c.get('situation') or {}\n" +
-    "  s=c['status'];print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText','')))\n" +
+    "  s=c['status'];lp=si.get('lastPlay') or {};lt=ids.get(str((lp.get('team') or {}).get('id','')),'')\n" +
+    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/'))\n" +
     "P";
   function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
   if(!live || !(window.claude && window.claude.use)) return;
@@ -1703,7 +1709,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
       mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
         stdoutOf(r).split("\n").forEach(function(L){
           var f = L.split("|"); if(f[0] !== "g" || f.length < 8) return;
-          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || ""});
+          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || ""});
         });
       }, function(e){ if(e && {not_granted:1, capability_disabled:1, capability_removed:1, user_changed:1}[e.code] && timer){ clearInterval(timer); timer = null; } }).then(function(){ busy = false; });
     }
@@ -1762,7 +1768,10 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
           away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
           home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score), espn: e.id ? String(e.id) : "",
           poss: (function(){ var si = c.situation || {}, id = String(si.possession || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
-          spot: (c.situation && c.situation.possessionText) || "", dd: (c.situation && c.situation.shortDownDistanceText) || ""});
+          spot: (c.situation && c.situation.possessionText) || "", dd: (c.situation && c.situation.shortDownDistanceText) || "",
+          lpTeam: (function(){ var lp = (c.situation && c.situation.lastPlay) || {}, id = String((lp.team && lp.team.id) || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
+          lpYds: c.situation && c.situation.lastPlay && c.situation.lastPlay.statYardage != null ? String(c.situation.lastPlay.statYardage) : "",
+          lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || ""});
       });
       if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
     }).catch(function(){});
