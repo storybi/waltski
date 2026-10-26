@@ -726,7 +726,7 @@ a.wt-dv-watch{text-decoration:none;}
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" data-cam="sb" href="#weather" aria-pressed="true" title="SB = Snowbasin snow stake (24-hour total), read Oct 26, 2026 5:05 a.m. MT. Click to show Snowbasin behind the header.">SB <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" data-cam="dv" href="#dv-cams" aria-pressed="false" title="DV = Deer Valley Ontario snow stake, read Oct 26, 2026 5:05 a.m. MT. Click to show Deer Valley live behind the header.">DV <b id="wt-stake-dv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-sv" data-cam="sv" href="https://www.sunvalley.com/the-mountain/web-cams/" aria-pressed="false" title="SV = Sun Valley snow stake, read Oct 26, 2026 5:05 a.m. MT. Click to show Sun Valley live behind the header.">SV <b id="wt-stake-sv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button></span>
+      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" data-cam="sb" href="#weather" aria-pressed="true" title="SB = Snowbasin snow stake (24-hour total), read Oct 26, 2026 5:05 a.m. MT. Click to show Snowbasin behind the header.">SB <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" data-cam="dv" href="#dv-cams" aria-pressed="false" title="DV = Deer Valley Ontario snow stake, read Oct 26, 2026 5:05 a.m. MT. Click to show Deer Valley live behind the header.">DV <b id="wt-stake-dv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-sv" data-cam="sv" href="https://www.sunvalley.com/the-mountain/web-cams/" aria-pressed="false" title="SV = Sun Valley snow stake, read Oct 26, 2026 5:05 a.m. MT. Click to show Sun Valley live behind the header.">SV <b id="wt-stake-sv">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next wt-radio" id="wt-radio" aria-pressed="false" title="Play Classical KING FM 98.1 live">Classical King</button></span>
       <span class="wt-upd"></span>
     </div>
     
@@ -2509,6 +2509,28 @@ a.wt-dv-watch{text-decoration:none;}
     }
     load(); setInterval(load, 10*60000);
   }, function(){});
+})();
+</script>
+<script>
+/* Classical King (Oct 26, 2026) — the header button plays Classical KING FM 98.1's live stream and flips to "Mute classical"; pressing again stops it.
+   Stream: classicalking.streamguys1.com/king-fm-aac-128k. If this view can't play outside audio (claude.ai may block it), the button opens
+   KING FM's own web player in a new tab instead. Keep as is during routine refreshes. */
+(function(){
+  var STREAM = "https://classicalking.streamguys1.com/king-fm-aac-128k", PLAYER = "https://player.streamguys.com/classicalking/king-fm/sgplayer/player.php?l=layout-small+single-stream-metadata";
+  var b = document.getElementById("wt-radio"); if(!b) return;
+  var a = null, on = false, blocked = false;
+  function label(){ b.textContent = blocked ? "Classical King ↗" : on ? "Mute classical" : "Classical King"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
+  function stop(){ if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
+  b.addEventListener("click", function(){
+    if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; }
+    if(on){ stop(); return; }
+    if(!a){ a = new Audio(); a.preload = "none"; a.addEventListener("error", function(){ if(on || a.getAttribute("src")){ blocked = true; on = false; label(); } }); }
+    a.src = STREAM + "?t=" + Date.now();
+    on = true; label();
+    var p = a.play();
+    if(p && p.catch) p.catch(function(e){ if(e && e.name === "AbortError") return; blocked = true; on = false; label(); window.open(PLAYER, "_blank", "noopener"); });
+  });
+  label();
 })();
 </script>
 <script>
