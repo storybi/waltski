@@ -13,6 +13,16 @@
 /* Public site: no Ask Claude bar */
 #askbar{display:none!important;}
 </style>
+<style>
+/* Public site: Snowbasin time-lapse video behind the header (falls back to the rotating cam photos) */
+#wt-banner video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 38%; opacity:0; transition:opacity 1.2s ease; z-index:0; pointer-events:none;}
+html.has-video #wt-banner video{opacity:1;}
+html.has-video #wt-banner .bl{opacity:0!important;}
+html.has-video .wt-banner-cap{display:none;}
+html.has-video .wt-vid-cap{display:block;}
+.wt-vid-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
+html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
+</style>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1815,6 +1825,32 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     }).catch(function(){});
   }
   if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 30000); document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); }); }
+})();
+</script>
+<script>
+/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly. */
+(function(){
+  var SRC = "https://storage.googleapis.com/prism-cam-00054/running/00054_timelapse_1080.mp4";
+  var b = document.getElementById("wt-banner"), root = document.documentElement;
+  if(!b) return;
+  try{
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if(navigator.connection && navigator.connection.saveData) return;
+  }catch(e){}
+  var nb = document.getElementById("wt-next");
+  if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
+  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin \u00b7 time-lapse"; b.appendChild(cap);
+  var v = document.createElement("video");
+  v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+  v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
+  v.addEventListener("playing", function(){ root.classList.add("has-banner", "has-video"); });
+  v.addEventListener("error", function(){ root.classList.remove("has-video"); });
+  v.src = SRC;
+  b.insertBefore(v, b.firstChild);
+  function go(){ var p = v.play(); if(p && p.catch) p.catch(function(){}); }
+  go();
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && v.paused) go(); });
+  setInterval(function(){ if(document.hidden) return; v.src = SRC + "?t=" + Date.now(); go(); }, 60*60000);
 })();
 </script>
 </body>

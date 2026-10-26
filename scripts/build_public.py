@@ -12,6 +12,7 @@ The output is a standalone page for GitHub Pages. Changes from the private page:
   * the Snowbasin cams and the photo banner load the live cam images directly every 5 minutes,
     falling back to the snapshot baked into the page if a cam doesn't load
   * the Seahawks game strip polls ESPN's public scoreboard directly while a game is live
+  * the header plays the Snowbasin time-lapse video instead of rotating photos (photos remain the fallback)
 
 Between Claude's twice-daily refreshes, .github/workflows/update-data.yml runs scripts/update_data.py
 (no Claude) to refresh the ticker, Markets cards, SpaceX chart, weather, game strip and cam snapshots.
@@ -123,6 +124,49 @@ live_js = r"""<script>
 """
 must(body.count("</style>") >= 1, "</style>")
 
+# 6. Header time-lapse video (Mark's pick, Oct 25, 2026): plays the Snowbasin time-lapse behind the header in place of the
+#    rotating photos. The file is rebuilt about hourly at the source, so the page reloads it every hour. If the video can't
+#    play (blocked, Low Power Mode, reduced motion or data saver), the rotating cam photos stay as they are.
+VIDEO_SRC = "https://storage.googleapis.com/prism-cam-00054/running/00054_timelapse_1080.mp4"
+video_css = """<style>
+/* Public site: Snowbasin time-lapse video behind the header (falls back to the rotating cam photos) */
+#wt-banner video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 38%; opacity:0; transition:opacity 1.2s ease; z-index:0; pointer-events:none;}
+html.has-video #wt-banner video{opacity:1;}
+html.has-video #wt-banner .bl{opacity:0!important;}
+html.has-video .wt-banner-cap{display:none;}
+html.has-video .wt-vid-cap{display:block;}
+.wt-vid-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
+html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
+</style>
+"""
+video_js = """<script>
+/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly. */
+(function(){
+  var SRC = "%s";
+  var b = document.getElementById("wt-banner"), root = document.documentElement;
+  if(!b) return;
+  try{
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if(navigator.connection && navigator.connection.saveData) return;
+  }catch(e){}
+  var nb = document.getElementById("wt-next");
+  if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
+  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin \\u00b7 time-lapse"; b.appendChild(cap);
+  var v = document.createElement("video");
+  v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+  v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
+  v.addEventListener("playing", function(){ root.classList.add("has-banner", "has-video"); });
+  v.addEventListener("error", function(){ root.classList.remove("has-video"); });
+  v.src = SRC;
+  b.insertBefore(v, b.firstChild);
+  function go(){ var p = v.play(); if(p && p.catch) p.catch(function(){}); }
+  go();
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && v.paused) go(); });
+  setInterval(function(){ if(document.hidden) return; v.src = SRC + "?t=" + Date.now(); go(); }, 60*60000);
+})();
+</script>
+""" % VIDEO_SRC
+
 head = """<!doctype html>
 <html lang="en">
 <head>
@@ -137,7 +181,7 @@ head = """<!doctype html>
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
-page = head + public_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + "</body>\n</html>\n"
+page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + "</body>\n</html>\n"
 
 open(out, "w", encoding="utf-8").write(page)
 print("build_public: wrote", out, len(page), "bytes")
