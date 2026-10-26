@@ -570,9 +570,14 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sg-gain{z-index:1; top:auto!important; bottom:9.5px!important; height:4px; border-radius:2px; background:#ffe14d; box-shadow:0 0 4px rgba(255,225,77,.7); transition:left .8s ease, width .8s ease;}
 .sg-gain.loss{background:#ff8a3d; box-shadow:0 0 4px rgba(255,138,61,.7);}
 @media (prefers-reduced-motion: reduce){ .sg-ez.off::before{animation:none; opacity:.2;} .sg-los,.sg-pos{transition:none;} }
-.sg-lbl{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.1em; text-transform:uppercase;}
+.sg-lbl{flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font:800 10.5px/20px var(--font-body); letter-spacing:.1em; text-transform:uppercase;}
+.sg-play{font-weight:600; letter-spacing:.01em; text-transform:none; margin-left:6px; font-size:11.5px;}
 .sg-meta{font-weight:600; letter-spacing:.04em; text-transform:none; opacity:.9; margin-left:6px;}
 .sg-board{flex:none; display:flex; align-items:center; gap:10px; margin-left:auto;}
+/* First-down line (yellow, like the TV line) across the ball lane, with a small "1st" tag */
+.sg-fd{z-index:1; top:26px!important; width:2px; margin-left:-1px; background:#ffd400; box-shadow:0 0 5px rgba(255,212,0,.9); transition:left .8s ease;}
+.sg-fd::after{content:"1st"; position:absolute; top:1px; left:4px; font:800 8.5px/1 var(--font-body); letter-spacing:.04em; color:#ffd400; text-shadow:0 1px 2px rgba(0,0,0,.85);}
+.sg-fd.l::after{left:auto; right:4px;}
 .sg-tm{display:inline-flex; align-items:center; gap:5px; flex:none;}
 .sg-ball{display:block; width:24px; height:14px; flex:none; filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));}
 .sg-ab{font-size:12px; letter-spacing:.03em;}
@@ -586,9 +591,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 @media (prefers-reduced-motion: reduce){ .sg-st.live::before{animation:none;} }
 .sg-dd{font-weight:600; opacity:.9;}
 .sg-go{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.08em; text-transform:uppercase;}
-@media (max-width:760px){ .sg-meta{display:none;} }
+@media (max-width:760px){ .sg-meta{display:none;} .sg-play{font-size:11px;} }
 @media (max-width:560px){ .sea-game{gap:0 9px; padding:4px calc(3% + 4px) 0; font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
-@media (max-width:380px){ .sg-lbl{display:none;} .sg-board{margin-left:0;} }
+@media (max-width:380px){ .sg-lbl .sg-t{display:none;} .sg-play{margin-left:0;} }
 /* Walt Ski Journal nameplate (Warm Broadsheet type, Oct 25, 2026) — Fraunces 400 caps "THE WALT SKI JOURNAL" with the orange peak mark; forest-green backing only when no photo shows */
 .wt-name{font-family:"Fraunces",Georgia,"Times New Roman",serif; font-optical-sizing:auto; font-weight:400; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(15px,6.6vw,86px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.2em; color:#F4EFE3;}
 .wt-peak{width:.68em; height:.42em; flex:none;}
@@ -1585,7 +1590,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
    Field: away team's goal on the left, home team's on the right. The end zone the offense drives toward wears the offense's colors.
    The bar links to the game on ESPN. Team-color footballs only — no team logos. */
 (function(){
-  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"1:16 - 2nd","score":{"KC":0,"SEA":10},"poss":"SEA","spot":"SEA 36","dd":"1st & 10","lp":null,"asof":"2026-10-26T01:37:00Z"};
+  var SEA_GAME = {"id":"7578cc9c-da75-43ad-b243-22b509a7bef0","espn":"401873022","start":"2026-10-26T00:20:00Z","away":"KC","home":"SEA","title":"Sunday Night Football","tv":"NBC · Peacock","status":"inprogress","detail":"0:53 - 2nd","score":{"KC":0,"SEA":10},"poss":"SEA","spot":"KC 34","dd":"2nd & 1","lp":{"team":"SEA","yds":9,"type":"Pass Reception"},"play":"S.Darnold pass short left to C.Kupp to KC 34 for 9 yards (L.Sneed). Penalty on KC-L.Sneed, Defensive Pass Interference, declined.","asof":"2026-10-26T01:41:00Z"};
   var T = {ARI:["Cardinals","#97233F","#FFB612"],ATL:["Falcons","#A71930","#000000"],BAL:["Ravens","#241773","#9E7C0C"],BUF:["Bills","#00338D","#C60C30"],CAR:["Panthers","#0085CA","#101820"],CHI:["Bears","#0B162A","#C83803"],CIN:["Bengals","#FB4F14","#000000"],CLE:["Browns","#311D00","#FF3C00"],DAL:["Cowboys","#003594","#869397"],DEN:["Broncos","#FB4F14","#002244"],DET:["Lions","#0076B6","#B0B7BC"],GB:["Packers","#203731","#FFB612"],HOU:["Texans","#03202F","#A71930"],IND:["Colts","#002C5F","#A2AAAD"],JAX:["Jaguars","#006778","#D7A22A"],KC:["Chiefs","#E31837","#FFB81C"],LV:["Raiders","#000000","#A5ACAF"],LAC:["Chargers","#0080C6","#FFC20E"],LA:["Rams","#003594","#FFA300"],LAR:["Rams","#003594","#FFA300"],MIA:["Dolphins","#008E97","#FC4C02"],MIN:["Vikings","#4F2683","#FFC62F"],NE:["Patriots","#002244","#C60C30"],NO:["Saints","#101820","#D3BC8D"],NYG:["Giants","#0B2265","#A71930"],NYJ:["Jets","#125740","#FFFFFF"],PHI:["Eagles","#004C54","#A5ACAF"],PIT:["Steelers","#101820","#FFB612"],SF:["49ers","#AA0000","#B3995D"],SEA:["Seahawks","#002244","#69BE28"],TB:["Buccaneers","#D50A0A","#34302B"],TEN:["Titans","#0C2340","#4B92DB"],WAS:["Commanders","#5A1414","#FFB612"],WSH:["Commanders","#5A1414","#FFB612"]};
   var TEAM_URL = "https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks";
   var el = document.getElementById("sea-game"), KEY = "wsj-sea-game", g = SEA_GAME, timer = null;
@@ -1642,6 +1647,12 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
           gainTxt = '<span class="yd">' + (yds > 0 ? "+" : "") + yds + '</span>';
         }
       }
+      /* First-down line: the line to gain, "& Goal" means the goal line itself (no separate line). */
+      var dm = /&\s*(\d+)/.exec(g.dd || "");
+      if(dm){
+        var fx = x + (offSide === "r" ? 1 : -1) * (+dm[1]);
+        if(fx > 0 && fx < 100) h += '<span class="sg-bg sg-fd ' + offSide + '" style="left:calc(3% + ' + (fx * 0.94).toFixed(2) + '%)" title="First-down line"></span>';
+      }
       h += '<span class="sg-bg sg-los" style="left:' + left + '"></span>' +
         '<span class="sg-bg sg-pos ' + (offSide === "l" ? "to-l" : "to-r") + '" style="left:' + left + '">' + ballSvg(c[1], c[2]) + '<span class="ar">' + (offSide === "l" ? "◀" : "▶") + '</span>' + gainTxt + '</span>';
     }
@@ -1660,7 +1671,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     el.setAttribute("aria-label", ta + " " + (g.score ? g.score[g.away] : "") + " at " + th + " " + (g.score ? g.score[g.home] : "") + ", " + st +
       (live && g.poss ? ", " + col(g.poss)[0] + " ball" + (g.dd ? ", " + g.dd : "") + (g.spot ? " at the " + g.spot : "") + (g.lp && g.lp.team === g.poss && +g.lp.yds ? ", last play " + (g.lp.yds > 0 ? "+" : "") + g.lp.yds + " yards" : "") : "") + ". Open the game on ESPN.");
     el.innerHTML = field(live) +
-      '<span class="sg-lbl">Seahawks<span class="sg-meta">' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</span></span>' +
+      '<span class="sg-lbl" title="' + esc(live && g.play ? g.play : [g.title, g.tv, day].filter(Boolean).join(" · ")) + '"><span class="sg-t">Seahawks</span>' +
+        (live && g.play ? '<span class="sg-play">' + esc(g.play) + '</span>' : '<span class="sg-meta">' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</span>') + '</span>' +
       '<span class="sg-board">' + team(g.away, ca) + '<span class="sg-at">at</span>' + team(g.home, ch) + '</span>' +
       '<span class="sg-st' + (live ? ' live' : '') + '">' + esc(st) + (live && g.dd ? '<span class="sg-dd"> · ' + esc(g.dd) + '</span>' : '') + '</span>' +
       '<span class="sg-go"><b>ESPN </b>↗</span>';
@@ -1682,7 +1694,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
     g = {id: same ? g.id : "", espn: r.espn || (same ? g.espn : ""), start: r.start || g.start, away: r.away, home: r.home, title: same ? g.title : "", tv: same ? g.tv : "",
          status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: r.detail || "", score: sc,
-         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", lp: keepPlay(r), asof: new Date().toISOString()};
+         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", lp: keepPlay(r), play: (r.lpText || "").replace(/^\s*(\([^)]*\)\s*)+/, "").replace(/\s+/g, " ").trim() || (same && g.play) || "", asof: new Date().toISOString()};
     try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
     if(!render() && timer){ clearInterval(timer); timer = null; }
   };
@@ -1696,7 +1708,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     "  if 'SEA' not in [x['team']['abbreviation'] for x in c['competitors']]: continue\n" +
     "  ids={x['team']['id']:x['team']['abbreviation'] for x in c['competitors']};si=c.get('situation') or {}\n" +
     "  s=c['status'];lp=si.get('lastPlay') or {};lt=ids.get(str((lp.get('team') or {}).get('id','')),'')\n" +
-    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/'))\n" +
+    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/')+'|'+' '.join(str(lp.get('text','')).replace('|','/').split()))\n" +
     "P";
   function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
   if(!live || !(window.claude && window.claude.use)) return;
@@ -1709,7 +1721,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
       mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
         stdoutOf(r).split("\n").forEach(function(L){
           var f = L.split("|"); if(f[0] !== "g" || f.length < 8) return;
-          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || ""});
+          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || "", lpText: f.slice(15).join("|") || ""});
         });
       }, function(e){ if(e && {not_granted:1, capability_disabled:1, capability_removed:1, user_changed:1}[e.code] && timer){ clearInterval(timer); timer = null; } }).then(function(){ busy = false; });
     }
@@ -1771,7 +1783,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
           spot: (c.situation && c.situation.possessionText) || "", dd: (c.situation && c.situation.shortDownDistanceText) || "",
           lpTeam: (function(){ var lp = (c.situation && c.situation.lastPlay) || {}, id = String((lp.team && lp.team.id) || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
           lpYds: c.situation && c.situation.lastPlay && c.situation.lastPlay.statYardage != null ? String(c.situation.lastPlay.statYardage) : "",
-          lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || ""});
+          lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || "",
+          lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || ""});
       });
       if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
     }).catch(function(){});
