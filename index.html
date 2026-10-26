@@ -14,15 +14,17 @@
 #askbar{display:none!important;}
 </style>
 <style>
-/* Public site: Snowbasin time-lapse video behind the header (falls back to the rotating cam photos) */
-#wt-banner video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 38%; opacity:0; transition:opacity 1.2s ease; z-index:0; pointer-events:none;}
-html.has-video #wt-banner video{opacity:1;}
+/* Public site: live Needles cam picture behind the header (falls back to the rotating cam photos) */
+#wt-banner img.wt-live{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%; opacity:0; transition:opacity 1.2s ease; z-index:0; pointer-events:none;}
+#wt-banner img.wt-live.on{opacity:1;}
 html.has-video #wt-banner .bl{opacity:0!important;}
 html.has-video .wt-banner-cap{display:none;}
 html.has-video .wt-vid-cap{display:block;}
 .wt-vid-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
 html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
 html:not(.has-video) .wt-play, html:not(.has-video) .wt-play-sep{display:none;}
+a.wt-play{text-decoration:none;}
+a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -1830,68 +1832,41 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 })();
 </script>
 <script>
-/* Public site: the header shows the LAST frame of Snowbasin's hourly time-lapse (the newest picture) instead of rotating photos.
-   Every page load fetches a fresh copy (cache-busted) and parks on its final frame; the dateline's "Play Timelapse" link plays the
-   whole time-lapse once at PLAY_RATE, then returns to the last frame. If the video can't load, the rotating cam photos stay. */
+/* Public site: the header shows the LIVE Needles cam picture (HD Relay snapshot, 1920x1080) instead of rotating photos.
+   It loads fresh on every page load and refreshes every minute with a crossfade. The dateline's "Watch Live" link (where
+   Next Photo was) opens Snowbasin's webcam page, where the real-time Needles video plays in Snowbasin's own player — the
+   live video itself can't be embedded here. If the snapshot can't load, the rotating cam photos stay. */
 (function(){
-  var SRC = "https://storage.googleapis.com/prism-cam-00054/running/00054_timelapse_1080.mp4";
-  var PLAY_RATE = 0.25;            /* speed of the one-time play (1 = normal) */
+  var SNAP = "https://b15.hdrelay.com/camera/1b6ed87c-f919-4e59-b9cc-7480e3ca31c3/snapshot", LIVE = "https://www.snowbasin.com/the-mountain/web-cams/", REFRESH = 60000;
   var b = document.getElementById("wt-banner"), root = document.documentElement;
   if(!b) return;
   var nb = document.getElementById("wt-next");
   if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
-  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · latest time-lapse frame"; b.appendChild(cap);
-  /* "Play Timelapse" link where Next Photo was */
+  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · Needles live cam"; b.appendChild(cap);
   var sep = document.createElement("span"); sep.className = "wt-sep2 wt-play-sep"; sep.setAttribute("aria-hidden", "true"); sep.textContent = "|";
-  var btn = document.createElement("button"); btn.type = "button"; btn.className = "wt-next wt-play"; btn.textContent = "Play Timelapse";
-  btn.title = "Play today's Snowbasin time-lapse once";
-  if(nb && nb.parentNode){ nb.parentNode.insertBefore(btn, nb.nextSibling); nb.parentNode.insertBefore(sep, btn); }
-  var v = document.createElement("video");
-  v.muted = true; v.defaultMuted = true; v.loop = false; v.playsInline = true; v.preload = "auto";
-  v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
-  b.insertBefore(v, b.firstChild);
-  var playing = false, ready = false;
-  function when(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
-  function toLast(){
-    if(!v.duration || isNaN(v.duration)) return;
-    try{ v.pause(); v.currentTime = Math.max(0, v.duration - 0.04); }catch(e){}
-  }
-  function stopPlay(){
-    playing = false; btn.textContent = "Play Timelapse"; toLast();
-  }
-  v.addEventListener("loadedmetadata", function(){
-    if(playing) return;
-    /* iPhones only paint a frame after playback has started, so start muted and jump straight to the end. */
-    var p = null; try{ p = v.play(); }catch(e){}
-    if(p && p.then) p.then(toLast, toLast); else toLast();
-  });
-  v.addEventListener("seeked", function(){
-    if(playing) return;
-    ready = true; root.classList.add("has-banner", "has-video");
-  });
-  v.addEventListener("ended", function(){ if(playing) stopPlay(); });
-  v.addEventListener("error", function(){ if(!ready) root.classList.remove("has-video"); });
-  btn.addEventListener("click", function(){
-    if(!ready) return;
-    if(playing){ stopPlay(); return; }
-    playing = true; btn.textContent = "Stop";
-    try{ v.currentTime = 0; v.playbackRate = PLAY_RATE; }catch(e){}
-    var p = v.play(); if(p && p.catch) p.catch(function(){ stopPlay(); });
-  });
+  var link = document.createElement("a"); link.className = "wt-next wt-play"; link.textContent = "Watch Live";
+  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch the Needles cam live on Snowbasin's webcam page";
+  if(nb && nb.parentNode){ nb.parentNode.insertBefore(link, nb.nextSibling); nb.parentNode.insertBefore(sep, link); }
+  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false;
+  L.forEach(function(i){ i.className = "wt-live"; i.alt = ""; i.setAttribute("aria-hidden", "true"); i.decoding = "async"; b.insertBefore(i, b.firstChild); });
+  function when(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
   function load(){
-    if(playing) return;
-    var url = SRC + "?t=" + Date.now();   /* fresh copy on every page load, so the last frame is the newest picture */
-    ready = false;
-    v.src = url; v.load();
-    try{
-      fetch(url, {method: "HEAD", cache: "no-store"}).then(function(r){
-        var lm = r.headers.get("Last-Modified");
-        if(lm) cap.textContent = "Snowbasin · latest time-lapse frame · updated " + when(new Date(lm));
-      }).catch(function(){});
-    }catch(e){}
+    if(busy) return; busy = true;
+    var next = 1 - front, img = L[next], probe = new Image();
+    probe.onload = function(){
+      busy = false;
+      if(probe.naturalWidth < 40) return;
+      img.src = probe.src;
+      img.classList.add("on"); L[front].classList.remove("on"); front = next;
+      root.classList.add("has-banner", "has-video");
+      cap.textContent = "Snowbasin · Needles live cam · " + when();
+    };
+    probe.onerror = function(){ busy = false; };
+    probe.src = SNAP + "?t=" + Date.now();
   }
   load();
-  setInterval(function(){ if(!document.hidden && !playing) load(); }, 60*60000);   /* the source updates hourly */
+  setInterval(function(){ if(!document.hidden) load(); }, REFRESH);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) load(); });
 })();
 </script>
 </body>
