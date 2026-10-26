@@ -582,7 +582,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 
   <header class="wt-mast" id="top">
     <div class="wt-edition">
-      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo" hidden>Next Photo</button></span>
+      <span>Morgan Edition<span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" href="#weather" title="Snowbasin snow stake (24-hour total), read Oct 25, 2026 6:00 p.m. MT">Snowstake <b id="wt-stake-in">0&quot;</b></a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button></span>
       <span class="wt-upd"></span>
     </div>
     
@@ -1534,10 +1534,16 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     if(timer){ clearInterval(timer); timer = null; }
     idx = 0; paint(0); size();
     if(frames.length > 1) timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
-    var nb = document.getElementById("wt-next"); if(nb) nb.hidden = frames.length < 2;
   }
   /* Next photo button: show the next cam view now, then carry on rotating every 10 seconds from there. */
   function nextPhoto(){
+    /* At night the banner set can hold a single cam (dark frames are skipped), so borrow the other cam views shown in the Weather section. */
+    if(frames.length < 2){
+      ["ogden","jp","wildcat"].forEach(function(k){
+        if(frames.some(function(f){ return f.k === k; })) return;
+        var i = document.querySelector("#cam-" + k + " img"); if(i && i.src) frames.push({k: k, src: i.src});
+      });
+    }
     if(frames.length < 2) return;
     if(timer){ clearInterval(timer); timer = null; }
     idx = (idx + 1) % frames.length; paint(idx);
