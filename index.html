@@ -656,6 +656,18 @@ body::before{display:none;}
 .radar-pane{filter:blur(1.6px) saturate(1.15);}
 .radar-map{background:#28302a;}
 .radar-tip{background:rgba(22,24,22,.72); color:#fff;}
+.radar-now{flex-basis:100%; font:500 12px var(--font-body); color:var(--fg-muted);}
+.radar-now:empty{display:none;}
+.radar-key{display:inline-flex; align-items:center; gap:4px; margin-left:12px; font-weight:600;}
+.radar-key svg{width:13px; height:13px; margin-left:6px;}
+.radar-fx{position:absolute; inset:0; z-index:430; pointer-events:none; overflow:hidden;}
+.radar-fx span{position:absolute; display:block; width:13px; height:13px; margin:-6px 0 0 -6px; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.7));}
+.radar-fx svg{display:block; width:100%; height:100%;}
+.radar-fx .fx-flake{animation:fx-drift 2.4s ease-in-out infinite;}
+.radar-fx .fx-drop{width:11px; height:11px; animation:fx-fall 1.4s ease-in infinite;}
+@keyframes fx-drift{0%{transform:translate(0,-4px) rotate(0deg)} 50%{transform:translate(2px,3px) rotate(30deg)} 100%{transform:translate(0,-4px) rotate(60deg)}}
+@keyframes fx-fall{0%{transform:translateY(-7px); opacity:0} 25%{opacity:1} 100%{transform:translateY(8px); opacity:0}}
+@media (prefers-reduced-motion: reduce){ .radar-fx span{animation:none!important;} }
 @media (max-width:560px){ .radar-map{height:260px;} .radar-legend i{width:90px;} }
 </style>
 <div id="wt-banner" aria-hidden="true"></div>
@@ -714,10 +726,11 @@ body::before{display:none;}
       <div class="radar-head">
         <h3>Live Doppler radar <span>Mountain Green &amp; Snowbasin</span></h3>
         <span class="radar-time" id="radar-time">Loading radar…</span>
+        <span class="radar-now" id="radar-now"></span>
       </div>
       <div class="radar-map" id="radar-map" role="img" aria-label="Animated weather radar map centered on Mountain Green and Snowbasin, Utah"></div>
       <div class="radar-foot">
-        <span class="radar-legend" aria-hidden="true"><span>Light</span><i></i><span>Heavy</span></span>
+        <span class="radar-legend" aria-hidden="true"><span>Light</span><i></i><span>Heavy</span><span class="radar-key"><svg viewBox="0 0 20 20"><g stroke="#5b8fc7" stroke-width="2" stroke-linecap="round"><path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/></g></svg>Snow<svg viewBox="0 0 20 20"><path d="M10 2.5C10 2.5 4.5 9.2 4.5 12.8a5.5 5.5 0 0 0 11 0C15.5 9.2 10 2.5 10 2.5z" fill="#3fa4ff"/></svg>Rain</span></span>
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
@@ -1953,14 +1966,17 @@ body::before{display:none;}
   /* ---- inside claude.ai: static radar image through Composio ---- */
   if(window.claude && window.claude.use){
     var CMD = "python3 - <<'P'\n" +
-      "import io,math,base64,urllib.request,datetime\n" +
+      "import io,math,base64,json,urllib.request,datetime\n" +
       "from PIL import Image,ImageDraw,ImageFilter\n" +
       "Z=9;LAT,LON=" + C[0] + "," + C[1] + ";W,H=760,440\n" +
+      "UA={'User-Agent':'waltski.com radar','Accept':'application/geo+json'}\n" +
       "def px(lat,lon):\n" +
       "  n=2**Z*256;x=(lon+180)/360*n;r=math.radians(lat);y=(1-math.log(math.tan(r)+1/math.cos(r))/math.pi)/2*n;return x,y\n" +
       "cx,cy=px(LAT,LON);x0,y0=cx-W/2,cy-H/2\n" +
+      "def raw(u):\n" +
+      "  return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=20).read()\n" +
       "def get(u):\n" +
-      "  return Image.open(io.BytesIO(urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'waltski.com radar'}),timeout=20).read())).convert('RGBA')\n" +
+      "  return Image.open(io.BytesIO(raw(u))).convert('RGBA')\n" +
       "base=Image.new('RGBA',(W,H),(40,48,40,255));rad=Image.new('RGBA',(W,H),(0,0,0,0));lab=Image.new('RGBA',(W,H),(0,0,0,0))\n" +
       "for tx in range(int(x0//256),int((x0+W)//256)+1):\n" +
       "  for ty in range(int(y0//256),int((y0+H)//256)+1):\n" +
@@ -1971,11 +1987,31 @@ body::before{display:none;}
       "    except Exception: pass\n" +
       "    try: t=get('https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/%d/%d/%d.png'%(Z,tx,ty)); rad.paste(t,(ox,oy),t)\n" +
       "    except Exception: pass\n" +
+      "A=rad.split()[3]\n" +
+      "kind=None;fc=''\n" +
+      "try:\n" +
+      "  pt=json.loads(raw('https://api.weather.gov/points/41.2160,-111.8569'))['properties']\n" +
+      "  h=json.loads(raw(pt['forecastHourly']))['properties']['periods'][0]\n" +
+      "  t=h['shortForecast'].lower();fc=h['shortForecast']+', %d°F'%h['temperature']\n" +
+      "  sn=any(w in t for w in ('snow','flurr','sleet','wintry','blizzard'));rn=any(w in t for w in ('rain','shower','drizzle','thunder'))\n" +
+      "  kind='mix' if sn and rn else 'snow' if sn else 'rain' if rn else ('snow' if h['temperature']<=34 else 'rain')\n" +
+      "except Exception: pass\n" +
       "rad=rad.filter(ImageFilter.GaussianBlur(2.2));a=rad.split()[3].point(lambda v:min(255,int(v*1.1)));rad.putalpha(a);img=Image.alpha_composite(Image.alpha_composite(base,rad),lab);d=ImageDraw.Draw(img)\n" +
+      "if kind:\n" +
+      "  pts=[(x,y) for y in range(14,H-6,30) for x in range(14,W-6,30) if A.getpixel((x,y))>60]\n" +
+      "  if len(pts)>60: pts=pts[::math.ceil(len(pts)/60)]\n" +
+      "  for i,(x,y) in enumerate(pts):\n" +
+      "    k=kind if kind!='mix' else ('rain' if i%2 else 'snow')\n" +
+      "    if k=='snow':\n" +
+      "      for ang in (90,30,150):\n" +
+      "        dx=6*math.cos(math.radians(ang));dy=6*math.sin(math.radians(ang))\n" +
+      "        d.line([x-dx+1,y-dy+1,x+dx+1,y+dy+1],fill=(0,0,0,110),width=2);d.line([x-dx,y-dy,x+dx,y+dy],fill=(255,255,255,255),width=2)\n" +
+      "    else:\n" +
+      "      d.polygon([(x,y-7),(x-4,y),(x+4,y)],fill=(63,164,255,255));d.ellipse([x-4,y-3,x+4,y+5],fill=(63,164,255,255),outline=(230,243,255,255))\n" +
       "for name,la,lo in " + JSON.stringify(PLACES) + ":\n" +
       "  x,y=px(la,lo);x-=x0;y-=y0;d.ellipse([x-6,y-6,x+6,y+6],fill=(226,115,58,255),outline=(255,255,255,255),width=2);d.text((x+10,y-7),name,fill=(20,20,20,255),stroke_width=2,stroke_fill=(255,255,255,255))\n" +
       "o=io.BytesIO();img.convert('RGB').save(o,'JPEG',quality=78,optimize=True)\n" +
-      "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
+      "print('ts|'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'));print('fc|'+(kind or '')+'|'+fc);print('img|'+base64.b64encode(o.getvalue()).decode())\n" +
       "P";
     var img = document.createElement("img"); img.alt = "Weather radar over Mountain Green and Snowbasin"; img.className = "radar-img";
     box.appendChild(img);
@@ -1988,7 +2024,7 @@ body::before{display:none;}
         if(busy || document.hidden) return; busy = true;
         mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
           var out = stdoutOf(r), at = null, b64 = null;
-          out.split("\n").forEach(function(L){ var i = L.indexOf("|"); if(i < 0) return; var k = L.slice(0,i), v = L.slice(i+1).trim(); if(k === "ts") at = v; if(k === "img" && v.length > 1000) b64 = v; });
+          out.split("\n").forEach(function(L){ var i = L.indexOf("|"); if(i < 0) return; var k = L.slice(0,i), v = L.slice(i+1).trim(); if(k === "ts") at = v; if(k === "img" && v.length > 1000) b64 = v; if(k === "fc"){ var j = v.indexOf("|"); var nw = document.getElementById("radar-now"); if(nw) nw.textContent = j > 0 && v.slice(0, j) ? "Snowbasin now: " + v.slice(j + 1) : ""; } });
           if(b64){ img.src = "data:image/jpeg;base64," + b64; tl.textContent = "Radar " + hm(new Date(at || Date.now())); try{ localStorage.setItem(KEY, JSON.stringify({at: at, img: b64})); }catch(e){} }
           else if(!img.src) tl.textContent = "Radar didn't load — open the NWS radar link below.";
         }, function(){ if(!img.getAttribute("src")) tl.textContent = "Radar unavailable here — open the NWS radar link below."; }).then(function(){ busy = false; });
@@ -2013,6 +2049,80 @@ body::before{display:none;}
       L.circleMarker([p[1], p[2]], {radius: 6, color: "#ffffff", weight: 2, fillColor: "#E2733A", fillOpacity: 1}).addTo(map)
         .bindTooltip(p[0], {permanent: true, direction: "right", offset: [8, 0], className: "radar-tip"});
     });
+    /* Precipitation symbols (Oct 25, 2026): little snowflakes where it's snowing, blue drops where it's raining, both for a mix.
+       Type comes from the NWS hourly forecast at Snowbasin (temperature decides when the forecast is dry but radar shows echoes).
+       Positions come from the current radar frame's pixels; if those can't be read, the symbols sit at Mountain Green and Snowbasin. */
+    var fx = document.createElement("div"); fx.className = "radar-fx"; fx.setAttribute("aria-hidden", "true"); box.appendChild(fx);
+    var kind = null, kindAt = 0, fxBusy = false;
+    var FLAKE = '<svg viewBox="0 0 20 20"><g stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/><path d="M7.5 3.5L10 5.5l2.5-2M7.5 16.5L10 14.5l2.5 2"/></g></svg>';
+    var DROP = '<svg viewBox="0 0 20 20"><path d="M10 2.5C10 2.5 4.5 9.2 4.5 12.8a5.5 5.5 0 0 0 11 0C15.5 9.2 10 2.5 10 2.5z" fill="#3fa4ff" stroke="#e6f3ff" stroke-width="1.2"/><path d="M7.6 12.5a2.6 2.6 0 0 0 1.6 2.5" stroke="#fff" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>';
+    function getKind(cb){
+      if(kind && Date.now() - kindAt < 15*60000) return cb(kind);
+      fetch("https://api.weather.gov/points/41.2160,-111.8569", {headers: {"Accept": "application/geo+json"}}).then(function(r){ return r.json(); })
+        .then(function(p){ return fetch(p.properties.forecastHourly, {headers: {"Accept": "application/geo+json"}}); }).then(function(r){ return r.json(); })
+        .then(function(j){
+          var h = j.properties.periods[0], t = (h.shortForecast || "").toLowerCase(), temp = h.temperature;
+          var sn = /snow|flurr|sleet|wintry|blizzard/.test(t), rn = /rain|shower|drizzle|thunder/.test(t);
+          kind = sn && rn ? "mix" : sn ? "snow" : rn ? "rain" : (temp <= 34 ? "snow" : "rain");
+          kind = {k: kind, forecast: h.shortForecast, temp: temp, wet: sn || rn};
+          kindAt = Date.now();
+          var nw = document.getElementById("radar-now"); if(nw) nw.textContent = "Snowbasin now: " + h.shortForecast + ", " + temp + "\u00b0F";
+          cb(kind);
+        }).catch(function(){ cb(null); });
+    }
+    function sym(k, i){ return k === "mix" ? (i % 2 ? DROP : FLAKE) : (k === "snow" ? FLAKE : DROP); }
+    function place(points, k){
+      fx.innerHTML = points.map(function(p, i){
+        return '<span class="fx-' + (sym(k, i) === FLAKE ? "flake" : "drop") + '" style="left:' + p[0].toFixed(0) + 'px;top:' + p[1].toFixed(0) + 'px;animation-delay:-' + ((i * 0.37) % 2.4).toFixed(2) + 's">' + sym(k, i) + '</span>';
+      }).join("");
+    }
+    function fallback(k){
+      if(!k || !k.wet){ fx.innerHTML = ""; return; }
+      var pts = [];
+      PLACES.forEach(function(p){ var c = map.latLngToContainerPoint([p[1], p[2]]); [[-14,-16],[12,-20],[-4,-30],[18,-6]].forEach(function(o){ pts.push([c.x + o[0], c.y + o[1]]); }); });
+      place(pts, k.k);
+    }
+    function updateFx(){
+      if(fxBusy) return; fxBusy = true;
+      getKind(function(k){
+        if(!k){ fx.innerHTML = ""; fxBusy = false; return; }
+        var z = map.getZoom(), size = map.getSize(), b = map.getPixelBounds(), bust = Math.floor(Date.now() / 300000);
+        var tx0 = Math.floor(b.min.x / 256), ty0 = Math.floor(b.min.y / 256), tx1 = Math.floor(b.max.x / 256), ty1 = Math.floor(b.max.y / 256);
+        var cv = document.createElement("canvas"); cv.width = (tx1 - tx0 + 1) * 256; cv.height = (ty1 - ty0 + 1) * 256;
+        var ctx = cv.getContext("2d"), pending = 0, failed = false;
+        function done(){
+          if(--pending > 0) return;
+          fxBusy = false;
+          if(failed){ fallback(k); return; }
+          var data; try{ data = ctx.getImageData(0, 0, cv.width, cv.height).data; }catch(e){ fallback(k); return; }
+          var pts = [], STEP = 30, seed = 7;
+          for(var y = 14; y < size.y - 6; y += STEP){
+            for(var x = 14; x < size.x - 6; x += STEP){
+              seed = (seed * 9301 + 49297) % 233280;
+              var jx = x + (seed / 233280 - 0.5) * 14, jy = y + ((seed * 7 % 233280) / 233280 - 0.5) * 14;
+              var gx = Math.round(b.min.x + jx - tx0 * 256), gy = Math.round(b.min.y + jy - ty0 * 256);
+              if(gx < 0 || gy < 0 || gx >= cv.width || gy >= cv.height) continue;
+              var o = (gy * cv.width + gx) * 4;
+              if(data[o + 3] > 60) pts.push([jx, jy]);
+            }
+          }
+          if(pts.length > 60){ var keep = []; for(var i = 0; i < pts.length; i += Math.ceil(pts.length / 60)) keep.push(pts[i]); pts = keep; }
+          place(pts, k.k);
+        }
+        for(var tx = tx0; tx <= tx1; tx++) for(var ty = ty0; ty <= ty1; ty++){
+          pending++;
+          (function(tx, ty){
+            var im = new Image(); im.crossOrigin = "anonymous";
+            im.onload = function(){ try{ ctx.drawImage(im, (tx - tx0) * 256, (ty - ty0) * 256); }catch(e){ failed = true; } done(); };
+            im.onerror = function(){ failed = true; done(); };
+            im.src = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/" + z + "/" + tx + "/" + ty + ".png?_=" + bust;
+          })(tx, ty);
+        }
+      });
+    }
+    updateFx();
+    map.on("moveend zoomend", function(){ fx.innerHTML = ""; updateFx(); });
+    setInterval(function(){ if(!document.hidden){ kind = null; updateFx(); } }, 5*60000);
     var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], idx = OFFS.length - 1, timer = null, base = null;
     function build(){
       layers.forEach(function(l){ map.removeLayer(l); });
