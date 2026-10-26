@@ -120,6 +120,35 @@ live_js = r"""<script>
   }
   if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 30000); document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); }); }
 })();
+/* Public site: live Oregon Ducks score straight from ESPN's public college scoreboard, every 30 seconds while the Ducks strip shows a live game. */
+(function(){
+  var el = document.getElementById("ore-game");
+  if(!el || !window.wsjOreUpdate) return;
+  var timer = null;
+  function poll(){
+    if(document.hidden) return;
+    fetch("https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300", {cache:"no-store"}).then(function(r){ return r.json(); }).then(function(j){
+      (j.events || []).forEach(function(e){
+        var c = e.competitions && e.competitions[0]; if(!c) return;
+        var t = {}; (c.competitors || []).forEach(function(x){ t[x.homeAway] = x; });
+        if(!t.home || !t.away || (t.home.team.abbreviation !== "ORE" && t.away.team.abbreviation !== "ORE")) return;
+        window.wsjOreUpdate({start: e.date, state: c.status.type.state, detail: c.status.type.shortDetail || "",
+          away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
+          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score), espn: e.id ? String(e.id) : "",
+          poss: (function(){ var si = c.situation || {}, id = String(si.possession || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
+          spot: (c.situation && c.situation.possessionText) || "", dd: (c.situation && c.situation.shortDownDistanceText) || "",
+          lpTeam: (function(){ var lp = (c.situation && c.situation.lastPlay) || {}, id = String((lp.team && lp.team.id) || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
+          lpYds: c.situation && c.situation.lastPlay && c.situation.lastPlay.statYardage != null ? String(c.situation.lastPlay.statYardage) : "",
+          lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || "",
+          lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || "",
+          awayRec: (t.away.records && t.away.records[0] && t.away.records[0].summary) || "", homeRec: (t.home.records && t.home.records[0] && t.home.records[0].summary) || "",
+          col: (function(){ var o = {}; [t.away, t.home].forEach(function(x){ var tm = x.team; o[tm.abbreviation] = [tm.name || tm.shortDisplayName || tm.abbreviation, "#" + (tm.color || "444444"), "#" + (tm.alternateColor || "999999")]; }); return o; })()});
+      });
+      if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
+    }).catch(function(){});
+  }
+  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 30000); document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); }); }
+})();
 </script>
 """
 must(body.count("</style>") >= 1, "</style>")

@@ -579,6 +579,7 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
   background-image:linear-gradient(90deg, rgba(255,255,255,.05) 0 50%, rgba(0,0,0,.05) 50%); background-size:18.8% 100%; background-position:3% 0;
   font:700 13px/20px var(--font-body); font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(0,0,0,.6);}
 .sea-game[hidden]{display:none!important;}
+.sea-game:not([hidden]) ~ .sea-game:not([hidden]){border-top:1px solid rgba(255,255,255,.45);}
 .sea-game:not([hidden]) + .wxbar{border-top:0;}
 .sea-game:hover .sg-go,.sea-game:focus-visible .sg-go{text-decoration:underline;}
 .sea-game:focus-visible{outline:2px solid #fff; outline-offset:-3px;}
@@ -731,6 +732,8 @@ body::before{display:none;}
 
   <!-- ================= SEAHAWKS GAME STRIP (game day + next day) ================= -->
   <a class="sea-game" id="sea-game" href="https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
+  <!-- Oregon Ducks game strip (added Oct 25, 2026): same football field, game day + next day; stacks under the Seahawks strip when both show. -->
+  <a class="sea-game ore-game" id="ore-game" href="https://www.espn.com/college-football/team/_/id/2483/oregon-ducks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
 
   <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
   <div class="wt-dock" id="wt-dock">
@@ -1867,6 +1870,179 @@ body::before{display:none;}
 })();
 </script>
 <script>
+/* Oregon Ducks game strip (added Oct 25, 2026) — a copy of the Seahawks strip for the Ducks (ESPN abbreviation ORE). Refresh ORE_GAME
+   every run from the sports data tool (step 3d, league ncaafb), including "col" — {ABBR: [nickname, "#color", "#altColor"]} for both
+   teams from ESPN (college teams have no built-in color table). Shows from kickoff through the end of the next day in Mountain Time,
+   then hides itself; when the Seahawks strip shows too, the two fields stack. While the game is live the page polls ESPN's public scoreboard every 30 seconds
+   (through the Composio connector inside claude.ai; directly on waltski.com) for the score, clock, possession, ball spot and down.
+   Field: away team's goal on the left, home team's on the right. The end zone the offense drives toward wears the offense's colors.
+   The bar links to the game on ESPN. Team-color footballs only — no team logos. */
+(function(){
+  var ORE_GAME = {"id":"","espn":"401858495","start":"2026-10-24T19:00:00Z","away":"ORE","home":"ILL","title":"","tv":"BTN","status":"closed","detail":"Final","score":{"ORE":10,"ILL":21},"poss":"","spot":"","dd":"","lp":null,"play":"","headline":"","rec":{"ORE":"4-3","ILL":"4-3"},"asof":"2026-10-26T04:20:00Z","col":{"ORE":["Ducks","#00934b","#fff41b"],"ILL":["Fighting Illini","#E84A27","#13294B"]}};
+  var T = {ORE:["Ducks","#00934b","#fff41b"]};
+  var TEAM_URL = "https://www.espn.com/college-football/team/_/id/2483/oregon-ducks";
+  var el = document.getElementById("ore-game"), KEY = "wsj-ore-game", g = ORE_GAME, timer = null;
+  if(!el) return;
+  try{ var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if(sv && sv.start === g.start && sv.asof > g.asof) g = sv; }catch(e){}
+  function mtDate(ms){ return new Date(ms).toLocaleDateString("en-CA",{timeZone:"America/Denver"}); }
+  function inWindow(){
+    if(!g || !g.start) return false;
+    var ks = Date.parse(g.start), now = Date.now();
+    if(isNaN(ks) || now < ks) return false;
+    var k = mtDate(ks), next = new Date(Date.parse(k + "T12:00:00Z") + 86400000).toISOString().slice(0,10), t = mtDate(now);
+    return t === k || t === next;
+  }
+  function esc(x){ return String(x == null ? "" : x).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function col(ab){ return (g && g.col && g.col[ab]) || T[ab] || [ab, "#444444", "#999999"]; }
+  function ballSvg(c1, c2, cls){
+    return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 28 16" aria-hidden="true"><path d="M1.2 8C6 1 22 1 26.8 8C22 15 6 15 1.2 8Z" fill="' + c1 + '" stroke="' + c2 + '" stroke-width="1.6"/>' +
+      '<path d="M3.6 5.2Q4.8 8 3.6 10.8M24.4 5.2Q23.2 8 24.4 10.8" fill="none" stroke="#fff" stroke-width="1.1" stroke-opacity=".85"/>' +
+      '<path d="M9 8H19M10.8 6.4V9.6M12.9 6.4V9.6M15.1 6.4V9.6M17.2 6.4V9.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  }
+  function team(ab, cls){
+    var t = col(ab), sc = g.score && g.score[ab] != null ? g.score[ab] : "–";
+    return '<span class="sg-tm ' + cls + '" title="' + esc(t[0]) + (g.poss === ab && g.status === "inprogress" ? ' — has the ball' : '') + '">' + ballSvg(t[1], t[2], "sg-ball") + '<span class="sg-ab">' + esc(ab) + '</span><span class="sg-sc">' + esc(sc) + '</span></span>';
+  }
+  /* Ball spot as a field position: 0 = away goal line (left), 100 = home goal line (right). "SEA 45" = that team's own 45; "50" = midfield. */
+  function spotX(){
+    var m = /^\s*([A-Z]{2,3})?\s*(\d{1,2})\s*$/.exec(g.spot || ""); if(!m) return null;
+    var n = +m[2]; if(n < 0 || n > 50) return null;
+    if(!m[1] || n === 50) return 50;
+    if(m[1] === g.away) return n;
+    if(m[1] === g.home) return 100 - n;
+    return null;
+  }
+  function field(live){
+    var off = live && (g.poss === g.away || g.poss === g.home) ? g.poss : "", def = off ? (off === g.away ? g.home : g.away) : "";
+    /* Offense drives toward the end zone it attacks: away offense heads right, home offense heads left. That end zone takes the offense's colors. */
+    var left, right, offSide = "";
+    if(off){ if(off === g.home){ left = off; right = def; offSide = "l"; } else { right = off; left = def; offSide = "r"; } }
+    else { left = g.home; right = g.away; }  /* same layout as during play: home colors on the left (away goal), away colors on the right */
+    var cl = col(left), cr = col(right);
+    var h = '<span class="sg-bg sg-yd"></span>' +
+      '<span class="sg-bg sg-ez l' + (offSide === "l" ? ' off' : '') + '" style="--ez1:' + cl[1] + ';--ez2:' + cl[2] + '"></span>' +
+      '<span class="sg-bg sg-ez r' + (offSide === "r" ? ' off' : '') + '" style="--ez1:' + cr[1] + ';--ez2:' + cr[2] + '"></span>';
+    var x = off ? spotX() : null;
+    if(x != null){
+      var left = "calc(3% + " + (x * 0.94).toFixed(2) + "%)", c = col(off);
+      if(offSide === "l" ? x <= 20 : x >= 80) h += '<span class="sg-bg sg-rz ' + offSide + '"></span>';
+      /* Last-play bar: from where the ball was snapped to where it is now, in the direction of travel. */
+      var yds = g.lp && g.lp.team === off ? +g.lp.yds : 0, gainTxt = "";
+      if(yds && !isNaN(yds)){
+        var dir = offSide === "r" ? 1 : -1, from = Math.max(0, Math.min(100, x - dir * yds)), lo = Math.min(from, x), w = Math.abs(x - from);
+        if(w > 0){
+          h += '<span class="sg-bg sg-gain' + (yds < 0 ? ' loss' : '') + '" style="left:calc(3% + ' + (lo * 0.94).toFixed(2) + '%);width:' + (w * 0.94).toFixed(2) + '%"></span>';
+          gainTxt = '<span class="yd">' + (yds > 0 ? "+" : "") + yds + '</span>';
+        }
+      }
+      /* First-down line: the line to gain, "& Goal" means the goal line itself (no separate line). */
+      var dm = /&\s*(\d+)/.exec(g.dd || "");
+      if(dm){
+        var fx = x + (offSide === "r" ? 1 : -1) * (+dm[1]);
+        if(fx > 0 && fx < 100) h += '<span class="sg-bg sg-fd ' + offSide + '" style="left:calc(3% + ' + (fx * 0.94).toFixed(2) + '%)" title="First-down line"></span>';
+      }
+      h += '<span class="sg-bg sg-los" style="left:' + left + '"></span>' +
+        '<span class="sg-bg sg-pos ' + (offSide === "l" ? "to-l" : "to-r") + '" style="left:' + left + '">' + ballSvg(c[1], c[2]) + '<span class="ar">' + (offSide === "l" ? "◀" : "▶") + '</span>' + gainTxt + '</span>';
+    }
+    return h;
+  }
+  /* One-line game summary for the final: a headline the refresh wrote, else one built from the score and records. */
+  function headline(){
+    if(g.headline) return g.headline;
+    var sea = "ORE", opp = g.away === sea ? g.home : g.away, ss = g.score ? +g.score[sea] : NaN, os = g.score ? +g.score[opp] : NaN;
+    if(isNaN(ss) || isNaN(os)) return "";
+    var on = "the " + col(opp)[0], ot = /ot/i.test(g.detail || "") ? " in overtime" : "", rec = g.rec && g.rec[sea] ? g.rec[sea].replace("-", "\u2013") : "";
+    var hi = Math.max(ss, os), lo = Math.min(ss, os), sc = hi + "\u2013" + lo;
+    if(ss > os) return "Ducks beat " + on + " " + sc + ot + (rec ? ", improve to " + rec : "");
+    if(ss < os) return "Ducks fall to " + on + " " + sc + ot + (rec ? ", drop to " + rec : "");
+    return "Ducks and " + on + " tie " + sc + ot + (rec ? ", now " + rec : "");
+  }
+  function render(){
+    if(!inWindow()){ el.hidden = true; el.innerHTML = ""; return false; }
+    var live = g.status === "inprogress", fin = g.status === "closed" || g.status === "complete";
+    el.classList.toggle("final", fin);
+    var a = g.score ? +g.score[g.away] : NaN, h = g.score ? +g.score[g.home] : NaN, ca = "", ch = "";
+    if(fin && !isNaN(a) && !isNaN(h) && a !== h){ ca = a > h ? "win" : "lose"; ch = h > a ? "win" : "lose"; }
+    if(live && g.poss === g.away) ca += " has"; if(live && g.poss === g.home) ch += " has";
+    var st = live ? (g.detail || "Live") : fin ? (/final/i.test(g.detail || "") ? g.detail : "Final") : (g.detail || "Kickoff");
+    var day = new Date(Date.parse(g.start)).toLocaleDateString("en-US",{timeZone:"America/Denver",weekday:"short",month:"short",day:"numeric"});
+    el.href = g.espn ? "https://www.espn.com/college-football/game/_/gameId/" + encodeURIComponent(g.espn) : TEAM_URL;
+    var ta = col(g.away)[0], th = col(g.home)[0];
+    el.setAttribute("aria-label", ta + " " + (g.score ? g.score[g.away] : "") + " at " + th + " " + (g.score ? g.score[g.home] : "") + ", " + st +
+      (live && g.poss ? ", " + col(g.poss)[0] + " ball" + (g.dd ? ", " + g.dd : "") + (g.spot ? " at the " + g.spot : "") + (g.lp && g.lp.team === g.poss && +g.lp.yds ? ", last play " + (g.lp.yds > 0 ? "+" : "") + g.lp.yds + " yards" : "") : "") + ". Open the game on ESPN.");
+    if(fin){
+      var hl = headline();
+      el.setAttribute("aria-label", "Final: " + ta + " " + (g.score ? g.score[g.away] : "") + ", " + th + " " + (g.score ? g.score[g.home] : "") + (hl ? ". " + hl : "") + ". Open the game on ESPN.");
+      el.innerHTML = field(false) + '<span class="sg-fin">' + esc(/ot/i.test(g.detail || "") ? "Final/OT" : "Final") + '</span>' +
+        '<span class="sg-board">' + team(g.away, ca) + '<span class="sg-at">at</span>' + team(g.home, ch) + '</span>' +
+        '<span class="sg-hl" title="' + esc(hl) + '">' + esc(hl) + '</span>' + '<span class="sg-go"><b>ESPN </b>\u2197</span>';
+      el.hidden = false;
+      return false;
+    }
+    el.innerHTML = field(live) +
+      '<span class="sg-lbl" title="' + esc(live && g.play ? g.play : [g.title, g.tv, day].filter(Boolean).join(" · ")) + '"><span class="sg-t">Ducks</span>' +
+        (live && g.play ? '<span class="sg-play">' + esc(g.play) + '</span>' : '<span class="sg-meta">' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</span>') + '</span>' +
+      '<span class="sg-board">' + team(g.away, ca) + '<span class="sg-at">at</span>' + team(g.home, ch) + '</span>' +
+      '<span class="sg-st' + (live ? ' live' : '') + '">' + esc(st) + (live && g.dd ? '<span class="sg-dd"> · ' + esc(g.dd) + '</span>' : '') + '</span>' +
+      '<span class="sg-go"><b>ESPN </b>↗</span>';
+    el.hidden = false;
+    return live;
+  }
+  /* Feed one scoreboard reading: state pre|in|post, ESPN short detail, abbreviations, scores, ESPN game id, possession abbreviation, spot ("SEA 45") and down & distance. */
+  /* Last scrimmage play {team, yds, type}. Timeouts, kicks and other non-snaps don't replace it, so the bar survives a timeout. */
+  function keepPlay(r){
+    var snap = r.lpTeam && r.lpType && !/timeout|kick|punt|field goal|extra point|two-minute|end of|end period|coin|official/i.test(r.lpType);
+    if(snap) return {team: r.lpTeam, yds: +r.lpYds || 0, type: r.lpType};
+    if(/kick|punt|field goal|extra point/i.test(r.lpType || "")) return null;
+    return g && g.lp && g.lp.team === r.poss ? g.lp : null;
+  }
+  window.wsjOreUpdate = function(r){
+    if(!r || !r.away || !r.home || (r.away !== "ORE" && r.home !== "ORE")) return;
+    if(r.start && g && g.start && Date.parse(r.start) < Date.parse(g.start) - 6*3600000) return;
+    var same = g && g.away === r.away && g.home === r.home;
+    var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
+    g = {id: same ? g.id : "", espn: r.espn || (same ? g.espn : ""), start: r.start || g.start, away: r.away, home: r.home, title: same ? g.title : "", tv: same ? g.tv : "",
+         status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: /end of half|halftime/i.test(r.lpType || "") ? "Halftime" : (r.detail || ""), score: sc,
+         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", rec: r.awayRec || r.homeRec ? (function(){ var o = {}; if(r.awayRec) o[r.away] = r.awayRec; if(r.homeRec) o[r.home] = r.homeRec; return o; })() : (same ? g.rec : null), headline: same ? g.headline : "", col: r.col || (same && g.col) || null, lp: keepPlay(r), play: (r.lpText || "").replace(/^\s*(\([^)]*\)\s*)+/, "").replace(/\s+/g, " ").trim() || (same && g.play) || "", asof: new Date().toISOString()};
+    try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
+    if(!render() && timer){ clearInterval(timer); timer = null; }
+  };
+  var live = render();
+  /* Inside claude.ai: poll ESPN's public scoreboard through the Composio connector every 30 seconds while the game is live. */
+  var CMD = "python3 - <<'P'\n" +
+    "import urllib.request,json\n" +
+    "j=json.load(urllib.request.urlopen(urllib.request.Request('https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300',headers={'User-Agent':'Mozilla/5.0'}),timeout=20))\n" +
+    "for e in j.get('events',[]):\n" +
+    "  c=e['competitions'][0];t={x['homeAway']:x for x in c['competitors']}\n" +
+    "  if 'ORE' not in [x['team']['abbreviation'] for x in c['competitors']]: continue\n" +
+    "  for x in c['competitors']: print('c|'+x['team']['abbreviation']+'|'+str(x['team'].get('name') or x['team'].get('shortDisplayName',''))+'|'+str(x['team'].get('color') or '444444')+'|'+str(x['team'].get('alternateColor') or '999999'))\n" +
+    "  ids={x['team']['id']:x['team']['abbreviation'] for x in c['competitors']};si=c.get('situation') or {}\n" +
+    "  s=c['status'];lp=si.get('lastPlay') or {};lt=ids.get(str((lp.get('team') or {}).get('id','')),'')\n" +
+    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/')+'|'+str(((t['away'].get('records') or [{}])[0]).get('summary',''))+'|'+str(((t['home'].get('records') or [{}])[0]).get('summary',''))+'|'+' '.join(str(lp.get('text','')).replace('|','/').split()))\n" +
+    "P";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  if(!live || !(window.claude && window.claude.use)) return;
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp) return;
+    var busy = false;
+    function poll(){
+      if(document.hidden || busy) return;
+      busy = true;
+      mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+        var colm = {};
+        stdoutOf(r).split("\n").forEach(function(L){
+          var f = L.split("|"); if(f[0] === "c" && f.length >= 5){ colm[f[1]] = [f[2], "#" + f[3], "#" + f[4]]; return; }
+          if(f[0] !== "g" || f.length < 8) return;
+          window.wsjOreUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || "", awayRec: f[15] || "", homeRec: f[16] || "", lpText: f.slice(17).join("|") || "", col: colm});
+        });
+      }, function(e){ if(e && {not_granted:1, capability_disabled:1, capability_removed:1, user_changed:1}[e.code] && timer){ clearInterval(timer); timer = null; } }).then(function(){ busy = false; });
+    }
+    poll(); timer = setInterval(poll, 30000);
+    document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); });
+  }, function(){});
+})();
+</script>
+<script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
   var REFRESH = 5*60000, BANNER = ["ogden","jp","wildcat"];
@@ -1922,6 +2098,35 @@ body::before{display:none;}
           lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || "",
           lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || "",
           awayRec: (t.away.records && t.away.records[0] && t.away.records[0].summary) || "", homeRec: (t.home.records && t.home.records[0] && t.home.records[0].summary) || ""});
+      });
+      if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
+    }).catch(function(){});
+  }
+  if(el.querySelector(".sg-st.live")){ poll(); timer = setInterval(poll, 30000); document.addEventListener("visibilitychange", function(){ if(!document.hidden && timer) poll(); }); }
+})();
+/* Public site: live Oregon Ducks score straight from ESPN's public college scoreboard, every 30 seconds while the Ducks strip shows a live game. */
+(function(){
+  var el = document.getElementById("ore-game");
+  if(!el || !window.wsjOreUpdate) return;
+  var timer = null;
+  function poll(){
+    if(document.hidden) return;
+    fetch("https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300", {cache:"no-store"}).then(function(r){ return r.json(); }).then(function(j){
+      (j.events || []).forEach(function(e){
+        var c = e.competitions && e.competitions[0]; if(!c) return;
+        var t = {}; (c.competitors || []).forEach(function(x){ t[x.homeAway] = x; });
+        if(!t.home || !t.away || (t.home.team.abbreviation !== "ORE" && t.away.team.abbreviation !== "ORE")) return;
+        window.wsjOreUpdate({start: e.date, state: c.status.type.state, detail: c.status.type.shortDetail || "",
+          away: t.away.team.abbreviation, awayScore: t.away.score == null ? "" : String(t.away.score),
+          home: t.home.team.abbreviation, homeScore: t.home.score == null ? "" : String(t.home.score), espn: e.id ? String(e.id) : "",
+          poss: (function(){ var si = c.situation || {}, id = String(si.possession || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
+          spot: (c.situation && c.situation.possessionText) || "", dd: (c.situation && c.situation.shortDownDistanceText) || "",
+          lpTeam: (function(){ var lp = (c.situation && c.situation.lastPlay) || {}, id = String((lp.team && lp.team.id) || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
+          lpYds: c.situation && c.situation.lastPlay && c.situation.lastPlay.statYardage != null ? String(c.situation.lastPlay.statYardage) : "",
+          lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || "",
+          lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || "",
+          awayRec: (t.away.records && t.away.records[0] && t.away.records[0].summary) || "", homeRec: (t.home.records && t.home.records[0] && t.home.records[0].summary) || "",
+          col: (function(){ var o = {}; [t.away, t.home].forEach(function(x){ var tm = x.team; o[tm.abbreviation] = [tm.name || tm.shortDisplayName || tm.abbreviation, "#" + (tm.color || "444444"), "#" + (tm.alternateColor || "999999")]; }); return o; })()});
       });
       if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
     }).catch(function(){});
@@ -1994,9 +2199,13 @@ body::before{display:none;}
   var VIEWS = {sb: {c: [41.18, -111.81], z: 9, fc: [41.2160, -111.8569], fcName: "Snowbasin", alt: "Mountain Green and Snowbasin"},
                dv: {c: [40.630, -111.495], z: 10, fc: [40.6375, -111.4783], fcName: "Deer Valley", alt: "Deer Valley Resort"}};
   var view = "sb"; try{ var vv = localStorage.getItem("wsj-radar-view"); if(VIEWS[vv]) view = vv; }catch(e){}
+  /* Linked to the header cam switch (Oct 25, 2026): the radar starts on, and follows, the header's SB / DV choice. */
+  try{ var hc = localStorage.getItem("wsj-head-cam"); if(VIEWS[hc]) view = hc; }catch(e){}
   var pick = document.getElementById("radar-view"); if(pick) pick.value = view;
   function V(){ return VIEWS[view]; }
   function setView(v){ view = VIEWS[v] ? v : "sb"; try{ localStorage.setItem("wsj-radar-view", view); }catch(e){} }
+  document.addEventListener("wsj-cam", function(e){ var v = e.detail; if(!VIEWS[v] || !pick || pick.value === v) return; pick.value = v; setView(v); pick.dispatchEvent(new Event("change")); });
+  if(pick) pick.addEventListener("change", function(){ document.dispatchEvent(new CustomEvent("wsj-radar", {detail: pick.value})); });
   function hm(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
   function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
 
@@ -2287,7 +2496,7 @@ body::before{display:none;}
     mode = m === "dv" ? "dv" : "sb";
     root.classList.toggle("cam-dv", mode === "dv");
     sw.querySelectorAll("button[data-cam]").forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
-    if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} }
+    if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
     if(play){ play.href = mode === "dv" ? WATCH : playHref; play.title = mode === "dv" ? "Watch Deer Valley's Hoodoo Express cam live on YouTube" : playTitle; }
     if(mode === "dv"){
       root.classList.add("has-banner");
@@ -2310,6 +2519,8 @@ body::before{display:none;}
   }
   sw.addEventListener("click", function(e){ var t = e.target.closest ? e.target.closest("button[data-cam]") : null; if(t) set(t.getAttribute("data-cam"), true); });
   window.addEventListener("resize", fit);
+  /* Linked to the radar location menu: choosing Deer Valley (or Snowbasin) there switches the header too. */
+  document.addEventListener("wsj-radar", function(e){ var v = e.detail === "dv" ? "dv" : "sb"; if(v !== mode) set(v, true); });
   var start = "sb"; try{ if(localStorage.getItem(KEY) === "dv") start = "dv"; }catch(e){}
   if(inClaude){
     window.claude.use("mcp").then(function(m){ mcp = m || null; if(mode === "dv") fetchFrame(); }, function(){});

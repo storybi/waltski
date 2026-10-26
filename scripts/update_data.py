@@ -12,6 +12,7 @@ free public sources:
   * SpaceX chart  (SX_ASOF, SX_SERIES)                       Yahoo Finance (SPCX)
   * Weather       (WX, which also drives the mini weather bar) National Weather Service API
   * Seahawks game strip (SEA_GAME)                           ESPN public scoreboard
+  * Oregon Ducks game strip (ORE_GAME)                        ESPN public college scoreboard
   * Snowbasin cam snapshots (SNAP, SNAP_AT)                  the cam hosts themselves
 
 Everything written by Claude (stories, briefs, devotions, snow outlook, badges, deals) is left alone.
@@ -434,28 +435,43 @@ def do_weather(s, now_mt):
 
 
 # ------------------------------------------------------------------------------------------- Seahawks
+NFL_SB = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+NCAAF_SB = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300"
+
+
 def do_seahawks(s, now_mt):
-    raw = get_var(s, "SEA_GAME")
+    return do_game(s, now_mt, "SEA_GAME", "SEA", NFL_SB, "seahawks", False)
+
+
+def do_ducks(s, now_mt):
+    """Oregon Ducks strip (added Oct 25, 2026): same as the Seahawks, from ESPN's college scoreboard, with team colors."""
+    if "ORE_GAME" not in s:
+        return s
+    return do_game(s, now_mt, "ORE_GAME", "ORE", NCAAF_SB, "ducks", True)
+
+
+def do_game(s, now_mt, var, abbr, url, name, colors):
+    raw = get_var(s, var)
     try:
         g = json.loads(raw) if raw else {}
     except Exception:  # noqa: BLE001
         g = {}
     try:
-        j = get("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard")
+        j = get(url)
     except Exception as e:  # noqa: BLE001
-        log("  seahawks failed:", e)
+        log("  %s failed:" % name, e)
         return s
     for e in j.get("events", []):
         c = e["competitions"][0]
         t = {x["homeAway"]: x for x in c["competitors"]}
-        if "SEA" not in (t["home"]["team"]["abbreviation"], t["away"]["team"]["abbreviation"]):
+        if abbr not in (t["home"]["team"]["abbreviation"], t["away"]["team"]["abbreviation"]):
             continue
         state = c["status"]["type"]["state"]
         start = e["date"]
         if len(start) == 17:
             start = start[:-1] + ":00Z"
         if state == "pre":
-            log("  seahawks: next game not started, strip left as is")
+            log("  %s: next game not started, strip left as is" % name)
             return s
         if g.get("start") and start < g["start"] and g.get("status") == "closed":
             return s
@@ -496,10 +512,14 @@ def do_seahawks(s, now_mt):
             "rec": rec or None,
             "asof": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
-        s, _ = set_var(s, "SEA_GAME", json.dumps(new, ensure_ascii=False, separators=(",", ":")))
-        log("  seahawks:", new["away"], new["score"][new["away"]], "at", new["home"], new["score"][new["home"]], new["detail"])
+        if colors:
+            new["col"] = {x["team"]["abbreviation"]: [x["team"].get("name") or x["team"].get("shortDisplayName") or x["team"]["abbreviation"],
+                                                      "#" + (x["team"].get("color") or "444444"), "#" + (x["team"].get("alternateColor") or "999999")]
+                          for x in c["competitors"]}
+        s, _ = set_var(s, var, json.dumps(new, ensure_ascii=False, separators=(",", ":")))
+        log("  %s:" % name, new["away"], new["score"][new["away"]], "at", new["home"], new["score"][new["home"]], new["detail"])
         return s
-    log("  seahawks: no game this week")
+    log("  %s: no game this week" % name)
     return s
 
 
@@ -536,7 +556,7 @@ def main():
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_cams):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_cams):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
