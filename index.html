@@ -242,7 +242,7 @@ td.indicator .sub.chg{font-family:var(--font-mono);}
 
 /* Daily Word (large) */
 #daily-word{margin-bottom:28px;}
-#daily-word .section-head{margin-top:4px;}
+#daily-word .section-head{margin-top:38px;}
 .word-lg{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:10px; overflow:hidden;}
 @media (max-width:760px){ .word-lg{grid-template-columns:1fr;} .word-lg .wl-verses{border-left:0; border-top:1px solid var(--border);} }
 .word-lg > div{padding:22px 24px;}
@@ -657,7 +657,7 @@ body::before{display:none;}
 
   <div class="wt-mast wt-mast-2">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#daily-word">Morning Devotion</a><a href="#snow">Snow</a><a href="#stories">Top Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a>
+      <a href="#snow">Snow</a><a href="#daily-word">Morning Devotion</a><a href="#stories">Top Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a>
     </nav>
   </div>
 
@@ -687,6 +687,38 @@ body::before{display:none;}
   </div>
   </div>
   <div id="wt-dock-end" aria-hidden="true"></div>
+
+  <!-- ================= SNOW DESK ================= -->
+  <section id="snow">
+    <div class="section-head"><h2>Mountain West Snow Watch</h2><div class="line"></div></div>
+    <div class="section-sub">What the forecast models are saying about snow for the Wasatch and the wider Rockies.</div>
+    <div class="snow-grid">
+      <div class="snow-card">
+        <div class="when-row"><div class="when">This week · Oct 26–Nov 1</div><span class="fx mix">Mixed</span></div>
+        <h3>Quiet start, then a wetter, colder turn by the weekend</h3>
+        <p>NWS Salt Lake City keeps Morgan mostly sunny through Thursday apart from a quick round of valley rain late Monday night. Rain and a few thunderstorms move in Friday into Saturday, turning to a rain-snow mix Saturday night and Sunday. OpenSnow shows 0" at Snowbasin through Thursday and about 4" for Oct 30–Nov 3, with stronger, colder storms possible in early November.</p>
+        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://opensnow.com/location/snowbasin/snow-summary" target="_blank" rel="noopener">OpenSnow Snowbasin</a></div>
+      </div>
+      <div class="snow-card">
+        <div class="when-row"><div class="when">Recap · Oct 22–25</div><span class="fx mix">Mixed</span></div>
+        <h3>Second storm of the season drops a few more inches up high</h3>
+        <p>A soaking round of rain and mountain snow moved through Thursday night into Friday — on top of the season's first real snow from Tropical Storm Rachel's remnants Oct 12–15, which buried Little Cottonwood Canyon (18 inches at Snowbird, 16 at Alta) while leaving northern Utah resorts comparatively bare. This week's round added 2–6 inches above 9,000 feet in the Wasatch and Uintas before clearing. October has been wet, but most of the water soaked into the ground: no Wasatch SNOTEL site holds more than an inch of snow-water equivalent.</p>
+        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://www.kpcw.org/ski-resorts/2026-10-14/tropical-storm-rachel-dumped-more-than-a-foot-of-snow-on-parts-of-utah-left-others-bare" target="_blank" rel="noopener">KPCW</a> · <a href="https://wasatchweatherweenies.blogspot.com/" target="_blank" rel="noopener">Wasatch Weather Weenies</a></div>
+      </div>
+      <div class="snow-card">
+        <div class="when-row"><div class="when">8–14 days · Nov 1–7</div><span class="fx mix">Mixed</span></div>
+        <h3>No clear storm signal yet for the Rockies</h3>
+        <p>NOAA's Climate Prediction Center's newest 8–14 day guidance (valid Nov 6–12) leans above-normal temperatures and below-normal precipitation across most of the West, with no specific heavy-snow call for Utah. That's consistent with — not a contradiction of — the pattern that brought a Halloween-week storm mainly to the southern Rockies and Sierra; the picture should sharpen as the window gets closer.</p>
+        <div class="src">Source: <a href="https://www.cpc.ncep.noaa.gov/products/predictions/814day/index.php" target="_blank" rel="noopener">NOAA CPC 8–14 Day Outlook</a></div>
+      </div>
+      <div class="snow-card">
+        <div class="when-row"><div class="when">Season · Winter 2026–27</div><span class="fx fav">Favorable</span></div>
+        <h3>Super El Niño favors a big Wasatch winter — mostly Jan–Mar</h3>
+        <p>With a potentially record El Niño building and the ECMWF seasonal model locked onto it, OpenSnow favors above-normal snow for the Wasatch, including Snowbasin and Park City, with the best odds January–March and no clear early-season signal. Northern Utah may run warm with occasional high snow levels. Colorado's south and east are favored in Nov–Dec and spring.</p>
+        <div class="src">Sources: <a href="https://opensnow.com/news/post/2026-2027-winter-forecast-preview" target="_blank" rel="noopener">OpenSnow winter preview</a> · <a href="https://www.severe-weather.eu/long-range-2/winter-2026-2027-snow-forecast-october-update-snowfall-explorer-super-el-nino-ski-season-united-states-canada-europe-fa/" target="_blank" rel="noopener">Severe Weather Europe</a></div>
+      </div>
+    </div>
+  </section>
 
   <!-- ================= DAILY WORD ================= -->
   <section id="daily-word">
@@ -721,38 +753,6 @@ body::before{display:none;}
   </section>
 
 
-
-  <!-- ================= SNOW DESK ================= -->
-  <section id="snow">
-    <div class="section-head"><h2>Mountain West Snow Watch</h2><div class="line"></div></div>
-    <div class="section-sub">What the forecast models are saying about snow for the Wasatch and the wider Rockies.</div>
-    <div class="snow-grid">
-      <div class="snow-card">
-        <div class="when-row"><div class="when">This week · Oct 26–Nov 1</div><span class="fx mix">Mixed</span></div>
-        <h3>Quiet start, then a wetter, colder turn by the weekend</h3>
-        <p>NWS Salt Lake City keeps Morgan mostly sunny through Thursday apart from a quick round of valley rain late Monday night. Rain and a few thunderstorms move in Friday into Saturday, turning to a rain-snow mix Saturday night and Sunday. OpenSnow shows 0" at Snowbasin through Thursday and about 4" for Oct 30–Nov 3, with stronger, colder storms possible in early November.</p>
-        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://opensnow.com/location/snowbasin/snow-summary" target="_blank" rel="noopener">OpenSnow Snowbasin</a></div>
-      </div>
-      <div class="snow-card">
-        <div class="when-row"><div class="when">Recap · Oct 22–25</div><span class="fx mix">Mixed</span></div>
-        <h3>Second storm of the season drops a few more inches up high</h3>
-        <p>A soaking round of rain and mountain snow moved through Thursday night into Friday — on top of the season's first real snow from Tropical Storm Rachel's remnants Oct 12–15, which buried Little Cottonwood Canyon (18 inches at Snowbird, 16 at Alta) while leaving northern Utah resorts comparatively bare. This week's round added 2–6 inches above 9,000 feet in the Wasatch and Uintas before clearing. October has been wet, but most of the water soaked into the ground: no Wasatch SNOTEL site holds more than an inch of snow-water equivalent.</p>
-        <div class="src">Sources: <a href="https://forecast.weather.gov/MapClick.php?lat=41.0361&amp;lon=-111.6769" target="_blank" rel="noopener">NWS Salt Lake City</a> · <a href="https://www.kpcw.org/ski-resorts/2026-10-14/tropical-storm-rachel-dumped-more-than-a-foot-of-snow-on-parts-of-utah-left-others-bare" target="_blank" rel="noopener">KPCW</a> · <a href="https://wasatchweatherweenies.blogspot.com/" target="_blank" rel="noopener">Wasatch Weather Weenies</a></div>
-      </div>
-      <div class="snow-card">
-        <div class="when-row"><div class="when">8–14 days · Nov 1–7</div><span class="fx mix">Mixed</span></div>
-        <h3>No clear storm signal yet for the Rockies</h3>
-        <p>NOAA's Climate Prediction Center's newest 8–14 day guidance (valid Nov 6–12) leans above-normal temperatures and below-normal precipitation across most of the West, with no specific heavy-snow call for Utah. That's consistent with — not a contradiction of — the pattern that brought a Halloween-week storm mainly to the southern Rockies and Sierra; the picture should sharpen as the window gets closer.</p>
-        <div class="src">Source: <a href="https://www.cpc.ncep.noaa.gov/products/predictions/814day/index.php" target="_blank" rel="noopener">NOAA CPC 8–14 Day Outlook</a></div>
-      </div>
-      <div class="snow-card">
-        <div class="when-row"><div class="when">Season · Winter 2026–27</div><span class="fx fav">Favorable</span></div>
-        <h3>Super El Niño favors a big Wasatch winter — mostly Jan–Mar</h3>
-        <p>With a potentially record El Niño building and the ECMWF seasonal model locked onto it, OpenSnow favors above-normal snow for the Wasatch, including Snowbasin and Park City, with the best odds January–March and no clear early-season signal. Northern Utah may run warm with occasional high snow levels. Colorado's south and east are favored in Nov–Dec and spring.</p>
-        <div class="src">Sources: <a href="https://opensnow.com/news/post/2026-2027-winter-forecast-preview" target="_blank" rel="noopener">OpenSnow winter preview</a> · <a href="https://www.severe-weather.eu/long-range-2/winter-2026-2027-snow-forecast-october-update-snowfall-explorer-super-el-nino-ski-season-united-states-canada-europe-fa/" target="_blank" rel="noopener">Severe Weather Europe</a></div>
-      </div>
-    </div>
-  </section>
 
   <!-- ================= TOP STORIES ================= -->
   <section id="stories">
