@@ -777,6 +777,14 @@ a.wt-dv-watch{text-decoration:none;}
 #snow .cam .ph{font-size:9.5px; padding:3px; line-height:1.2;}
 @media (max-width:640px){ #snow .cams{gap:3px;} #snow .cam figcaption{font-size:9px;} #snow .cam-tag{display:none;} #snow .cam .ph{font-size:0;} #snow .cam .ph::after{content:"\2197"; font-size:12px;} }
 </style>
+<style>
+/* Taller header photo (Mark, Oct 26, 2026): extra space at the bottom of the header area, so more of the picture shows */
+#wt-head-end{height:clamp(90px,16vw,200px);}
+/* Cams under the radar show only the selected resort (SB / DV / SV in the header or the radar menu) */
+#snow .dv-cams, #snow .sv-cams{display:none;}
+html.cam-dv #snow .dv-cams, html.cam-sv #snow .sv-cams{display:block;}
+html.cam-dv #snow .wx-cams:not(.dv-cams), html.cam-sv #snow .wx-cams:not(.sv-cams){display:none;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
