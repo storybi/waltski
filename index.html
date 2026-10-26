@@ -624,7 +624,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
 
   <div class="wt-mast wt-mast-2">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#daily-word">Morning Devotion</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#stories">Top Stories</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#snow">Snow</a>
+      <a href="#daily-word">Morning Devotion</a><a href="#stories">Top Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude Tips</a><a href="#ai-business">AI in Business</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#snow">Snow</a>
     </nav>
   </div>
 
@@ -679,85 +679,6 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     </div>
   </section>
 
-
-  <!-- ================= MARKETS ================= -->
-  <section id="markets">
-    <div class="section-head"><h2>Markets</h2><div class="line"></div></div>
-    <div class="section-sub" id="mkt-sub">Major US indexes — change over 1, 3, 6 and 12 months, over a shaded one-year chart (green = up for the year, red = down).</div>
-    <div class="mkt-grid" id="mkt"></div>
-  </section>
-
-  <!-- ================= SPACEX ================= -->
-  <section id="spacex">
-    <div class="section-head"><h2>SpaceX</h2><div class="line"></div></div>
-    <div class="section-sub">One-year performance and the latest headline. SpaceX listed on Nasdaq on June 12, 2026, so the chart runs from its IPO.</div>
-    <div class="sx-grid">
-      <div class="sx-chart">
-        <div class="sx-top">
-          <h3>Space Exploration Technologies<span class="sym">NASDAQ: SPCX</span></h3>
-          <span class="sx-px" id="sx-px"></span>
-          <div class="sx-stats" id="sx-stats"></div>
-        </div>
-        <svg class="sx-svg" id="sx-svg" viewBox="0 0 720 260" role="img" aria-label="SpaceX daily closing price since its June 12, 2026 IPO"></svg>
-        <div class="sx-note" id="sx-note"></div>
-      </div>
-      <aside class="sx-news">
-        <div class="lbl-row"><div class="lbl">Latest headline</div><span class="fx mix">Mixed</span></div>
-        <h3><a href="https://techcrunch.com/2026/10/20/spacex-and-tesla-boards-form-special-committees-to-review-merger/" target="_blank" rel="noopener">SpaceX and Tesla Boards Form Special Committees to Weigh a Merger</a></h3>
-        <p>Musk told SpaceX's Q3 call that holders of both companies asked for independent board committees — seven at Tesla, six at SpaceX — to study combining the companies around shared bets on AI software, robotics, and the Starmind and Terafab projects. Shares spiked as much as 8% on the news and ran to $159.31 by Wednesday, then gave back most of the move as investors weighed Tesla's tougher all-shareholder approval threshold against Musk's majority SpaceX vote; shares closed Friday at $147.49, up 1.9% on the day.</p>
-        <div class="src">TechCrunch · Oct 20, 2026</div>
-        <a class="more" href="https://techcrunch.com/2026/10/20/spacex-and-tesla-boards-form-special-committees-to-review-merger/" target="_blank" rel="noopener">Read the story →</a>
-      </aside>
-    </div>
-  </section>
-<script>
-/* SpaceX desk — refresh SX_SERIES (daily closes [date, close] for the trailing year or since IPO), SX_ASOF, SX_PREV and the headline above on every run. */
-(function(){
-  var SX_ASOF = "Close Fri, Oct 23, 2026";
-  var SX_IPO = {date:"2026-06-12", price:150.00};
-  var SX_SERIES = [["2026-06-12",160.95],["2026-06-15",192.5],["2026-06-16",201.8],["2026-06-17",191.82],["2026-06-18",185.0],["2026-06-22",154.6],["2026-06-23",156.11],["2026-06-24",154.54],["2026-06-25",153.0],["2026-06-26",153.23],["2026-06-29",164.19],["2026-06-30",170.86],["2026-07-01",157.54],["2026-07-02",162.0],["2026-07-06",160.42],["2026-07-07",149.47],["2026-07-08",148.3],["2026-07-09",152.16],["2026-07-10",145.3],["2026-07-13",139.14],["2026-07-14",136.08],["2026-07-15",135.27],["2026-07-16",131.11],["2026-07-17",123.99],["2026-07-20",119.85],["2026-07-21",123.54],["2026-07-22",115.26],["2026-07-23",118.24],["2026-07-24",115.07],["2026-07-27",113.5],["2026-07-28",116.41],["2026-07-29",112.55],["2026-07-30",112.2],["2026-07-31",108.37],["2026-08-03",114.53],["2026-08-04",125.33],["2026-08-05",108.27],["2026-08-06",114.92],["2026-08-07",133.11],["2026-08-10",138.74],["2026-08-11",133.29],["2026-08-12",146.15],["2026-08-13",141.29],["2026-08-14",139.98],["2026-08-17",146.23],["2026-08-18",143.34],["2026-08-19",139.65],["2026-08-20",134.0],["2026-08-21",136.97],["2026-08-24",135.0],["2026-08-25",137.95],["2026-08-26",139.63],["2026-08-27",140.87],["2026-08-28",141.5],["2026-08-31",143.69],["2026-09-01",142.23],["2026-09-02",140.71],["2026-09-03",149.74],["2026-09-04",147.95],["2026-09-08",153.47],["2026-09-09",147.55],["2026-09-10",148.18],["2026-09-11",151.21],["2026-09-14",148.15],["2026-09-15",143.49],["2026-09-16",150.88],["2026-09-17",154.81],["2026-09-18",152.71],["2026-09-21",151.85],["2026-09-22",154.72],["2026-09-23",148.36],["2026-09-24",148.03],["2026-09-25",148.68],["2026-09-28",145.47],["2026-09-29",149.24],["2026-09-30",150.86],["2026-10-01",148.07],["2026-10-02",158.96],["2026-10-05",171.09],["2026-10-06",171.92],["2026-10-07",167.6],["2026-10-08",160.57],["2026-10-09",162.57],["2026-10-12",163.42],["2026-10-13",156.54],["2026-10-14",152.16],["2026-10-15",148.62],["2026-10-16",146.03],["2026-10-19",147.96],["2026-10-20",147.79],["2026-10-21",159.31],["2026-10-22",144.75],["2026-10-23",147.49]];
-  try{
-    var W=720,H=260,L=46,R=14,T=12,B=26, n=SX_SERIES.length;
-    var vals=SX_SERIES.map(function(r){return r[1];});
-    var lo=Math.min.apply(null,vals.concat([SX_IPO.price])), hi=Math.max.apply(null,vals.concat([SX_IPO.price]));
-    var pad=(hi-lo)*0.08; lo=Math.floor((lo-pad)/10)*10; hi=Math.ceil((hi+pad)/10)*10;
-    function x(i){ return L+(W-L-R)*i/(n-1); }
-    function y(v){ return T+(H-T-B)*(1-(v-lo)/(hi-lo)); }
-    var first=SX_SERIES[0][1], last=vals[n-1], prev=vals[n-2];
-    var startRef = (SX_SERIES[0][0]===SX_IPO.date) ? SX_IPO.price : first;
-    var chgP=(last/startRef-1)*100, cls=chgP>=0?'up':'down';
-    var g='<g class="grid">', ax='<g class="axis">', step=(hi-lo)>120?40:20;
-    for(var v=Math.ceil(lo/step)*step; v<=hi; v+=step){ g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/>'; ax+='<text x="'+(L-8)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end">$'+v+'</text>'; }
-    var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], lastM=-1;
-    SX_SERIES.forEach(function(r,i){ var m=+r[0].slice(5,7)-1; if(m!==lastM){ if(lastM!==-1||i===0){ ax+='<text x="'+x(i).toFixed(1)+'" y="'+(H-6)+'" text-anchor="'+(i===0?'start':'middle')+'">'+MON[m]+(i===0?' '+(+r[0].slice(8,10)):'')+'</text>'; } lastM=m; } });
-    g+='</g>'; ax+='</g>';
-    var pts=SX_SERIES.map(function(r,i){return x(i).toFixed(1)+','+y(r[1]).toFixed(1);});
-    var line='M'+pts.join(' L'), area=line+' L'+x(n-1).toFixed(1)+','+(H-B)+' L'+L+','+(H-B)+' Z';
-    var ipoY=y(SX_IPO.price).toFixed(1);
-    var svg=g+ax+'<line class="ipo" x1="'+L+'" x2="'+(W-R)+'" y1="'+ipoY+'" y2="'+ipoY+'"/><text class="ipo-l" x="'+x(Math.round((n-1)*0.42)).toFixed(1)+'" y="'+(+ipoY-5)+'" text-anchor="middle">IPO $'+SX_IPO.price.toFixed(0)+'</text>'+
-      '<g class="'+cls+'"><path class="ar" d="'+area+'"/><path class="ln" d="'+line+'"/><circle class="dot" cx="'+x(n-1).toFixed(1)+'" cy="'+y(last).toFixed(1)+'" r="3.5"/></g>';
-    document.getElementById('sx-svg').innerHTML=svg;
-    function f(v){return '$'+v.toFixed(2);}
-    function pc(p){return '<span class="'+(p>=0?'up':'down')+'">'+(p>=0?'▲ +':'▼ −')+Math.abs(p).toFixed(1)+'%</span>';}
-    var hiV=Math.max.apply(null,vals), loV=Math.min.apply(null,vals);
-    document.getElementById('sx-px').textContent=f(last);
-    document.getElementById('sx-stats').innerHTML='<span>Day '+pc((last/prev-1)*100)+'</span><span>Since IPO '+pc(chgP)+'</span><span>High <b>'+f(hiV)+'</b></span><span>Low <b>'+f(loV)+'</b></span>';
-    document.getElementById('sx-note').textContent=SX_ASOF+' · daily closes · dashed line = $'+SX_IPO.price.toFixed(0)+' IPO price · Source: Robinhood';
-  }catch(e){}
-})();
-</script>
-
-  <!-- ================= SUMMARY TABLE ================= -->
-  <section id="economy">
-    <div class="section-head"><h2>Indicator Summary</h2><div class="line"></div></div>
-    <div class="section-sub">Latest reading against the prior release and the same release one and two years earlier. Badges compare the latest reading with the prior release: <b style="color:var(--good)">▲ green = improved</b>, <b style="color:var(--bad)">▼ red = worsened</b>, gray = unchanged.</div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Indicator</th><th>Latest</th><th>Prior month</th><th>Prior year</th><th>Two years ago</th><th>Why it matters</th></tr></thead>
-        <tbody id="summary-body"></tbody>
-      </table>
-    </div>
-  </section>
 
   <!-- ================= TOP STORIES ================= -->
   <section id="stories">
@@ -856,6 +777,85 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
         </div>
       </a>
 
+    </div>
+  </section>
+
+  <!-- ================= MARKETS ================= -->
+  <section id="markets">
+    <div class="section-head"><h2>Markets</h2><div class="line"></div></div>
+    <div class="section-sub" id="mkt-sub">Major US indexes — change over 1, 3, 6 and 12 months, over a shaded one-year chart (green = up for the year, red = down).</div>
+    <div class="mkt-grid" id="mkt"></div>
+  </section>
+
+  <!-- ================= SPACEX ================= -->
+  <section id="spacex">
+    <div class="section-head"><h2>SpaceX</h2><div class="line"></div></div>
+    <div class="section-sub">One-year performance and the latest headline. SpaceX listed on Nasdaq on June 12, 2026, so the chart runs from its IPO.</div>
+    <div class="sx-grid">
+      <div class="sx-chart">
+        <div class="sx-top">
+          <h3>Space Exploration Technologies<span class="sym">NASDAQ: SPCX</span></h3>
+          <span class="sx-px" id="sx-px"></span>
+          <div class="sx-stats" id="sx-stats"></div>
+        </div>
+        <svg class="sx-svg" id="sx-svg" viewBox="0 0 720 260" role="img" aria-label="SpaceX daily closing price since its June 12, 2026 IPO"></svg>
+        <div class="sx-note" id="sx-note"></div>
+      </div>
+      <aside class="sx-news">
+        <div class="lbl-row"><div class="lbl">Latest headline</div><span class="fx mix">Mixed</span></div>
+        <h3><a href="https://techcrunch.com/2026/10/20/spacex-and-tesla-boards-form-special-committees-to-review-merger/" target="_blank" rel="noopener">SpaceX and Tesla Boards Form Special Committees to Weigh a Merger</a></h3>
+        <p>Musk told SpaceX's Q3 call that holders of both companies asked for independent board committees — seven at Tesla, six at SpaceX — to study combining the companies around shared bets on AI software, robotics, and the Starmind and Terafab projects. Shares spiked as much as 8% on the news and ran to $159.31 by Wednesday, then gave back most of the move as investors weighed Tesla's tougher all-shareholder approval threshold against Musk's majority SpaceX vote; shares closed Friday at $147.49, up 1.9% on the day.</p>
+        <div class="src">TechCrunch · Oct 20, 2026</div>
+        <a class="more" href="https://techcrunch.com/2026/10/20/spacex-and-tesla-boards-form-special-committees-to-review-merger/" target="_blank" rel="noopener">Read the story →</a>
+      </aside>
+    </div>
+  </section>
+<script>
+/* SpaceX desk — refresh SX_SERIES (daily closes [date, close] for the trailing year or since IPO), SX_ASOF, SX_PREV and the headline above on every run. */
+(function(){
+  var SX_ASOF = "Close Fri, Oct 23, 2026";
+  var SX_IPO = {date:"2026-06-12", price:150.00};
+  var SX_SERIES = [["2026-06-12",160.95],["2026-06-15",192.5],["2026-06-16",201.8],["2026-06-17",191.82],["2026-06-18",185.0],["2026-06-22",154.6],["2026-06-23",156.11],["2026-06-24",154.54],["2026-06-25",153.0],["2026-06-26",153.23],["2026-06-29",164.19],["2026-06-30",170.86],["2026-07-01",157.54],["2026-07-02",162.0],["2026-07-06",160.42],["2026-07-07",149.47],["2026-07-08",148.3],["2026-07-09",152.16],["2026-07-10",145.3],["2026-07-13",139.14],["2026-07-14",136.08],["2026-07-15",135.27],["2026-07-16",131.11],["2026-07-17",123.99],["2026-07-20",119.85],["2026-07-21",123.54],["2026-07-22",115.26],["2026-07-23",118.24],["2026-07-24",115.07],["2026-07-27",113.5],["2026-07-28",116.41],["2026-07-29",112.55],["2026-07-30",112.2],["2026-07-31",108.37],["2026-08-03",114.53],["2026-08-04",125.33],["2026-08-05",108.27],["2026-08-06",114.92],["2026-08-07",133.11],["2026-08-10",138.74],["2026-08-11",133.29],["2026-08-12",146.15],["2026-08-13",141.29],["2026-08-14",139.98],["2026-08-17",146.23],["2026-08-18",143.34],["2026-08-19",139.65],["2026-08-20",134.0],["2026-08-21",136.97],["2026-08-24",135.0],["2026-08-25",137.95],["2026-08-26",139.63],["2026-08-27",140.87],["2026-08-28",141.5],["2026-08-31",143.69],["2026-09-01",142.23],["2026-09-02",140.71],["2026-09-03",149.74],["2026-09-04",147.95],["2026-09-08",153.47],["2026-09-09",147.55],["2026-09-10",148.18],["2026-09-11",151.21],["2026-09-14",148.15],["2026-09-15",143.49],["2026-09-16",150.88],["2026-09-17",154.81],["2026-09-18",152.71],["2026-09-21",151.85],["2026-09-22",154.72],["2026-09-23",148.36],["2026-09-24",148.03],["2026-09-25",148.68],["2026-09-28",145.47],["2026-09-29",149.24],["2026-09-30",150.86],["2026-10-01",148.07],["2026-10-02",158.96],["2026-10-05",171.09],["2026-10-06",171.92],["2026-10-07",167.6],["2026-10-08",160.57],["2026-10-09",162.57],["2026-10-12",163.42],["2026-10-13",156.54],["2026-10-14",152.16],["2026-10-15",148.62],["2026-10-16",146.03],["2026-10-19",147.96],["2026-10-20",147.79],["2026-10-21",159.31],["2026-10-22",144.75],["2026-10-23",147.49]];
+  try{
+    var W=720,H=260,L=46,R=14,T=12,B=26, n=SX_SERIES.length;
+    var vals=SX_SERIES.map(function(r){return r[1];});
+    var lo=Math.min.apply(null,vals.concat([SX_IPO.price])), hi=Math.max.apply(null,vals.concat([SX_IPO.price]));
+    var pad=(hi-lo)*0.08; lo=Math.floor((lo-pad)/10)*10; hi=Math.ceil((hi+pad)/10)*10;
+    function x(i){ return L+(W-L-R)*i/(n-1); }
+    function y(v){ return T+(H-T-B)*(1-(v-lo)/(hi-lo)); }
+    var first=SX_SERIES[0][1], last=vals[n-1], prev=vals[n-2];
+    var startRef = (SX_SERIES[0][0]===SX_IPO.date) ? SX_IPO.price : first;
+    var chgP=(last/startRef-1)*100, cls=chgP>=0?'up':'down';
+    var g='<g class="grid">', ax='<g class="axis">', step=(hi-lo)>120?40:20;
+    for(var v=Math.ceil(lo/step)*step; v<=hi; v+=step){ g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/>'; ax+='<text x="'+(L-8)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end">$'+v+'</text>'; }
+    var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], lastM=-1;
+    SX_SERIES.forEach(function(r,i){ var m=+r[0].slice(5,7)-1; if(m!==lastM){ if(lastM!==-1||i===0){ ax+='<text x="'+x(i).toFixed(1)+'" y="'+(H-6)+'" text-anchor="'+(i===0?'start':'middle')+'">'+MON[m]+(i===0?' '+(+r[0].slice(8,10)):'')+'</text>'; } lastM=m; } });
+    g+='</g>'; ax+='</g>';
+    var pts=SX_SERIES.map(function(r,i){return x(i).toFixed(1)+','+y(r[1]).toFixed(1);});
+    var line='M'+pts.join(' L'), area=line+' L'+x(n-1).toFixed(1)+','+(H-B)+' L'+L+','+(H-B)+' Z';
+    var ipoY=y(SX_IPO.price).toFixed(1);
+    var svg=g+ax+'<line class="ipo" x1="'+L+'" x2="'+(W-R)+'" y1="'+ipoY+'" y2="'+ipoY+'"/><text class="ipo-l" x="'+x(Math.round((n-1)*0.42)).toFixed(1)+'" y="'+(+ipoY-5)+'" text-anchor="middle">IPO $'+SX_IPO.price.toFixed(0)+'</text>'+
+      '<g class="'+cls+'"><path class="ar" d="'+area+'"/><path class="ln" d="'+line+'"/><circle class="dot" cx="'+x(n-1).toFixed(1)+'" cy="'+y(last).toFixed(1)+'" r="3.5"/></g>';
+    document.getElementById('sx-svg').innerHTML=svg;
+    function f(v){return '$'+v.toFixed(2);}
+    function pc(p){return '<span class="'+(p>=0?'up':'down')+'">'+(p>=0?'▲ +':'▼ −')+Math.abs(p).toFixed(1)+'%</span>';}
+    var hiV=Math.max.apply(null,vals), loV=Math.min.apply(null,vals);
+    document.getElementById('sx-px').textContent=f(last);
+    document.getElementById('sx-stats').innerHTML='<span>Day '+pc((last/prev-1)*100)+'</span><span>Since IPO '+pc(chgP)+'</span><span>High <b>'+f(hiV)+'</b></span><span>Low <b>'+f(loV)+'</b></span>';
+    document.getElementById('sx-note').textContent=SX_ASOF+' · daily closes · dashed line = $'+SX_IPO.price.toFixed(0)+' IPO price · Source: Robinhood';
+  }catch(e){}
+})();
+</script>
+
+  <!-- ================= SUMMARY TABLE ================= -->
+  <section id="economy">
+    <div class="section-head"><h2>Indicator Summary</h2><div class="line"></div></div>
+    <div class="section-sub">Latest reading against the prior release and the same release one and two years earlier. Badges compare the latest reading with the prior release: <b style="color:var(--good)">▲ green = improved</b>, <b style="color:var(--bad)">▼ red = worsened</b>, gray = unchanged.</div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Indicator</th><th>Latest</th><th>Prior month</th><th>Prior year</th><th>Two years ago</th><th>Why it matters</th></tr></thead>
+        <tbody id="summary-body"></tbody>
+      </table>
     </div>
   </section>
 
