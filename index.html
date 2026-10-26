@@ -620,6 +620,9 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .wt-name{font-family:"Montserrat","Helvetica Neue",Arial,sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:.2em; font-size:clamp(15px,6.8vw,80px); line-height:1; white-space:nowrap; display:flex; flex-wrap:nowrap; align-items:center; justify-content:center; gap:.35em; color:#F4EFE3;}
 .wt-name > span{margin-right:-.2em;}
 .wt-peak{width:.68em; height:.42em; flex:none;}
+/* Nameplate toned down (Oct 26, 2026): smaller, lighter, left-justified */
+.wt-name{font-size:clamp(13px,4.2vw,40px); font-weight:600; letter-spacing:.12em; justify-content:flex-start; text-align:left; gap:.3em;}
+.wt-name > span{margin-right:-.12em;}
 /* Custom J (Oct 25, 2026): Fraunces stem and top serif with a straight, flat foot instead of the curled hook */
 .wt-j{display:inline-block; width:.359em; height:.7em; margin-right:.02em; vertical-align:baseline; fill:currentColor; overflow:visible;}
 html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0 1px 1.5px rgba(0,0,0,.8));}
@@ -642,6 +645,10 @@ html.has-banner:not(.banner-past) .tk-sp{filter:none;}
 body::before{display:none;}
 /* Updated stamp: never in the header (a phone rule used to un-hide it); shown once at the very bottom of the page instead */
 .wt-greet .wt-stamp,.wt-greet .wt-stamp[hidden]{display:none!important;}
+/* Subtitle toned down with the nameplate (Oct 26, 2026) */
+.wt-mast{text-align:left;}
+.wt-greet{font-size:13px; text-align:left;}
+@media (max-width:480px){ .wt-greet{font-size:11.5px;} }
 .wt-foot-upd{margin:14px 0 0; font:500 11.5px/1.5 var(--font-body); color:var(--fg-faint); text-align:center;}
 /* Live Doppler radar under the Snow Watch cards */
 .radar{margin:4px 0 16px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--snow);}
