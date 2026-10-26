@@ -139,10 +139,13 @@ html.has-video .wt-vid-cap{display:block;}
 html.has-video #wt-next, html.has-video .wt-next-sep{display:none;}
 </style>
 """
-video_js = """<script>
-/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly; it plays at 1/16 speed. */
+video_js = r"""<script>
+/* Public site: play the Snowbasin time-lapse behind the header instead of rotating photos; reload it hourly.
+   Speed: RATE is the fraction of normal speed (Mark asked for 1/32). Browsers can't play slower than 1/16, so below that the
+   page pauses the video and steps it forward itself (about one frame per second at 1/32). */
 (function(){
-  var SRC = "%s";
+  var SRC = "@@SRC@@";
+  var RATE = 0.03125, STEP_MS = 250;
   var b = document.getElementById("wt-banner"), root = document.documentElement;
   if(!b) return;
   try{
@@ -151,25 +154,46 @@ video_js = """<script>
   }catch(e){}
   var nb = document.getElementById("wt-next");
   if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
-  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin \\u00b7 time-lapse"; b.appendChild(cap);
+  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · time-lapse"; b.appendChild(cap);
   var v = document.createElement("video");
   v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true; v.preload = "auto";
   v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true"); v.setAttribute("disablepictureinpicture", "");
-  /* Play the time-lapse at 1/16 speed, the slowest browsers allow (Mark asked for it slower three times). Reapplied whenever the video (re)loads. */
-  var RATE = 0.0625;
-  function slow(){ try{ v.defaultPlaybackRate = RATE; v.playbackRate = RATE; }catch(e){} }
-  v.addEventListener("loadedmetadata", slow);
-  v.addEventListener("playing", function(){ slow(); root.classList.add("has-banner", "has-video"); });
+  var stepper = null, seeking = false;
+  var manual = RATE < 0.0625;
+  function startStepping(){
+    if(stepper) return;
+    v.pause();
+    stepper = setInterval(function(){
+      if(seeking && Date.now() - seekAt > 3000) seeking = false;
+      if(document.hidden || seeking || !v.duration || isNaN(v.duration)) return;
+      var t = v.currentTime + (STEP_MS / 1000) * RATE;
+      if(t >= v.duration - 0.05) t = 0;
+      seeking = true; seekAt = Date.now();
+      v.currentTime = t;
+    }, STEP_MS);
+  }
+  var seekAt = 0;
+  v.addEventListener("seeked", function(){ seeking = false; });
+  v.addEventListener("loadedmetadata", function(){ if(!manual){ try{ v.defaultPlaybackRate = RATE; v.playbackRate = RATE; }catch(e){} } });
+  v.addEventListener("playing", function(){
+    root.classList.add("has-banner", "has-video");
+    if(manual) startStepping(); else { try{ v.playbackRate = RATE; }catch(e){} }
+  });
   v.addEventListener("error", function(){ root.classList.remove("has-video"); });
-  v.src = SRC; slow();
+  v.src = SRC;
   b.insertBefore(v, b.firstChild);
   function go(){ var p = v.play(); if(p && p.catch) p.catch(function(){}); }
   go();
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden && v.paused) go(); });
-  setInterval(function(){ if(document.hidden) return; v.src = SRC + "?t=" + Date.now(); go(); }, 60*60000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden && !stepper && v.paused) go(); });
+  setInterval(function(){
+    if(document.hidden) return;
+    if(stepper){ clearInterval(stepper); stepper = null; }
+    seeking = false;
+    v.src = SRC + "?t=" + Date.now(); go();
+  }, 60*60000);
 })();
 </script>
-""" % VIDEO_SRC
+""".replace("@@SRC@@", VIDEO_SRC)
 
 head = """<!doctype html>
 <html lang="en">
