@@ -766,6 +766,17 @@ a.wt-dv-watch{text-decoration:none;}
 .wt-dock .wt-nav, html.has-banner .wt-dock .wt-nav{border-bottom:0; padding:6px 8px;}
 .wt-dock .wt-nav a, html.has-banner .wt-dock .wt-nav a{color:var(--fg-muted); text-shadow:none;}
 </style>
+<style>
+/* Resort cams moved under the Doppler radar, each resort on ONE row that shrinks to fit — no wrapping (Mark, Oct 26, 2026) */
+#snow .wx-cams{margin:0 0 14px;}
+#snow .wx-cams .cams-head{margin-top:0; padding-top:10px;}
+#snow .cams{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); grid-template-columns:none; gap:6px; margin-top:8px;}
+#snow .cam figcaption{display:block; margin-top:3px; font:600 10.5px/1.25 var(--font-body); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#snow .cam figcaption .elev{display:none;}
+#snow .cam-tag{font-size:8px; padding:2px 4px; left:3px; top:3px; max-width:calc(100% - 6px); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;}
+#snow .cam .ph{font-size:9.5px; padding:3px; line-height:1.2;}
+@media (max-width:640px){ #snow .cams{gap:3px;} #snow .cam figcaption{font-size:9px;} #snow .cam-tag{display:none;} #snow .cam .ph{font-size:0;} #snow .cam .ph::after{content:"\2197"; font-size:12px;} }
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -837,6 +848,21 @@ a.wt-dv-watch{text-decoration:none;}
         <span class="radar-legend" aria-hidden="true"><span>Light</span><i></i><span>Heavy</span><span class="radar-key"><svg viewBox="0 0 20 20"><g stroke="#5b8fc7" stroke-width="2" stroke-linecap="round"><path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/></g></svg>Snow<svg viewBox="0 0 20 20"><path d="M10 2.5C10 2.5 4.5 9.2 4.5 12.8a5.5 5.5 0 0 0 11 0C15.5 9.2 10 2.5 10 2.5z" fill="#3fa4ff"/></svg>Rain</span></span>
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
+    </div>
+    <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
+    <div class="wx-cams">
+      <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
+      <div class="cams" id="cams"></div>
+    </div>
+    <!-- Deer Valley cams (added Oct 25, 2026): Deer Valley's own CamStreamer live players, in the order of deervalley.com/explore-the-mountain/webcams. Rendered by the "Deer Valley cams" script; keep as is. -->
+    <div class="wx-cams dv-cams" id="dv-cams">
+      <div class="cams-head"><h4>Deer Valley Cams</h4><span class="cams-status" id="dv-status">Live video from Deer Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.deervalley.com/explore-the-mountain/webcams" target="_blank" rel="noopener">deervalley.com</a></div>
+      <div class="cams" id="dv-grid"></div>
+    </div>
+    <!-- Sun Valley cams (added Oct 26, 2026): the HD Relay cams from sunvalley.com/the-mountain/web-cams, in that page's order. Rendered by the "Sun Valley cams" script; keep as is. -->
+    <div class="wx-cams sv-cams" id="sv-cams">
+      <div class="cams-head"><h4>Sun Valley Cams</h4><span class="cams-status" id="sv-status">Current pictures from Sun Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.sunvalley.com/the-mountain/web-cams/" target="_blank" rel="noopener">sunvalley.com</a></div>
+      <div class="cams" id="sv-grid"></div>
     </div>
     <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
     <div class="wxv" id="wxv">
@@ -1279,20 +1305,6 @@ a.wt-dv-watch{text-decoration:none;}
     <div class="section-head"><h2>Weather</h2><div class="line"></div></div>
     <div class="section-sub">7-day outlook from the National Weather Service and local forecasts. Snowy days are tinted blue.</div>
     <div class="wx-grid" id="wx-home"></div>
-    <div class="wx-cams">
-      <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
-      <div class="cams" id="cams"></div>
-    </div>
-    <!-- Deer Valley cams (added Oct 25, 2026): Deer Valley's own CamStreamer live players, in the order of deervalley.com/explore-the-mountain/webcams. Rendered by the "Deer Valley cams" script; keep as is. -->
-    <div class="wx-cams dv-cams" id="dv-cams">
-      <div class="cams-head"><h4>Deer Valley Cams</h4><span class="cams-status" id="dv-status">Live video from Deer Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.deervalley.com/explore-the-mountain/webcams" target="_blank" rel="noopener">deervalley.com</a></div>
-      <div class="cams" id="dv-grid"></div>
-    </div>
-    <!-- Sun Valley cams (added Oct 26, 2026): the HD Relay cams from sunvalley.com/the-mountain/web-cams, in that page's order. Rendered by the "Sun Valley cams" script; keep as is. -->
-    <div class="wx-cams sv-cams" id="sv-cams">
-      <div class="cams-head"><h4>Sun Valley Cams</h4><span class="cams-status" id="sv-status">Current pictures from Sun Valley Resort's webcams</span><a class="cams-refresh dv-link" href="https://www.sunvalley.com/the-mountain/web-cams/" target="_blank" rel="noopener">sunvalley.com</a></div>
-      <div class="cams" id="sv-grid"></div>
-    </div>
   </section>
 
   <!-- ================= MORE WEATHER (other cities) ================= -->
