@@ -557,8 +557,8 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 .sg-ez::after{content:""; position:absolute; inset:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,.12) 0 3px, transparent 3px 8px);}
 .sg-ez.off::before{content:""; position:absolute; inset:0; background:var(--ez2); opacity:.0; animation:sg-ez 2.4s ease-in-out infinite;}
 @keyframes sg-ez{50%{opacity:.28}}
-/* Red zone: when the offense is inside the opponent's 20, the 10 yards in front of the goal line it attacks turn red */
-.sg-rz{z-index:0; width:9.4%; background:rgba(214,32,32,.62); box-shadow:inset 0 0 0 1px rgba(255,120,120,.5);}
+/* Red zone: when the offense is inside the opponent's 20, the field from the 20 to the goal line it attacks turns red */
+.sg-rz{z-index:0; width:18.8%; background:rgba(214,32,32,.62); box-shadow:inset 0 0 0 1px rgba(255,120,120,.5);}
 .sg-rz.l{left:3%;} .sg-rz.r{right:3%;}
 .sg-los{z-index:1; width:2px; margin-left:-1px; background:#3aa0ff; box-shadow:0 0 4px rgba(58,160,255,.9); transition:left .8s ease;}
 .sg-pos{position:absolute; top:50%; z-index:1; transform:translate(-50%,-50%); display:flex; align-items:center; pointer-events:none; transition:left .8s ease; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.6));}
