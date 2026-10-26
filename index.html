@@ -590,6 +590,12 @@ html.has-banner:not(.banner-past) .tk-sp{filter:drop-shadow(0 1px 2px rgba(0,0,0
 @keyframes sg-blink{50%{opacity:.25}}
 @media (prefers-reduced-motion: reduce){ .sg-st.live::before{animation:none;} }
 .sg-dd{font-weight:600; opacity:.9;}
+/* Final: the field shrinks to half height and shows just the final score and a one-line headline */
+.sea-game.final{height:26px; min-height:26px; padding:3px calc(3% + 6px); align-items:center;}
+.sea-game.final .sg-board{margin-left:0;}
+.sg-fin{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.1em; text-transform:uppercase; color:#ffe14d;}
+.sg-hl{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; font:600 12px/20px var(--font-body);}
+@media (max-width:560px){ .sea-game.final{padding:3px calc(3% + 4px);} .sg-hl{font-size:11px;} }
 .sg-go{flex:none; font:800 10.5px/20px var(--font-body); letter-spacing:.08em; text-transform:uppercase;}
 @media (max-width:760px){ .sg-meta{display:none;} .sg-play{font-size:11px;} }
 @media (max-width:560px){ .sea-game{gap:0 9px; padding:4px calc(3% + 4px) 0; font-size:12px;} .sg-board{gap:7px;} .sg-ball{width:20px; height:12px;} .sg-ab{font-size:11px;} .sg-go b{display:none;} .sg-dd{display:none;} }
@@ -1658,9 +1664,21 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     }
     return h;
   }
+  /* One-line game summary for the final: a headline the refresh wrote, else one built from the score and records. */
+  function headline(){
+    if(g.headline) return g.headline;
+    var sea = "SEA", opp = g.away === sea ? g.home : g.away, ss = g.score ? +g.score[sea] : NaN, os = g.score ? +g.score[opp] : NaN;
+    if(isNaN(ss) || isNaN(os)) return "";
+    var on = "the " + col(opp)[0], ot = /ot/i.test(g.detail || "") ? " in overtime" : "", rec = g.rec && g.rec[sea] ? g.rec[sea].replace("-", "\u2013") : "";
+    var hi = Math.max(ss, os), lo = Math.min(ss, os), sc = hi + "\u2013" + lo;
+    if(ss > os) return "Seahawks beat " + on + " " + sc + ot + (rec ? ", improve to " + rec : "");
+    if(ss < os) return "Seahawks fall to " + on + " " + sc + ot + (rec ? ", drop to " + rec : "");
+    return "Seahawks and " + on + " tie " + sc + ot + (rec ? ", now " + rec : "");
+  }
   function render(){
     if(!inWindow()){ el.hidden = true; el.innerHTML = ""; return false; }
     var live = g.status === "inprogress", fin = g.status === "closed" || g.status === "complete";
+    el.classList.toggle("final", fin);
     var a = g.score ? +g.score[g.away] : NaN, h = g.score ? +g.score[g.home] : NaN, ca = "", ch = "";
     if(fin && !isNaN(a) && !isNaN(h) && a !== h){ ca = a > h ? "win" : "lose"; ch = h > a ? "win" : "lose"; }
     if(live && g.poss === g.away) ca += " has"; if(live && g.poss === g.home) ch += " has";
@@ -1670,6 +1688,15 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var ta = col(g.away)[0], th = col(g.home)[0];
     el.setAttribute("aria-label", ta + " " + (g.score ? g.score[g.away] : "") + " at " + th + " " + (g.score ? g.score[g.home] : "") + ", " + st +
       (live && g.poss ? ", " + col(g.poss)[0] + " ball" + (g.dd ? ", " + g.dd : "") + (g.spot ? " at the " + g.spot : "") + (g.lp && g.lp.team === g.poss && +g.lp.yds ? ", last play " + (g.lp.yds > 0 ? "+" : "") + g.lp.yds + " yards" : "") : "") + ". Open the game on ESPN.");
+    if(fin){
+      var hl = headline();
+      el.setAttribute("aria-label", "Final: " + ta + " " + (g.score ? g.score[g.away] : "") + ", " + th + " " + (g.score ? g.score[g.home] : "") + (hl ? ". " + hl : "") + ". Open the game on ESPN.");
+      el.innerHTML = field(false) + '<span class="sg-fin">' + esc(/ot/i.test(g.detail || "") ? "Final/OT" : "Final") + '</span>' +
+        '<span class="sg-board">' + team(g.away, ca) + '<span class="sg-at">at</span>' + team(g.home, ch) + '</span>' +
+        '<span class="sg-hl" title="' + esc(hl) + '">' + esc(hl) + '</span>' + '<span class="sg-go"><b>ESPN </b>\u2197</span>';
+      el.hidden = false;
+      return false;
+    }
     el.innerHTML = field(live) +
       '<span class="sg-lbl" title="' + esc(live && g.play ? g.play : [g.title, g.tv, day].filter(Boolean).join(" · ")) + '"><span class="sg-t">Seahawks</span>' +
         (live && g.play ? '<span class="sg-play">' + esc(g.play) + '</span>' : '<span class="sg-meta">' + esc([g.title, g.tv, day].filter(Boolean).join(" · ")) + '</span>') + '</span>' +
@@ -1694,7 +1721,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     var sc = {}; sc[r.away] = r.awayScore === "" ? null : +r.awayScore; sc[r.home] = r.homeScore === "" ? null : +r.homeScore;
     g = {id: same ? g.id : "", espn: r.espn || (same ? g.espn : ""), start: r.start || g.start, away: r.away, home: r.home, title: same ? g.title : "", tv: same ? g.tv : "",
          status: r.state === "in" ? "inprogress" : r.state === "post" ? "closed" : "scheduled", detail: /end of half|halftime/i.test(r.lpType || "") ? "Halftime" : (r.detail || ""), score: sc,
-         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", lp: keepPlay(r), play: (r.lpText || "").replace(/^\s*(\([^)]*\)\s*)+/, "").replace(/\s+/g, " ").trim() || (same && g.play) || "", asof: new Date().toISOString()};
+         poss: r.poss || "", spot: r.spot || "", dd: r.dd || "", rec: r.awayRec || r.homeRec ? (function(){ var o = {}; if(r.awayRec) o[r.away] = r.awayRec; if(r.homeRec) o[r.home] = r.homeRec; return o; })() : (same ? g.rec : null), headline: same ? g.headline : "", lp: keepPlay(r), play: (r.lpText || "").replace(/^\s*(\([^)]*\)\s*)+/, "").replace(/\s+/g, " ").trim() || (same && g.play) || "", asof: new Date().toISOString()};
     try{ localStorage.setItem(KEY, JSON.stringify(g)); }catch(e){}
     if(!render() && timer){ clearInterval(timer); timer = null; }
   };
@@ -1708,7 +1735,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
     "  if 'SEA' not in [x['team']['abbreviation'] for x in c['competitors']]: continue\n" +
     "  ids={x['team']['id']:x['team']['abbreviation'] for x in c['competitors']};si=c.get('situation') or {}\n" +
     "  s=c['status'];lp=si.get('lastPlay') or {};lt=ids.get(str((lp.get('team') or {}).get('id','')),'')\n" +
-    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/')+'|'+' '.join(str(lp.get('text','')).replace('|','/').split()))\n" +
+    "  print('g|'+e['date']+'|'+s['type']['state']+'|'+s['type'].get('shortDetail','')+'|'+t['away']['team']['abbreviation']+'|'+str(t['away'].get('score',''))+'|'+t['home']['team']['abbreviation']+'|'+str(t['home'].get('score',''))+'|'+str(e.get('id',''))+'|'+ids.get(str(si.get('possession','')),'')+'|'+str(si.get('possessionText',''))+'|'+str(si.get('shortDownDistanceText',''))+'|'+lt+'|'+str(lp.get('statYardage',''))+'|'+str((lp.get('type') or {}).get('text','')).replace('|','/')+'|'+str(((t['away'].get('records') or [{}])[0]).get('summary',''))+'|'+str(((t['home'].get('records') or [{}])[0]).get('summary',''))+'|'+' '.join(str(lp.get('text','')).replace('|','/').split()))\n" +
     "P";
   function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
   if(!live || !(window.claude && window.claude.use)) return;
@@ -1721,7 +1748,7 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
       mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
         stdoutOf(r).split("\n").forEach(function(L){
           var f = L.split("|"); if(f[0] !== "g" || f.length < 8) return;
-          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || "", lpText: f.slice(15).join("|") || ""});
+          window.wsjSeaUpdate({start: f[1], state: f[2], detail: f[3], away: f[4], awayScore: f[5], home: f[6], homeScore: f[7], espn: f[8] || "", poss: f[9] || "", spot: f[10] || "", dd: f[11] || "", lpTeam: f[12] || "", lpYds: f[13] || "", lpType: f[14] || "", awayRec: f[15] || "", homeRec: f[16] || "", lpText: f.slice(17).join("|") || ""});
         });
       }, function(e){ if(e && {not_granted:1, capability_disabled:1, capability_removed:1, user_changed:1}[e.code] && timer){ clearInterval(timer); timer = null; } }).then(function(){ busy = false; });
     }
@@ -1784,7 +1811,8 @@ html.has-banner .wt-j{filter:drop-shadow(0 2px 5px rgba(0,0,0,.7)) drop-shadow(0
           lpTeam: (function(){ var lp = (c.situation && c.situation.lastPlay) || {}, id = String((lp.team && lp.team.id) || ""); return id === String(t.home.team.id) ? t.home.team.abbreviation : id === String(t.away.team.id) ? t.away.team.abbreviation : ""; })(),
           lpYds: c.situation && c.situation.lastPlay && c.situation.lastPlay.statYardage != null ? String(c.situation.lastPlay.statYardage) : "",
           lpType: (c.situation && c.situation.lastPlay && c.situation.lastPlay.type && c.situation.lastPlay.type.text) || "",
-          lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || ""});
+          lpText: (c.situation && c.situation.lastPlay && c.situation.lastPlay.text) || "",
+          awayRec: (t.away.records && t.away.records[0] && t.away.records[0].summary) || "", homeRec: (t.home.records && t.home.records[0] && t.home.records[0].summary) || ""});
       });
       if(!el.querySelector(".sg-st.live") && timer){ clearInterval(timer); timer = null; }
     }).catch(function(){});
