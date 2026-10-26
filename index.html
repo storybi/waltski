@@ -729,6 +729,19 @@ a.wt-dv-watch{text-decoration:none;}
 @media (max-width:380px){ .wt-nav{gap:2px 6px; font-size:10.5px;} }
 @media (max-width:340px){ .wt-nav{gap:2px 5px; font-size:10px;} }
 </style>
+<style>
+/* Oct 26, 2026 — weather bar + ticker sit below the header photo on the page background, so more of the photo shows */
+.wt-dock{margin-top:14px;}
+.wt-dock .wxbar, .wt-dock .wt-ticker, html.has-banner .wt-dock .wt-ticker, html.has-banner:not(.banner-past) .wt-dock .wt-ticker{background-color:var(--bg)!important;}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .wt-dock .wxbar, :root:not([data-theme="dark"]) .wt-dock .wt-ticker{background-image:var(--paper);} }
+:root[data-theme="light"] .wt-dock .wxbar, :root[data-theme="light"] .wt-dock .wt-ticker{background-image:var(--paper);}
+.games-top .sea-game:last-of-type{margin-bottom:0;}
+/* Game strips: in the header only while live; finished games show at the top of Sports for the rest of game day and the next day */
+.sp-games{display:flex; flex-direction:column; margin:0 0 14px;}
+.sp-games:not(:has(.sea-game:not([hidden]))){display:none;}
+.sp-games .sea-game{border:1px solid #1d5a26;}
+.sp-games .sea-game:not([hidden]) ~ .sea-game:not([hidden]){border-top:1px solid rgba(255,255,255,.45);}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -764,9 +777,14 @@ a.wt-dv-watch{text-decoration:none;}
   </div>
 
   <!-- ================= SEAHAWKS GAME STRIP (game day + next day) ================= -->
+  <!-- Live-game slot (Oct 26, 2026): a game strip sits here, in the header, only while its game is live; otherwise the "Game strip placement" script moves it to the Sports section. -->
+  <div class="games-top" id="games-top">
   <a class="sea-game" id="sea-game" href="https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
   <!-- Oregon Ducks game strip (added Oct 25, 2026): same football field, game day + next day; stacks under the Seahawks strip when both show. -->
   <a class="sea-game ore-game" id="ore-game" href="https://www.espn.com/college-football/team/_/id/2483/oregon-ducks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
+  </div>
+  <!-- End of the header photo area (Oct 26, 2026): the photo banner stops here, so the weather bar and ticker below sit on the plain page background. -->
+  <div id="wt-head-end" aria-hidden="true"></div>
 
   <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
   <div class="wt-dock" id="wt-dock">
@@ -1208,6 +1226,7 @@ a.wt-dv-watch{text-decoration:none;}
   <section id="sports">
     <div class="section-head"><h2>Sports</h2><div class="line"></div></div>
     <div class="section-sub">Records, last results and next kickoffs. Times are Mountain Time.</div>
+    <div class="sp-games" id="sp-games"></div>
     <div class="sp-grid">
       <div class="sp-card" style="--team:#2e7d4f">
         <div class="sp-head"><h3>Seattle Seahawks</h3><span class="sp-rec">4–3</span></div>
@@ -1764,7 +1783,7 @@ a.wt-dv-watch{text-decoration:none;}
   var cap = document.createElement("span"); cap.className = "wt-banner-cap"; el.appendChild(cap);
   var frames = [], at = null, idx = 0, front = 0, timer = null;
   function size(){
-    var w = document.getElementById("wt-dock-end") || document.getElementById("wxbar") || document.getElementById("askbar"); if(!w) return;
+    var w = document.getElementById("wt-head-end") || document.getElementById("wt-dock-end") || document.getElementById("wxbar") || document.getElementById("askbar"); if(!w) return;
     var b = w.getBoundingClientRect().bottom + window.scrollY;
     el.style.height = Math.max(0, Math.round(b + 16)) + "px"; past();
   }
@@ -2847,5 +2866,34 @@ a.wt-dv-watch{text-decoration:none;}
   fix(); setInterval(fix, 60000);
 })();
 </script>
-</body>
+<script>
+/* Game strip placement (Oct 26, 2026, Mark's layout) — the Seahawks and Oregon Ducks football fields live in the Sports section.
+   While a game is live (its strip shows the live status) that strip moves up to the header, above the weather bar; when the game
+   ends it moves back to the top of Sports, where it stays for the rest of game day and the next day (Mountain Time) before the
+   strip script hides it. Keep as is. */
+(function(){
+  var top = document.getElementById("games-top"), sp = document.getElementById("sp-games");
+  if(!top || !sp) return;
+  var ids = ["sea-game", "ore-game"];
+  function place(){
+    var moved = false;
+    ids.forEach(function(id){
+      var el = document.getElementById(id); if(!el) return;
+      var live = !el.hidden && !!el.querySelector(".sg-st.live");
+      var want = live ? top : sp;
+      if(el.parentNode !== want){
+        /* keep Seahawks before Ducks in either slot */
+        var after = null; for(var i = ids.indexOf(id) + 1; i < ids.length; i++){ var n = document.getElementById(ids[i]); if(n && n.parentNode === want){ after = n; break; } }
+        want.insertBefore(el, after); moved = true;
+      }
+    });
+    if(moved){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} }
+  }
+  place();
+  if(window.MutationObserver){
+    var mo = new MutationObserver(function(){ place(); });
+    ids.forEach(function(id){ var el = document.getElementById(id); if(el) mo.observe(el, {childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"]}); });
+  } else setInterval(place, 15000);
+})();
+</script></body>
 </html>
