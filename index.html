@@ -758,6 +758,14 @@ a.wt-dv-watch{text-decoration:none;}
 @media (max-width:520px){ .wt-edition .wt-ed-line{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; row-gap:2px;} .wt-edition .wt-sep2{margin:0 5px;} }
 @media (max-width:400px){ .wt-edition{font-size:9.5px; letter-spacing:.02em;} .wt-edition .wt-sep2{margin:0 4px;} }
 </style>
+<style>
+/* Section links sit in the sticky dock right under the stock ticker (Mark, Oct 26, 2026) */
+.wt-dock .wt-dock-nav{margin:0; padding:0; background-color:var(--bg); border:1px solid var(--border); border-top:0;}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .wt-dock .wt-dock-nav{background-image:var(--paper);} }
+:root[data-theme="light"] .wt-dock .wt-dock-nav{background-image:var(--paper);}
+.wt-dock .wt-nav, html.has-banner .wt-dock .wt-nav{border-bottom:0; padding:6px 8px;}
+.wt-dock .wt-nav a, html.has-banner .wt-dock .wt-nav a{color:var(--fg-muted); text-shadow:none;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -772,11 +780,6 @@ a.wt-dv-watch{text-decoration:none;}
   </header>
 
 
-  <div class="wt-mast wt-mast-2">
-    <nav class="wt-nav" aria-label="Sections">
-      <a href="#snow">Snow</a><a href="#daily-word">Devotion</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a>
-    </nav>
-  </div>
 
   <div class="askbar" id="askbar" role="search">
     <form class="ask-form" id="ask-form" autocomplete="off">
@@ -808,6 +811,12 @@ a.wt-dv-watch{text-decoration:none;}
   <div class="wt-ticker" id="ticker" role="region" aria-label="Stock ticker">
     <span class="tk-lbl" id="tk-asof">Markets</span>
     <div class="tk-view"><div class="tk-track" id="tk-track"></div></div>
+  </div>
+  <!-- Section links locked under the stock ticker (Mark, Oct 26, 2026) -->
+  <div class="wt-mast wt-mast-2 wt-dock-nav">
+    <nav class="wt-nav" aria-label="Sections">
+      <a href="#snow">Snow</a><a href="#daily-word">Devotion</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a>
+    </nav>
   </div>
   </div>
   <div id="wt-dock-end" aria-hidden="true"></div>
