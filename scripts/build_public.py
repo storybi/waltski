@@ -259,7 +259,7 @@ head = """<!doctype html>
 <meta property="og:title" content="Waltski News">
 <meta property="og:description" content="Markets, economy, top stories, Wasatch snow and weather — refreshed twice a day.">
 <meta name="theme-color" content="#000000">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M2 38 L22 10 L32 22 L42 6 L62 38 Z' fill='%23E2733A'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M14 3h12v11h11v12H26v11H14V26H3V14h11z' fill='%23E2733A'/%3E%3C/svg%3E">
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
