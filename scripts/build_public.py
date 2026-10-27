@@ -73,8 +73,9 @@ GBAR_CSS = """<style>
 @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .gbar{background-image:var(--paper);} }
 :root[data-theme="light"] .gbar{background-image:var(--paper);}
 .gbar-g{width:16px; height:16px; flex:none; color:var(--fg-faint);}
-.gbar input{flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--fg); font:15px var(--font-body); padding:6px 2px;}
-.gbar input::placeholder{color:var(--fg-faint);}
+.gbar input{flex:1; min-width:0; border:1px solid #b9b3a6; outline:0; background:#fff; color:#111; font:15px var(--font-body); padding:6px 8px; border-radius:3px;}
+.gbar input:focus{border-color:#E2733A; box-shadow:0 0 0 2px rgba(226,115,58,.25);}
+.gbar input::placeholder{color:#8a8578;}
 .gbar button{font:600 12.5px var(--font-body); border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:6px 10px; cursor:pointer; white-space:nowrap;}
 .gbar button:hover{border-color:var(--fg-muted);}
 .gbar .gbar-ai{background:var(--accent); border-color:var(--accent); color:#fff;}
