@@ -3052,11 +3052,11 @@ html.banner-lock .wt-clock{visibility:hidden;}
 })();
 </script>
 <script>
-/* Header clock (Oct 27, 2026): ticks every second in Mountain Time */
+/* Header clock (Oct 27, 2026): ticks every second in the viewer's own device time zone (Mark, Oct 27, 2026) */
 (function(){
   var hm=document.getElementById("wt-clock-hm"), ap=document.getElementById("wt-clock-ap"), dd=document.getElementById("wt-clock-d");
   if(!hm) return;
-  var tz="America/Denver";
+  var tz; /* undefined = the device's own time zone */
   function tick(){
     var n=new Date(), parts={};
     try{ new Intl.DateTimeFormat("en-US",{timeZone:tz,hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(n).forEach(function(p){parts[p.type]=p.value;}); }
