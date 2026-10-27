@@ -871,6 +871,15 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 .sbmap-src{margin-top:6px; font:500 11.5px var(--font-body); color:var(--fg-faint);}
 .sbmap-src a{color:var(--accent);}
 </style>
+<style>
+/* Header clock (Mark, Oct 27, 2026): digital Mountain Time clock centered in the open photo area of the header, day and date below in white */
+#wt-head-end{position:relative; z-index:1; display:flex; align-items:center; justify-content:center; pointer-events:none;}
+.wt-clock{text-align:center; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.55), 0 0 14px rgba(0,0,0,.35); line-height:1;}
+.wt-clock-t{font:800 clamp(32px,8vw,76px)/1 "Montserrat", var(--font-body), sans-serif; letter-spacing:.04em; font-variant-numeric:tabular-nums;}
+.wt-clock-ap{font-size:.32em; font-weight:700; letter-spacing:.08em; margin-left:.3em; vertical-align:.95em;}
+.wt-clock-d{margin-top:.45em; font:800 clamp(11px,2.2vw,18px)/1.2 "Montserrat", var(--font-body), sans-serif; letter-spacing:.14em; text-transform:uppercase;}
+html.banner-lock .wt-clock{visibility:hidden;}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -908,7 +917,7 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
   <a class="sea-game ore-game" id="ore-game" href="https://www.espn.com/college-football/team/_/id/2483/oregon-ducks" target="_blank" rel="noopener" aria-live="polite" hidden></a>
   </div>
   <!-- End of the header photo area (Oct 26, 2026): the photo banner stops here, so the weather bar and ticker below sit on the plain page background. -->
-  <div id="wt-head-end" aria-hidden="true"></div>
+  <div id="wt-head-end"><div class="wt-clock" id="wt-clock" role="timer" aria-live="off"><div class="wt-clock-t"><span id="wt-clock-hm">--:--</span><span class="wt-clock-ap" id="wt-clock-ap"></span></div><div class="wt-clock-d" id="wt-clock-d"></div></div></div>
 
   <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
   <div class="wt-dock" id="wt-dock">
@@ -3022,6 +3031,24 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
     /* load once it's near the screen, so it doesn't compete with the cams at the top */
     if(window.IntersectionObserver){ var io = new IntersectionObserver(function(es){ if(es.some(function(e){ return e.isIntersecting; })){ io.disconnect(); go(); } }, {rootMargin: "600px"}); io.observe(fr); } else go();
   }, function(){});
+})();
+</script>
+<script>
+/* Header clock (Oct 27, 2026): ticks every second in Mountain Time */
+(function(){
+  var hm=document.getElementById("wt-clock-hm"), ap=document.getElementById("wt-clock-ap"), dd=document.getElementById("wt-clock-d");
+  if(!hm) return;
+  var tz="America/Denver";
+  function tick(){
+    var n=new Date(), parts={};
+    try{ new Intl.DateTimeFormat("en-US",{timeZone:tz,hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(n).forEach(function(p){parts[p.type]=p.value;}); }
+    catch(e){ var h=n.getHours(); parts={hour:String(h%12||12),minute:("0"+n.getMinutes()).slice(-2),dayPeriod:h<12?"AM":"PM"}; }
+    hm.textContent=parts.hour+":"+parts.minute;
+    ap.textContent=(parts.dayPeriod||"").toUpperCase();
+    try{ dd.textContent=n.toLocaleDateString("en-US",{timeZone:tz,weekday:"long",month:"long",day:"numeric",year:"numeric"}); }
+    catch(e){ dd.textContent=n.toDateString(); }
+  }
+  tick(); setTimeout(function(){ tick(); setInterval(tick,1000); }, 1000-(Date.now()%1000));
 })();
 </script>
 <script>
