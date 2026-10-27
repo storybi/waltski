@@ -913,7 +913,7 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
   <!-- Section links locked under the stock ticker (Mark, Oct 26, 2026) -->
   <div class="wt-mast wt-mast-2 wt-dock-nav">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#daily-word">Devotion</a>
+      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#top" class="wt-home-link">Home</a><a href="#daily-word">Devotion</a>
     </nav>
   </div>
   </div>
@@ -2972,6 +2972,11 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
   if(window.MutationObserver) new MutationObserver(q).observe(b, {attributes: true, attributeFilter: ["style"]});
   upd();
 })();
+</script>
+<script>
+/* Home link in the section links (Mark, Oct 26, 2026): jumps back to the very top of the page. Keep as is. */
+(function(){ var a=document.querySelector('.wt-nav a.wt-home-link'); if(!a) return;
+  a.addEventListener('click',function(e){ e.preventDefault(); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(x){ window.scrollTo(0,0); } }); })();
 </script>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
