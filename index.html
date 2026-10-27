@@ -888,7 +888,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
 <style>
 /* Weather Watch without a heading (Mark, Oct 27, 2026): radar starts right under the weather bar / ticker; on phones the radar header is one compact row and the map is taller */
 #snow{margin-top:10px;}
-#snow .radar{margin-top:0;}
+#snow .radar{margin-top:0; border-left:1px solid var(--border);} /* blue left edge removed (Mark, Oct 27, 2026) */
 @media (max-width:640px){
   #snow .radar-head{padding:6px 8px; gap:2px 8px; flex-wrap:nowrap; align-items:center;}
   #snow .radar-head h3{display:none;}
