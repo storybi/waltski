@@ -858,6 +858,18 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 /* Thick orange plus between WALTSKI and NEWS — "Waltski+News" (Mark, Oct 26, 2026; replaced the mountain-peak mark) */
 .wt-name .wt-peak.wt-plus{width:.72em; height:.72em; margin:0 .02em; filter:drop-shadow(0 1px 3px rgba(0,0,0,.45));}
 </style>
+<style>
+/* Snowbasin trail map at the bottom of the paper (Mark, Oct 26, 2026) */
+/* 15 section links (SB Map + Home added) still fit in two rows on small phones */
+@media (max-width:400px){ .wt-nav{gap:2px 5px; font-size:10px; letter-spacing:-.01em;} .wt-dock .wt-nav{padding:6px 4px;} }
+@media (max-width:350px){ .wt-nav{gap:2px 4px; font-size:9px; letter-spacing:-.02em;} .wt-dock .wt-nav{padding:5px 2px;} }
+.sbmap-frame{display:block; position:relative; aspect-ratio:4000/2133; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; text-decoration:none;}
+.sbmap-frame img{display:block; width:100%; height:100%; object-fit:contain;}
+.sbmap-frame .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:12px; text-align:center; font:600 13px var(--font-body); color:var(--fg-faint);}
+.sbmap-frame:hover .ph{color:var(--accent); text-decoration:underline;}
+.sbmap-src{margin-top:6px; font:500 11.5px var(--font-body); color:var(--fg-faint);}
+.sbmap-src a{color:var(--accent);}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -913,7 +925,7 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
   <!-- Section links locked under the stock ticker (Mark, Oct 26, 2026) -->
   <div class="wt-mast wt-mast-2 wt-dock-nav">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#top" class="wt-home-link">Home</a><a href="#daily-word">Devotion</a>
+      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#sbmap">SB Map</a><a href="#top" class="wt-home-link">Home</a><a href="#daily-word">Devotion</a>
     </nav>
   </div>
   </div>
@@ -1433,6 +1445,16 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
     </div>
   </section>
 
+
+  <!-- ================= SNOWBASIN TRAIL MAP (Mark, Oct 26, 2026) ================= -->
+  <!-- Bottom of the paper. Shown from Snowbasin's own site: on waltski.com the picture loads straight from snowbasin.com; inside claude.ai
+       (which can't load outside images) it comes through the Composio connector and is kept on this device. Rendered by the "Snowbasin trail map" script; keep as is. -->
+  <section id="sbmap">
+    <div class="section-head"><h2>Snowbasin Trail Map</h2><div class="line"></div></div>
+    <div class="section-sub">Snowbasin Resort&rsquo;s 2025&ndash;26 winter trail map. Tap the map to open it full size on snowbasin.com.</div>
+    <a class="sbmap-frame" id="sbmap-frame" href="https://www.snowbasin.com/azure/snowbasin/media/siteassets/pdf/maps/winter/winter-trail-map-2025-26-(22-5in-x-12in).jpg?w=4000&amp;mode=crop&amp;scale=both" target="_blank" rel="noopener" aria-label="Open the Snowbasin winter trail map full size on snowbasin.com"><span class="ph" id="sbmap-ph">Loading the trail map&hellip;</span></a>
+    <div class="sbmap-src">Map &copy; Snowbasin Resort &middot; <a href="https://www.snowbasin.com/the-mountain/mountain-maps/" target="_blank" rel="noopener">snowbasin.com</a></div>
+  </section>
 
   <footer>
     <div><b>Primary sources:</b>
@@ -2977,6 +2999,35 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 /* Home link in the section links (Mark, Oct 26, 2026): jumps back to the very top of the page. Keep as is. */
 (function(){ var a=document.querySelector('.wt-nav a.wt-home-link'); if(!a) return;
   a.addEventListener('click',function(e){ e.preventDefault(); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(x){ window.scrollTo(0,0); } }); })();
+</script>
+<script>
+/* Snowbasin trail map (Mark, Oct 26, 2026) — on waltski.com the map loads straight from snowbasin.com; inside claude.ai it comes through
+   the Composio connector (resized) and the last copy is kept on this device. Keep as is during routine refreshes. */
+(function(){
+  var URL = "https://www.snowbasin.com/azure/snowbasin/media/siteassets/pdf/maps/winter/winter-trail-map-2025-26-(22-5in-x-12in).jpg", KEY = "wsj-sbmap";
+  var fr = document.getElementById("sbmap-frame"), ph = document.getElementById("sbmap-ph"); if(!fr) return;
+  function put(src){ var im = fr.querySelector("img"); if(!im){ im = document.createElement("img"); im.alt = "Snowbasin Resort 2025-26 winter trail map"; im.loading = "lazy"; fr.appendChild(im); } im.src = src; if(ph) ph.remove(); }
+  if(!(window.claude && window.claude.use)){
+    var t = new Image(); t.onload = function(){ put(t.src); }; t.onerror = function(){ if(ph) ph.textContent = "Open the Snowbasin trail map on snowbasin.com \u2197"; };
+    t.src = URL + "?w=2000&mode=crop&scale=both"; return;
+  }
+  try{ var sv = localStorage.getItem(KEY); if(sv && sv.length > 1000) put("data:image/jpeg;base64," + sv); }catch(e){}
+  var CMD = "python3 - <<'P'\n" +
+    "import urllib.request,io,base64\nfrom PIL import Image\n" +
+    "b=urllib.request.urlopen(urllib.request.Request('" + URL + "?w=2000&mode=crop&scale=both',headers={'User-Agent':'Mozilla/5.0'}),timeout=30).read()\n" +
+    "im=Image.open(io.BytesIO(b)).convert('RGB');im.thumbnail((1600,1600));o=io.BytesIO();im.save(o,'JPEG',quality=68,optimize=True)\n" +
+    "print('map|'+base64.b64encode(o.getvalue()).decode())\nP";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp){ if(ph) ph.textContent = "Open the Snowbasin trail map on snowbasin.com \u2197"; return; }
+    var go = function(){ mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: CMD}, {cache:false}).then(function(r){
+      var m = /map\|([A-Za-z0-9+\/=]{1000,})/.exec(stdoutOf(r)); if(!m){ if(ph) ph.textContent = "Open the Snowbasin trail map on snowbasin.com \u2197"; return; }
+      put("data:image/jpeg;base64," + m[1]); try{ localStorage.setItem(KEY, m[1]); }catch(e){}
+    }, function(){ if(ph) ph.textContent = "Open the Snowbasin trail map on snowbasin.com \u2197"; }); };
+    /* load once it's near the screen, so it doesn't compete with the cams at the top */
+    if(window.IntersectionObserver){ var io = new IntersectionObserver(function(es){ if(es.some(function(e){ return e.isIntersecting; })){ io.disconnect(); go(); } }, {rootMargin: "600px"}); io.observe(fr); } else go();
+  }, function(){});
+})();
 </script>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
