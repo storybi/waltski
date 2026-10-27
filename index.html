@@ -985,7 +985,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
       </div>
       <div class="radar-map" id="radar-map" role="img" aria-label="Animated weather radar map of northern Utah ski country"><div class="rdl" aria-hidden="true"><span class="rdl-rain">Rain</span><span class="rdl-mix">Mixed</span><span class="rdl-snow">Snow</span></div></div>
       <div class="radar-foot">
-        <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
+        <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · clouds: GOES-West infrared via NASA GIBS · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
@@ -2434,6 +2434,9 @@ html.banner-lock .wt-clock{visibility:hidden;}
   /* IEM n0q colour table (mesonet.agron.iastate.edu/GIS/rasters.php?rid=2), one entry per dBZ */
   var REF = [[-32,133,113,143],[-31,134,115,141],[-30,135,118,139],[-29,137,121,135],[-28,138,123,133],[-27,139,126,132],[-26,141,129,128],[-25,142,131,126],[-24,143,133,124],[-23,145,136,121],[-22,146,139,119],[-21,150,145,83],[-20,155,151,91],[-19,160,157,100],[-18,165,163,109],[-17,170,169,118],[-16,176,175,126],[-15,183,184,140],[-14,189,190,148],[-13,194,196,157],[-12,199,202,166],[-11,204,208,175],[-10,207,210,180],[-9,198,201,180],[-8,192,196,180],[-7,185,190,180],[-6,179,185,180],[-5,173,179,180],[-4,164,171,180],[-3,157,165,180],[-2,151,160,180],[-1,145,154,180],[0,144,152,180],[1,136,146,178],[2,124,137,175],[3,116,131,172],[4,108,125,170],[5,99,118,168],[6,91,112,166],[7,79,103,162],[8,71,97,160],[9,65,91,158],[10,69,104,166],[11,74,118,174],[12,79,132,182],[13,86,153,195],[14,91,166,203],[15,96,180,212],[16,101,194,220],[17,106,208,228],[18,104,214,215],[19,82,214,162],[20,67,214,126],[21,53,214,91],[22,17,209,23],[23,16,200,22],[24,15,188,21],[25,14,179,20],[26,14,171,19],[27,13,162,18],[28,12,153,17],[29,12,145,16],[30,11,132,14],[31,10,124,13],[32,9,115,12],[33,9,107,11],[34,8,98,10],[35,50,115,8],[36,91,136,7],[37,132,157,6],[38,173,178,5],[39,214,199,4],[40,255,226,0],[41,255,211,0],[42,255,201,0],[43,255,192,0],[44,255,182,0],[45,255,172,0],[46,255,162,0],[47,255,148,0],[48,255,138,0],[49,255,128,0],[50,248,0,0],[51,234,0,0],[52,213,0,0],[53,198,0,0],[54,184,0,0],[55,170,0,0],[56,155,0,0],[57,141,0,0],[58,120,0,0],[59,255,255,255],[60,255,234,255],[61,255,212,255],[62,255,190,255],[63,255,157,255],[64,255,117,255],[65,249,96,250],[66,243,75,244],[67,237,54,239],[68,231,32,233],[69,178,0,255],[70,164,0,247],[71,147,0,239],[72,131,0,232],[73,114,0,221]];
   var TH = [7,15,23,30,38,45,52,60];
+  /* Cloud cover source: NASA GIBS GOES-West ABI band 13 (clean infrared), newest picture. Grey = surface/low cloud temperature, colours = very cold tops. */
+  var CLOUD_URL = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GOES-West_ABI_Band13_Clean_Infrared/default/default/GoogleMapsCompatible_Level6";
+  function cloudAlpha(r, g, b){ var mx = Math.max(r, g, b), mn = Math.min(r, g, b); if(mx - mn > 40) return 225; var v = (r + g + b) / 3; return v <= 165 ? 0 : Math.min(225, Math.round((v - 165) / 50 * 225)); }
   var PAL = {rain: ["#a4ecb0","#6fd889","#45bd65","#2a9a4a","#f2d230","#f28c28","#e0402c","#b52bb0"],
              snow: ["#a9eef6","#7fd0f0","#5aa9e6","#3d84d6","#2c62c2","#2447a3","#3a2f9a","#5a2a9e"],
              mix:  ["#f7d6e5","#efb0cd","#e48ab6","#d4669f","#bf4a8a","#a33876","#862a66","#6a1f58"]};
@@ -2499,6 +2502,20 @@ html.banner-lock .wt-clock{visibility:hidden;}
       "  rad=Image.fromarray(out,'RGBA');A=rad.split()[3]\n" +
       "except Exception:\n" +
       "  rad=rad.filter(ImageFilter.GaussianBlur(2.2))\n" +
+      "try:\n" +
+      "  import numpy as np\n" +
+      "  s6=2**(Z-6);cx0,cy0,cx1,cy1=x0/s6,y0/s6,(x0+W)/s6,(y0+H)/s6;tx0,ty0=int(cx0//256),int(cy0//256);tx1,ty1=int(cx1//256),int(cy1//256)\n" +
+      "  mo=Image.new('RGBA',((tx1-tx0+1)*256,(ty1-ty0+1)*256),(0,0,0,0))\n" +
+      "  for tx in range(tx0,tx1+1):\n" +
+      "    for ty in range(ty0,ty1+1):\n" +
+      "      try: mo.paste(get('" + CLOUD_URL + "/6/%d/%d.png'%(ty,tx%64)),((tx-tx0)*256,(ty-ty0)*256))\n" +
+      "      except Exception: pass\n" +
+      "  cl=mo.crop((int(cx0-tx0*256),int(cy0-ty0*256),int(cx0-tx0*256)+max(1,int(round(W/s6))),int(cy0-ty0*256)+max(1,int(round(H/s6))))).resize((W,H),Image.BICUBIC)\n" +
+      "  q=np.asarray(cl).astype(float);mx=q[...,:3].max(-1);mn=q[...,:3].min(-1);v=q[...,:3].mean(-1)\n" +
+      "  al=np.clip((v-165)/50,0,1)*225;al[(mx-mn)>40]=225;al[q[...,3]==0]=0\n" +
+      "  co=np.zeros((H,W,4),np.uint8);co[...,0]=246;co[...,1]=248;co[...,2]=250;co[...,3]=(al*0.9).astype(np.uint8)\n" +
+      "  base=Image.alpha_composite(base,Image.fromarray(co,'RGBA'))\n" +
+      "except Exception: pass\n" +
       "img=Image.alpha_composite(Image.alpha_composite(base,rad),lab);d=ImageDraw.Draw(img)\n" +
       "if kind:\n" +
       "  pts=[(x,y) for y in range(14,H-6,30) for x in range(14,W-6,30) if A.getpixel((x,y))>60]\n" +
@@ -2553,6 +2570,36 @@ html.banner-lock .wt-clock{visibility:hidden;}
     map.createPane("radar"); map.getPane("radar").style.zIndex = 350; map.getPane("radar").className += " radar-pane";
     map.createPane("labels"); map.getPane("labels").style.zIndex = 420; map.getPane("labels").style.pointerEvents = "none";
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {maxZoom: 13, minZoom: 5, pane: "labels"}).addTo(map);
+    /* Cloud cover (Mark, Oct 27, 2026): latest GOES-West infrared satellite picture from NASA GIBS (about every 10 min, highest zoom 6),
+       turned into soft white clouds (cold, high cloud tops = whiter) under the precipitation colors. Refreshes every 10 minutes. */
+    map.createPane("clouds"); map.getPane("clouds").style.zIndex = 330; map.getPane("clouds").style.pointerEvents = "none";
+    var cloudBust = Math.floor(Date.now() / 600000), cloudCache = {};
+    function cloudImg(z, x, y, cb){
+      var k = z + "/" + x + "/" + y + "/" + cloudBust;
+      if(cloudCache[k]){ if(cloudCache[k].ok) cb(cloudCache[k].im); else cloudCache[k].q.push(cb); return; }
+      var im = new Image(), ent = {ok: false, im: im, q: [cb]}; cloudCache[k] = ent; im.crossOrigin = "anonymous";
+      im.onload = function(){ ent.ok = true; ent.q.forEach(function(f){ f(im); }); ent.q = []; };
+      im.onerror = function(){ ent.q.forEach(function(f){ f(null); }); ent.q = []; delete cloudCache[k]; };
+      im.src = CLOUD_URL + "/" + z + "/" + y + "/" + x + ".png?_=" + cloudBust;
+    }
+    var Clouds = L.GridLayer.extend({createTile: function(c, done){
+      var cv = document.createElement("canvas"); cv.width = cv.height = 256;
+      var z6 = Math.min(c.z, 6), sc = Math.pow(2, c.z - z6), n6 = Math.pow(2, z6), px = Math.floor(c.x / sc), py = Math.floor(c.y / sc);
+      if(py < 0 || py >= n6){ setTimeout(function(){ done(null, cv); }, 0); return cv; }
+      cloudImg(z6, ((px % n6) + n6) % n6, py, function(im){
+        if(im){ try{
+          var ctx = cv.getContext("2d"), sz = 256 / sc; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(im, (c.x - px * sc) * sz, (c.y - py * sc) * sz, sz, sz, 0, 0, 256, 256);
+          var id = ctx.getImageData(0, 0, 256, 256), d = id.data;
+          for(var i = 0; i < d.length; i += 4){ var a = cloudAlpha(d[i], d[i+1], d[i+2]); d[i] = 246; d[i+1] = 248; d[i+2] = 250; d[i+3] = a; }
+          ctx.putImageData(id, 0, 0);
+        }catch(e){ cv.getContext("2d").clearRect(0, 0, 256, 256); } }
+        done(null, cv);
+      });
+      return cv;
+    }});
+    var clouds = new Clouds({pane: "clouds", opacity: 0.9, maxZoom: 13, minZoom: 5}).addTo(map);
+    setInterval(function(){ if(!document.hidden){ cloudBust = Math.floor(Date.now() / 600000); cloudCache = {}; clouds.redraw(); } }, 10*60000);
     PLACES.forEach(function(p){
       L.circleMarker([p[1], p[2]], {radius: 6, color: "#ffffff", weight: 2, fillColor: "#E2733A", fillOpacity: 1}).addTo(map)
         .bindTooltip(p[0], {permanent: true, direction: "right", offset: [8, 0], className: "radar-tip"});
