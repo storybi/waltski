@@ -899,6 +899,19 @@ html.banner-lock .wt-clock{visibility:hidden;}
   #snow .radar-map{height:min(62vh,420px);}
 }
 </style>
+<style>
+/* Radar look (Mark, Oct 27, 2026): smooth, banded precipitation shapes in soft weather-app colors (greens -> yellow -> red for rain,
+   blues for snow, pinks for a mix), drawn by the "Live radar" script; vertical Rain / Mixed / Snow key on the left edge of the map */
+#snow .radar-pane{filter:none;}
+#snow .radar-pane img{image-rendering:auto;}
+.rdl{position:absolute; left:0; top:10%; bottom:10%; z-index:440; width:22px; display:flex; flex-direction:column; gap:4px; pointer-events:none;}
+.rdl span{flex:1; display:flex; align-items:center; justify-content:center; border:2px solid #fff; border-left:0; border-radius:0 9px 9px 0; box-shadow:0 1px 4px rgba(0,0,0,.35);
+  font:600 11px/1 var(--font-body); color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.55); writing-mode:vertical-rl; transform:rotate(180deg); letter-spacing:.02em;}
+.rdl .rdl-rain{flex:1.6; border-radius:9px 0 0 9px; border-left:2px solid #fff; border-right:0; background:linear-gradient(to top,#a4ecb0,#5fd179,#2f9e4c,#f2d230,#f28c28,#e0402c,#b52bb0,#6a1fa0);}
+.rdl .rdl-mix{border-radius:9px 0 0 9px; border-left:2px solid #fff; border-right:0; background:linear-gradient(to top,#f6d3e3,#e98fbb,#b63f85);}
+.rdl .rdl-snow{border-radius:9px 0 0 9px; border-left:2px solid #fff; border-right:0; background:linear-gradient(to top,#8ee6f2,#5eb3ea,#2c66c6,#203a8f);}
+@media (max-width:560px){ .rdl{width:18px;} .rdl span{font-size:10px;} }
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -970,9 +983,8 @@ html.banner-lock .wt-clock{visibility:hidden;}
         <span class="radar-time" id="radar-time">Loading radar…</span>
         <span class="radar-now" id="radar-now"></span>
       </div>
-      <div class="radar-map" id="radar-map" role="img" aria-label="Animated weather radar map of northern Utah ski country"></div>
+      <div class="radar-map" id="radar-map" role="img" aria-label="Animated weather radar map of northern Utah ski country"><div class="rdl" aria-hidden="true"><span class="rdl-rain">Rain</span><span class="rdl-mix">Mixed</span><span class="rdl-snow">Snow</span></div></div>
       <div class="radar-foot">
-        <span class="radar-legend" aria-hidden="true"><span>Light</span><i></i><span>Heavy</span><span class="radar-key"><svg viewBox="0 0 20 20"><g stroke="#5b8fc7" stroke-width="2" stroke-linecap="round"><path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/></g></svg>Snow<svg viewBox="0 0 20 20"><path d="M10 2.5C10 2.5 4.5 9.2 4.5 12.8a5.5 5.5 0 0 0 11 0C15.5 9.2 10 2.5 10 2.5z" fill="#3fa4ff"/></svg>Rain</span></span>
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
@@ -2419,6 +2431,12 @@ html.banner-lock .wt-clock{visibility:hidden;}
                /* HI (Oct 26, 2026): Kaneohe and Kailua, Oahu in one view. The CONUS radar mosaic stops at the mainland, so this view uses the
                   Molokai NWS radar (HMO, latest scan only, refreshed every 5 minutes) instead of the 50-minute loop. */
                hi: {c: [21.408, -157.772], z: 11, fc: [21.4022, -157.7394], fcName: "Kailua", alt: "Kaneohe and Kailua, Oahu", ridge: "HMO"}};
+  /* IEM n0q colour table (mesonet.agron.iastate.edu/GIS/rasters.php?rid=2), one entry per dBZ */
+  var REF = [[-32,133,113,143],[-31,134,115,141],[-30,135,118,139],[-29,137,121,135],[-28,138,123,133],[-27,139,126,132],[-26,141,129,128],[-25,142,131,126],[-24,143,133,124],[-23,145,136,121],[-22,146,139,119],[-21,150,145,83],[-20,155,151,91],[-19,160,157,100],[-18,165,163,109],[-17,170,169,118],[-16,176,175,126],[-15,183,184,140],[-14,189,190,148],[-13,194,196,157],[-12,199,202,166],[-11,204,208,175],[-10,207,210,180],[-9,198,201,180],[-8,192,196,180],[-7,185,190,180],[-6,179,185,180],[-5,173,179,180],[-4,164,171,180],[-3,157,165,180],[-2,151,160,180],[-1,145,154,180],[0,144,152,180],[1,136,146,178],[2,124,137,175],[3,116,131,172],[4,108,125,170],[5,99,118,168],[6,91,112,166],[7,79,103,162],[8,71,97,160],[9,65,91,158],[10,69,104,166],[11,74,118,174],[12,79,132,182],[13,86,153,195],[14,91,166,203],[15,96,180,212],[16,101,194,220],[17,106,208,228],[18,104,214,215],[19,82,214,162],[20,67,214,126],[21,53,214,91],[22,17,209,23],[23,16,200,22],[24,15,188,21],[25,14,179,20],[26,14,171,19],[27,13,162,18],[28,12,153,17],[29,12,145,16],[30,11,132,14],[31,10,124,13],[32,9,115,12],[33,9,107,11],[34,8,98,10],[35,50,115,8],[36,91,136,7],[37,132,157,6],[38,173,178,5],[39,214,199,4],[40,255,226,0],[41,255,211,0],[42,255,201,0],[43,255,192,0],[44,255,182,0],[45,255,172,0],[46,255,162,0],[47,255,148,0],[48,255,138,0],[49,255,128,0],[50,248,0,0],[51,234,0,0],[52,213,0,0],[53,198,0,0],[54,184,0,0],[55,170,0,0],[56,155,0,0],[57,141,0,0],[58,120,0,0],[59,255,255,255],[60,255,234,255],[61,255,212,255],[62,255,190,255],[63,255,157,255],[64,255,117,255],[65,249,96,250],[66,243,75,244],[67,237,54,239],[68,231,32,233],[69,178,0,255],[70,164,0,247],[71,147,0,239],[72,131,0,232],[73,114,0,221]];
+  var TH = [7,15,23,30,38,45,52,60];
+  var PAL = {rain: ["#a4ecb0","#6fd889","#45bd65","#2a9a4a","#f2d230","#f28c28","#e0402c","#b52bb0"],
+             snow: ["#a9eef6","#7fd0f0","#5aa9e6","#3d84d6","#2c62c2","#2447a3","#3a2f9a","#5a2a9e"],
+             mix:  ["#f7d6e5","#efb0cd","#e48ab6","#d4669f","#bf4a8a","#a33876","#862a66","#6a1f58"]};
   function radTiles(){ var r = V().ridge; return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + (r ? "ridge::" + r + "-N0Q-0" : "nexrad-n0q-900913"); }
   var view = "sb"; try{ var vv = localStorage.getItem("wsj-radar-view"); if(VIEWS[vv]) view = vv; }catch(e){}
   /* Linked to the header cam switch (Oct 25, 2026): the radar starts on, and follows, the header's SB / DV choice. */
@@ -2464,7 +2482,24 @@ html.banner-lock .wt-clock{visibility:hidden;}
       "  sn=any(w in t for w in ('snow','flurr','sleet','wintry','blizzard'));rn=any(w in t for w in ('rain','shower','drizzle','thunder'))\n" +
       "  kind='mix' if sn and rn else 'snow' if sn else 'rain' if rn else ('snow' if h['temperature']<=34 else 'rain')\n" +
       "except Exception: pass\n" +
-      "rad=rad.filter(ImageFilter.GaussianBlur(2.2));a=rad.split()[3].point(lambda v:min(255,int(v*1.1)));rad.putalpha(a);img=Image.alpha_composite(Image.alpha_composite(base,rad),lab);d=ImageDraw.Draw(img)\n" +
+      "try:\n" +
+      "  import numpy as np\n" +
+      "  REF=np.array(" + JSON.stringify(REF) + ");TH=" + JSON.stringify(TH) + "\n" +
+      "  PAL=" + JSON.stringify(PAL) + "[kind or 'rain']\n" +
+      "  a=np.asarray(rad).astype(np.int32);m=a[:,:,3]>40\n" +
+      "  k=(a[:,:,0]<<16)|(a[:,:,1]<<8)|a[:,:,2];u,inv=np.unique(k,return_inverse=True);uc=np.stack([u>>16,(u>>8)&255,u&255],1)\n" +
+      "  dd=((uc[:,None,:]-REF[None,:,1:])**2).sum(-1);lut=np.where(dd.min(1)<=3000,REF[dd.argmin(1),0],0);lut[lut<5]=0\n" +
+      "  dz=lut[inv].reshape(k.shape)*m\n" +
+      "  sm=dz.reshape(H//4,4,W//4,4).mean(axis=(1,3))\n" +
+      "  f=Image.fromarray(np.clip(sm*3,0,255).astype('uint8'),'L').filter(ImageFilter.GaussianBlur(2.6)).resize((W,H),Image.BILINEAR)\n" +
+      "  v=np.asarray(f).astype(float)/3;out=np.zeros((H,W,4),np.uint8)\n" +
+      "  bi=np.digitize(v,TH)\n" +
+      "  for i,c in enumerate(PAL):\n" +
+      "    out[bi==i+1]=[int(c[1:3],16),int(c[3:5],16),int(c[5:7],16),200]\n" +
+      "  rad=Image.fromarray(out,'RGBA');A=rad.split()[3]\n" +
+      "except Exception:\n" +
+      "  rad=rad.filter(ImageFilter.GaussianBlur(2.2))\n" +
+      "img=Image.alpha_composite(Image.alpha_composite(base,rad),lab);d=ImageDraw.Draw(img)\n" +
       "if kind:\n" +
       "  pts=[(x,y) for y in range(14,H-6,30) for x in range(14,W-6,30) if A.getpixel((x,y))>60]\n" +
       "  if len(pts)>60: pts=pts[::math.ceil(len(pts)/60)]\n" +
@@ -2475,7 +2510,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
       "        dx=6*math.cos(math.radians(ang));dy=6*math.sin(math.radians(ang))\n" +
       "        d.line([x-dx+1,y-dy+1,x+dx+1,y+dy+1],fill=(0,0,0,110),width=2);d.line([x-dx,y-dy,x+dx,y+dy],fill=(255,255,255,255),width=2)\n" +
       "    else:\n" +
-      "      d.polygon([(x,y-7),(x-4,y),(x+4,y)],fill=(63,164,255,255));d.ellipse([x-4,y-3,x+4,y+5],fill=(63,164,255,255),outline=(230,243,255,255))\n" +
+      "      d.line([x,y-7,x,y+7],fill=(255,255,255,215),width=2)\n" +
       "for name,la,lo in " + JSON.stringify(PLACES) + ":\n" +
       "  x,y=px(la,lo);x-=x0;y-=y0;d.ellipse([x-6,y-6,x+6,y+6],fill=(226,115,58,255),outline=(255,255,255,255),width=2);d.text((x+10,y-7),name,fill=(20,20,20,255),stroke_width=2,stroke_fill=(255,255,255,255))\n" +
       "o=io.BytesIO();img.convert('RGB').save(o,'JPEG',quality=78,optimize=True)\n" +
@@ -2528,7 +2563,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
     var fx = document.createElement("div"); fx.className = "radar-fx"; fx.setAttribute("aria-hidden", "true"); box.appendChild(fx);
     var kind = null, kindAt = 0, fxBusy = false;
     var FLAKE = '<svg viewBox="0 0 20 20"><g stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M10 2v16M3.1 6l13.8 8M3.1 14l13.8-8"/><path d="M7.5 3.5L10 5.5l2.5-2M7.5 16.5L10 14.5l2.5 2"/></g></svg>';
-    var DROP = '<svg viewBox="0 0 20 20"><path d="M10 2.5C10 2.5 4.5 9.2 4.5 12.8a5.5 5.5 0 0 0 11 0C15.5 9.2 10 2.5 10 2.5z" fill="#3fa4ff" stroke="#e6f3ff" stroke-width="1.2"/><path d="M7.6 12.5a2.6 2.6 0 0 0 1.6 2.5" stroke="#fff" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>';
+    var DROP = '<svg viewBox="0 0 20 20"><path d="M10 1.5v15" stroke="#fff" stroke-opacity=".85" stroke-width="1.7" stroke-linecap="round"/></svg>';
     function getKind(cb){
       if(kind && Date.now() - kindAt < 15*60000) return cb(kind);
       var fcv = V(); fetch("https://api.weather.gov/points/" + fcv.fc[0].toFixed(4) + "," + fcv.fc[1].toFixed(4), {headers: {"Accept": "application/geo+json"}}).then(function(r){ return r.json(); })
@@ -2576,7 +2611,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
               var gx = Math.round(b.min.x + jx - tx0 * 256), gy = Math.round(b.min.y + jy - ty0 * 256);
               if(gx < 0 || gy < 0 || gx >= cv.width || gy >= cv.height) continue;
               var o = (gy * cv.width + gx) * 4;
-              if(data[o + 3] > 60) pts.push([jx, jy]);
+              if(data[o + 3] > 60 && dbz(data[o], data[o + 1], data[o + 2]) >= 12) pts.push([jx, jy]);
             }
           }
           if(pts.length > 60){ var keep = []; for(var i = 0; i < pts.length; i += Math.ceil(pts.length / 60)) keep.push(pts[i]); pts = keep; }
@@ -2597,36 +2632,109 @@ html.banner-lock .wt-clock{visibility:hidden;}
     map.on("moveend zoomend", function(){ fx.innerHTML = ""; updateFx(); });
     if(pick) pick.addEventListener("change", function(){ setView(pick.value); kind = null; var nw = document.getElementById("radar-now"); if(nw) nw.textContent = ""; map.setView(V().c, V().z); idx = OFFS.length - 1; build(); });
     setInterval(function(){ if(!document.hidden){ kind = null; updateFx(); } }, 5*60000);
-    var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], idx = OFFS.length - 1, timer = null, base = null;
-    function build(){
-      layers.forEach(function(l){ map.removeLayer(l); });
-      layers = [];
-      var bust = Math.floor(Date.now() / 300000);
-      base = new Date(Math.floor(Date.now() / 300000) * 300000);
-      if(V().ridge){
-        var lr = L.tileLayer(radTiles() + "/{z}/{x}/{y}.png?_=" + bust, {opacity: 0.85, maxZoom: 13, zIndex: 10, pane: "radar"});
-        lr.addTo(map); layers.push(lr); tl.textContent = "Latest scan · NWS Molokai radar"; return;
+    var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], ready = 0, idx = OFFS.length - 1, timer = null, base = null, gen = 0;
+    /* Smoothed radar (Oct 27, 2026): each frame's NWS tiles are read pixel by pixel, turned back into reflectivity (dBZ),
+       averaged and blurred into soft shapes, then painted in stepped bands with the weather-app palette for the forecast precip type. */
+    function hex(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+    var PALRGB = {}; for(var pk in PAL) PALRGB[pk] = PAL[pk].map(hex);
+    var dcache = {};
+    function dbz(r, g, b){
+      var k = (r << 16) | (g << 8) | b, v = dcache[k]; if(v !== undefined) return v;
+      var best = 0, bd = 1e9;
+      for(var i = 0; i < REF.length; i++){ var dr = r - REF[i][1], dg = g - REF[i][2], db = b - REF[i][3], d = dr*dr + dg*dg + db*db; if(d < bd){ bd = d; best = REF[i][0]; } }
+      if(bd > 3000 || best < 5) best = 0; dcache[k] = best; return best;
+    }
+    function boxBlur(f, w, h, r){
+      var t = new Float32Array(f.length), x, y, i, acc, n = 2*r + 1;
+      for(y = 0; y < h; y++){ acc = 0; for(i = -r; i <= r; i++) acc += f[y*w + Math.min(w-1, Math.max(0, i))];
+        for(x = 0; x < w; x++){ t[y*w + x] = acc / n; acc += f[y*w + Math.min(w-1, x + r + 1)] - f[y*w + Math.max(0, x - r)]; } }
+      for(x = 0; x < w; x++){ acc = 0; for(i = -r; i <= r; i++) acc += t[Math.min(h-1, Math.max(0, i))*w + x];
+        for(y = 0; y < h; y++){ f[y*w + x] = acc / n; acc += t[Math.min(h-1, y + r + 1)*w + x] - t[Math.max(0, y - r)*w + x]; } }
+    }
+    function renderFrame(url, palKey, cb){
+      var z = map.getZoom(), b = map.getPixelBounds(), PAD = 160;
+      var tx0 = Math.floor((b.min.x - PAD) / 256), ty0 = Math.max(0, Math.floor((b.min.y - PAD) / 256)), tx1 = Math.floor((b.max.x + PAD) / 256), ty1 = Math.floor((b.max.y + PAD) / 256);
+      var W = (tx1 - tx0 + 1) * 256, H = (ty1 - ty0 + 1) * 256;
+      var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var ctx = cv.getContext("2d"), pending = 0, any = false;
+      function done(){
+        if(--pending > 0) return;
+        if(!any){ cb(null); return; }
+        var data; try{ data = ctx.getImageData(0, 0, W, H).data; }catch(e){ cb(null); return; }
+        var F = 4, fw = W / F, fh = H / F, f = new Float32Array(fw * fh), x, y, o;
+        for(y = 0; y < H; y++) for(x = 0; x < W; x++){ o = (y*W + x) * 4; if(data[o+3] > 40) f[(y >> 2)*fw + (x >> 2)] += dbz(data[o], data[o+1], data[o+2]); }
+        for(o = 0; o < f.length; o++) f[o] /= F * F;
+        boxBlur(f, fw, fh, 2); boxBlur(f, fw, fh, 2); boxBlur(f, fw, fh, 1);
+        var S = 2, ow = W / S, oh = H / S, out = document.createElement("canvas"); out.width = ow; out.height = oh;
+        var octx = out.getContext("2d"), im = octx.createImageData(ow, oh), d = im.data, pal = PALRGB[palKey] || PALRGB.rain;
+        for(y = 0; y < oh; y++){
+          var fy = Math.min(fh - 1.001, Math.max(0, (y + 0.5) * S / F - 0.5)), y0 = fy | 0, ay = fy - y0;
+          for(x = 0; x < ow; x++){
+            var fx2 = Math.min(fw - 1.001, Math.max(0, (x + 0.5) * S / F - 0.5)), x0 = fx2 | 0, ax = fx2 - x0, p = y0*fw + x0;
+            var v = (f[p]*(1-ax) + f[p+1]*ax)*(1-ay) + (f[p+fw]*(1-ax) + f[p+fw+1]*ax)*ay;
+            if(v < TH[0]) continue;
+            var bi = 0; while(bi < TH.length - 1 && v >= TH[bi+1]) bi++;
+            var c = pal[bi]; o = (y*ow + x) * 4; d[o] = c[0]; d[o+1] = c[1]; d[o+2] = c[2]; d[o+3] = 255;
+          }
+        }
+        octx.putImageData(im, 0, 0);
+        var bounds = L.latLngBounds(map.unproject([tx0*256, (ty1+1)*256], z), map.unproject([(tx1+1)*256, ty0*256], z));
+        cb(out.toDataURL("image/png"), bounds);
       }
-      OFFS.forEach(function(m, i){
-        var url = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913" + (m ? "-m" + (m < 10 ? "0" : "") + m + "m" : "") + "/{z}/{x}/{y}.png?_=" + bust;
-        var l = L.tileLayer(url, {opacity: 0, maxZoom: 13, zIndex: 10 + i, pane: "radar"});
-        l.addTo(map); layers.push(l);
+      var bust = Math.floor(Date.now() / 300000);
+      for(var tx = tx0; tx <= tx1; tx++) for(var ty = ty0; ty <= ty1; ty++){
+        pending++;
+        (function(tx, ty){
+          var n = Math.pow(2, z), wx = ((tx % n) + n) % n, im = new Image(); im.crossOrigin = "anonymous";
+          im.onload = function(){ try{ ctx.drawImage(im, (tx - tx0) * 256, (ty - ty0) * 256); any = true; }catch(e){} done(); };
+          im.onerror = function(){ done(); };
+          im.src = url + "/" + z + "/" + wx + "/" + ty + ".png?_=" + bust;
+        })(tx, ty);
+      }
+    }
+    var OPA = 0.78;
+    function frameUrl(m){ return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913" + (m ? "-m" + (m < 10 ? "0" : "") + m + "m" : ""); }
+    function build(){
+      var my = ++gen;
+      base = new Date(Math.floor(Date.now() / 300000) * 300000);
+      getKind(function(k){
+        if(my !== gen) return;
+        var palKey = (k && k.k) || "rain", list = V().ridge ? [radTiles()] : OFFS.map(frameUrl), fresh = new Array(list.length), got = 0;
+        var order = []; for(var q = list.length - 1; q >= 0; q--) order.push(q);
+        (function next(){
+          if(my !== gen) return;
+          if(!order.length) return;
+          var i = order.shift();
+          renderFrame(list[i], palKey, function(src, bounds){
+            if(my !== gen) return;
+            var ov = src ? L.imageOverlay(src, bounds, {opacity: 0, pane: "radar", interactive: false}) : L.layerGroup();
+            ov.addTo(map); fresh[i] = ov; got++;
+            if(i === list.length - 1){
+              layers.forEach(function(l){ map.removeLayer(l); });
+              layers = fresh; ready = 0; idx = list.length - 1; show(idx);
+              if(V().ridge) tl.textContent = "Latest scan · NWS Molokai radar";
+            }
+            if(got === list.length) ready = list.length;
+            setTimeout(next, 30);
+          });
+        })();
       });
-      show(OFFS.length - 1);
     }
     function show(i){
-      layers.forEach(function(l, k){ l.setOpacity(k === i ? 0.85 : 0); });
+      layers.forEach(function(l, k){ if(l && l.setOpacity) l.setOpacity(k === i ? OPA : 0); });
+      if(V().ridge) return;
       var m = OFFS[i], t = new Date(base.getTime() - m * 60000);
       tl.textContent = (m ? "−" + m + " min · " : "Now · ") + hm(t);
     }
     function step(){
-      if(V().ridge || layers.length < OFFS.length){ clearTimeout(timer); timer = setTimeout(step, 3000); return; }
+      if(V().ridge || ready < OFFS.length){ clearTimeout(timer); timer = setTimeout(step, 3000); return; }
       idx = (idx + 1) % OFFS.length; show(idx);
       clearTimeout(timer); timer = setTimeout(step, idx === OFFS.length - 1 ? 2200 : 550);
     }
+    var rebuildT = null;
+    map.on("zoomend moveend", function(){ clearTimeout(rebuildT); rebuildT = setTimeout(build, 500); });
     build();
     timer = setTimeout(step, 1500);
-    setInterval(function(){ if(!document.hidden) build(); }, 5*60000);
+    setInterval(function(){ if(!document.hidden){ kind = null; build(); } }, 5*60000);
   };
   document.head.appendChild(s);
 })();
