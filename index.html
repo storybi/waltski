@@ -885,6 +885,20 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 .wt-clock-d{margin-top:.45em; font:800 clamp(11px,2.2vw,18px)/1.2 "Montserrat", var(--font-body), sans-serif; letter-spacing:.14em; text-transform:uppercase;}
 html.banner-lock .wt-clock{visibility:hidden;}
 </style>
+<style>
+/* Weather Watch without a heading (Mark, Oct 27, 2026): radar starts right under the weather bar / ticker; on phones the radar header is one compact row and the map is taller */
+#snow{margin-top:10px;}
+#snow .radar{margin-top:0;}
+@media (max-width:640px){
+  #snow .radar-head{padding:6px 8px; gap:2px 8px; flex-wrap:nowrap; align-items:center;}
+  #snow .radar-head h3{display:none;}
+  #snow .radar-pick{margin-left:0; flex:1 1 auto; min-width:0; padding:3px 6px;}
+  #snow .radar-time{white-space:nowrap; font-size:11px;}
+  #snow .radar-head{flex-wrap:wrap;}
+  #snow .radar-now{font-size:11px;}
+  #snow .radar-map{height:min(62vh,420px);}
+}
+</style>
 <div id="wt-banner" aria-hidden="true"></div>
 <div class="wrap">
 
@@ -948,8 +962,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
 
   <!-- ================= SNOW DESK ================= -->
   <section id="snow">
-    <div class="section-head"><h2>Weather Watch</h2><div class="line"></div></div>
-    <div class="section-sub">OpenSnow’s daily take, plus the most useful Northern Wasatch forecast of the day.</div>
+    <!-- Weather Watch heading and sub line removed (Mark, Oct 27, 2026) so the Doppler radar sits higher on a phone; do not add them back. -->
     <!-- Live Doppler radar over Mountain Green & Snowbasin (added Oct 25, 2026). Rendered by the "Live radar" script; keep as is. -->
     <div class="radar" id="radar">
       <div class="radar-head">
