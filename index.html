@@ -449,7 +449,7 @@ body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-in
 .tk-sp.up polyline{stroke:#3ddc84;} .tk-sp.down polyline{stroke:#ff5c6c;}
 .tk-it .up{color:#3ddc84;} .tk-it .down{color:#ff5c6c;} .tk-it .flat{color:#bdbdbd;}
 @keyframes tk-scroll{from{transform:translateX(0)} to{transform:translateX(-50%)}}
-@media (prefers-reduced-motion: reduce){ .tk-track{animation:none;} .tk-view{overflow-x:auto;} }
+/* Tickers keep scrolling even when the computer asks for reduced motion (Windows "Animation effects" off) — Mark, Oct 28, 2026. They still pause on hover. */
 @media (max-width:480px){ .tk-lbl{display:none;} }
 .askbar{top:calc(env(safe-area-inset-top,0px) + var(--tick-h));}
 /* Update-now button (fires the refresh scheduled task) */
