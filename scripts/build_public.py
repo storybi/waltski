@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the public www.waltski.com page from Mark's private claude.ai "News" artifact.
+"""Build the public www.skiinut.com page from Mark's private claude.ai "News" artifact.
 
 Usage:  python3 scripts/build_public.py <artifact index.html> <output index.html>
 
@@ -256,12 +256,12 @@ head = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Waltski News</title>
-<meta name="description" content="Waltski News — markets, economy, top stories, Wasatch snow and weather, refreshed twice a day.">
-<meta property="og:title" content="Waltski News">
+<title>Skiinut</title>
+<meta name="description" content="Skiinut — markets, economy, top stories, Wasatch snow and weather, refreshed twice a day.">
+<meta property="og:title" content="Skiinut">
 <meta property="og:description" content="Markets, economy, top stories, Wasatch snow and weather — refreshed twice a day.">
 <meta name="theme-color" content="#000000">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M14 3h12v11h11v12H26v11H14V26H3V14h11z' fill='%23E2733A'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23E2733A'/%3E%3Ctext x='20' y='28' font-family='Montserrat,Arial,sans-serif' font-weight='800' font-size='20' fill='%23fff' text-anchor='middle'%3EIN%3C/text%3E%3C/svg%3E">
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
