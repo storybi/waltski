@@ -3226,15 +3226,15 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
 })();
 </script>
 <style>
-/* Two pages below the header (Mark, Oct 28, 2026): "Ski Weather" (main page) and "Other News" (business & economic news + Morning Devotion).
+/* Two pages below the header (Mark, Oct 28, 2026): "Ski Weather" (main page) and "Other News" (business & economic news, Sports + Morning Devotion).
    The header, weather bar, ticker and footer show on both. html.view-news picks the news page. Keep as is. */
 html:not(.view-news) #stories, html:not(.view-news) #markets, html:not(.view-news) #spacex, html:not(.view-news) #economy,
 html:not(.view-news) #industrial, html:not(.view-news) #medical, html:not(.view-news) #claude-tips, html:not(.view-news) #ai-business,
-html:not(.view-news) #daily-word{display:none!important;}
-html.view-news #snow, html.view-news #sports, html.view-news #weather, html.view-news #weather-more, html.view-news #models,
+html:not(.view-news) #daily-word, html:not(.view-news) #sports{display:none!important;}
+html.view-news #snow, html.view-news #weather, html.view-news #weather-more, html.view-news #models,
 html.view-news #shopping, html.view-news #sbmap{display:none!important;}
-html:not(.view-news) .wt-nav a:is([href="#stories"],[href="#markets"],[href="#spacex"],[href="#economy"],[href="#industrial"],[href="#medical"],[href="#claude-tips"],[href="#ai-business"],[href="#daily-word"]),
-html.view-news .wt-nav a:is([href="#snow"],[href="#sports"],[href="#weather"],[href="#sbmap"],[href="#shopping"]){display:none;}
+html:not(.view-news) .wt-nav a:is([href="#stories"],[href="#markets"],[href="#spacex"],[href="#economy"],[href="#industrial"],[href="#medical"],[href="#claude-tips"],[href="#ai-business"],[href="#sports"],[href="#daily-word"]),
+html.view-news .wt-nav a:is([href="#snow"],[href="#weather"],[href="#sbmap"],[href="#shopping"]){display:none;}
 html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{display:none;}
 .wt-nav a.wt-view-link{color:#fff!important; background:#E2733A; padding:1px 8px; border-radius:2px; font-weight:700; text-shadow:none!important;}
 .wt-nav a.wt-view-link:hover,.wt-nav a.wt-view-link:focus-visible{background:#c95f2a; text-decoration:none;}
@@ -3242,8 +3242,8 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 <script>
 (function(){
   var root = document.documentElement;
-  var NEWS = ["news","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","daily-word"];
-  var SKI = ["ski","snow","sports","weather","weather-more","models","shopping","sbmap"];
+  var NEWS = ["news","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","sports","daily-word"];
+  var SKI = ["ski","snow","weather","weather-more","models","shopping","sbmap"];
   function setView(v, jump){
     var was = root.classList.contains("view-news"), news = v === "news";
     root.classList.toggle("view-news", news);
