@@ -1805,8 +1805,13 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     var hm=d.toLocaleTimeString("en-US",{timeZone:tz,hour:"2-digit",minute:"2-digit",hour12:false}).split(":"), tod=(+hm[0]%24)*60+(+hm[1]);
     var hello = tod<8*60 ? "Rise and shine" : tod<11*60+30 ? "Happy mid-morning" : tod<17*60+30 ? "Good afternoon" : "Good evening";
     var wg=document.getElementById("wt-greet"); if(wg) wg.textContent=hello+", it\u2019s "+day;
-    /* Morning Devotion appears only on the morning edition: a refresh at or after 11:30 a.m. MT (the noon run and later) hides the section and its nav link. */
-    if(tod>=11*60+30){ var dw=document.getElementById("daily-word"); if(dw) dw.hidden=true; var dl=document.querySelector('.wt-nav a[href="#daily-word"]'); if(dl) dl.hidden=true; }
+    /* Morning Devotion (Mark, Oct 27, 2026): hidden from noon to midnight Mountain Time by the reader's clock, whatever time the
+       paper was refreshed; it shows from midnight to noon. Checked on load and every minute. */
+    (function(){
+      function devo(){ var n=new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"2-digit",hour12:false}), hide=(+n%24)>=12;
+        var dw=document.getElementById("daily-word"); if(dw) dw.hidden=hide; var dl=document.querySelector('.wt-nav a[href="#daily-word"]'); if(dl) dl.hidden=hide; }
+      devo(); setInterval(devo, 60000);
+    })();
     document.getElementById("wt-upd").textContent=abbr+" "+dd+" "+t+" MT";
     var mins=Math.round((Date.now()-d.getTime())/60000), ago="";
     if(mins>=0){ ago = mins<60 ? mins+" min ago" : mins<1440 ? Math.round(mins/60)+" hr ago" : Math.round(mins/1440)+" days ago"; }
