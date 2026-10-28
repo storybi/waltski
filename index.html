@@ -3344,6 +3344,13 @@ html.view-news #ski-ticker{display:none!important;}
 })();
 </script>
 <style>
+/* Ski Weather page canvas (Mark, Oct 28, 2026): in light mode the page behind the sections is plain white (no newsprint texture), so the
+   off-white framed sections stand out. Other News keeps the newsprint. Dark mode is unchanged. Section frames have no blue left stripe. */
+@media (prefers-color-scheme: light){ html:not(.view-news):not([data-theme="dark"]){--bg:#ffffff; --paper:none;} }
+html:not(.view-news)[data-theme="light"]{--bg:#ffffff; --paper:none;}
+.snow-card, .radar, .wxv{border-left:1px solid var(--border)!important;}
+</style>
+<style>
 /* Two pages below the header (Mark, Oct 28, 2026): "Ski Weather" (main page) and "Other News" (business & economic news, Sports + Morning Devotion).
    The header, weather bar, ticker and footer show on both. html.view-news picks the news page. Keep as is. */
 html:not(.view-news) #stories, html:not(.view-news) #markets, html:not(.view-news) #spacex, html:not(.view-news) #economy,
