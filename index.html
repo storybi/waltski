@@ -887,6 +887,12 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 .wt-clock-ap{font-size:.32em; font-weight:700; letter-spacing:.08em; margin-left:.3em; vertical-align:.95em;}
 .wt-clock-d{margin-top:.45em; font:800 clamp(11px,2.2vw,18px)/1.2 "Montserrat", var(--font-body), sans-serif; letter-spacing:.14em; text-transform:uppercase;}
 html.banner-lock .wt-clock{visibility:hidden;}
+/* SKIINUT title over the locked photo band (Mark, Oct 27, 2026): left-justified, lined up with the page's title, only while the band is locked */
+.wt-lock-name{position:fixed; top:0; left:calc(max(16px, env(safe-area-inset-left,0px)) + max(0px, (100vw - 1212px) / 2) + 12px); z-index:4; height:var(--lock-h,0px); display:flex; align-items:center; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s;
+  font-family:"Montserrat","Helvetica Neue",Arial,sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.12em; font-size:clamp(13px,4.2vw,40px); line-height:1; white-space:nowrap; color:#F4EFE3; text-shadow:0 2px 10px rgba(0,0,0,.75), 0 1px 3px rgba(0,0,0,.8);}
+.wt-lock-name .wt-in{color:#E2733A; font-weight:inherit;}
+html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
+@media (max-width:640px){ .wt-lock-name{left:max(16px, env(safe-area-inset-left,0px));} }
 </style>
 <style>
 /* Weather Watch without a heading (Mark, Oct 27, 2026): radar starts right under the weather bar / ticker; on phones the radar header is one compact row and the map is taller */
@@ -916,6 +922,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
 @media (max-width:560px){ .rdl{width:18px;} .rdl span{font-size:10px;} }
 </style>
 <div id="wt-banner" aria-hidden="true"></div>
+<div class="wt-lock-name" id="wt-lock-name" aria-hidden="true"><span>Ski<b class="wt-in">in</b>ut</span></div>
 <div class="wrap">
 
   <header class="wt-mast" id="top">
@@ -970,7 +977,7 @@ html.banner-lock .wt-clock{visibility:hidden;}
   <!-- Section links locked under the stock ticker (Mark, Oct 26, 2026) -->
   <div class="wt-mast wt-mast-2 wt-dock-nav">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#sbmap">SB Map</a><a href="#top" class="wt-home-link">Home</a><a href="#daily-word">Devotion</a>
+      <a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#sbmap">SB Map</a><a href="#daily-word">Devotion</a><a href="#top" class="wt-home-link">Home</a>
     </nav>
   </div>
   </div>
