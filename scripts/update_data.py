@@ -612,13 +612,21 @@ def do_ski_resorts(s, now_mt):
     return ski_conditions.do_ski(s, now_mt, set_var=set_var, get_var=get_var)
 
 
+def do_wsj_videos(s, now_mt):
+    """WSJ Video section at the top of the Other News page (Mark, Oct 28, 2026): see scripts/wsj_videos.py."""
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import wsj_videos
+    return wsj_videos.do_wsj(s, now_mt, set_var=set_var, get_var=get_var)
+
+
 def main():
     path = sys.argv[1]
     s = open(path, encoding="utf-8").read()
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001

@@ -1054,7 +1054,18 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
 
 
   <!-- ================= TOP STORIES ================= -->
-  <section id="stories">
+  <section id="wsjv">
+  <div class="section-head"><h2>WSJ Video</h2><div class="line"></div></div>
+  <div class="wsjv" id="wsjv-box">
+    <div class="wsjv-frame" id="wsjv-frame"><div class="wsjv-ph" id="wsjv-ph">Loading the newest Wall Street Journal video…</div></div>
+    <div class="wsjv-meta">
+      <div class="wsjv-txt"><b class="wsjv-title" id="wsjv-title"></b><span class="wsjv-sub" id="wsjv-sub"></span></div>
+      <div class="wsjv-btns"><a class="wsjv-yt" id="wsjv-yt" href="https://www.youtube.com/@wsj/videos" target="_blank" rel="noopener">YouTube ↗</a><button type="button" class="wsjv-next" id="wsjv-next">Next video ›</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="stories">
     <div class="section-head"><h2>Top Stories</h2><div class="line"></div></div>
     <div class="section-sub">A blend of market-moving business news, global economic policy, and management strategy.</div>
     <div class="stories">
@@ -3352,6 +3363,80 @@ html.view-news #ski-ticker{display:none!important;}
 })();
 </script>
 <style>
+/* WSJ Video (Mark, Oct 28, 2026): top section of the Other News page. Plays the newest Wall Street Journal YouTube video this device
+   hasn't watched yet, then works back through older ones until a new video posts. Watched = started playing (or skipped). */
+html:not(.view-news) #wsjv{display:none!important;}
+#wsjv .section-head{margin-top:18px;}
+.wsjv{background:var(--surface); border:1px solid var(--border);}
+.wsjv-frame{position:relative; aspect-ratio:16/9; background:#000;}
+.wsjv-frame iframe,.wsjv-frame > div:not(.wsjv-ph){position:absolute; inset:0; width:100%; height:100%; border:0;}
+.wsjv-ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:16px; text-align:center; color:#ddd; font:600 14px/1.4 var(--font-body);}
+.wsjv-ph a{color:#fff;}
+.wsjv-meta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; padding:10px 14px;}
+.wsjv-txt{min-width:0; flex:1 1 320px;}
+.wsjv-title{display:block; font:700 16px/1.3 var(--font-display);}
+.wsjv-sub{display:block; font:500 12px var(--font-body); color:var(--fg-faint); margin-top:3px;}
+.wsjv-btns{display:flex; gap:8px; flex:none;}
+.wsjv-yt,.wsjv-next{font:700 11px var(--font-body); letter-spacing:.06em; text-transform:uppercase; padding:6px 10px; border:1px solid var(--fg); background:var(--surface); color:var(--fg); text-decoration:none; cursor:pointer; border-radius:0;}
+.wsjv-next{background:var(--fg); color:var(--bg);}
+.wsjv-next:disabled{opacity:.45; cursor:default;}
+</style>
+<script>
+/* WSJ Video — WSJV is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/wsj_videos.py) and by the daily Claude refresh.
+   WSJV = {asof, v:[[videoId, title, "11h ago"], ...]} newest first (Videos tab, no Shorts). Keep the variable name. */
+(function(){
+  var WSJV = {"asof":"Wed 9:07 p.m. MT","v":[["KdzWdQys4wA","Young Men Debate Trump’s Presidency, the Iran War and Midterms | WSJ","11h ago"],["d7saYBHziTI","We Went Inside Cuba to See Its Messy Economic Transformation | WSJ","1d ago"],["ToGXm1r198U","How the USS George Washington Is Preparing for Possible Iran Escalation | WSJ","4d ago"],["zPiJKJuQ7i0","Why California’s $33B Bullet Train Is Now a $231B Problem | WSJ","6d ago"],["9A6YGb9gqJs","I Tested Apple’s iPhone Duo for a Week. Is It Worth $2K? | WSJ","7d ago"],["hW5UjNHCma0","Trump Remade the GOP. How Do the Ultrarich Feel? | WSJ","8d ago"],["oGapuxMg-Cg","The Tiny Robot Solving a Massive Underground Crisis | WSJ","13d ago"],["DMXtPMDJP-4","The Space Force Showed Us Its Weapons Used in Iran and Venezuela | WSJ Equipped","2w ago"],["zsEgP2gvxTs","Young Voters Helped Trump Win. How Do They Feel Now? | WSJ","2w ago"],["Lk8MJWcZrF8","How to Actually Fix the Colorado River Crisis | WSJ Pro Perfected","2w ago"],["Ou-YSLb56zo","Why This Deep Red State Is a Battleground for the GOP’s Future | WSJ","3w ago"],["hK15MsOoFt0","Why the Kushner-Trump $1.4B Albania Resort Is in Trouble | WSJ","3w ago"],["nXw6le320fA","Why Warner Bros. Is Being Sold for $81B | WSJ What Went Wrong","3w ago"],["LLGQ0wstfG0","What Democrats Actually Think of the Party, the DSA and Midterms | WSJ","3w ago"],["R_2Vgv-2e_w","How Arc’teryx Became a $2B+ Luxury Brand Without Intending To | WSJ The Economics Of","4w ago"],["mMx6iYjvTgk","Miami-Dade Voted for Trump. How Do Voters Feel About Him Now? | WSJ","4w ago"],["-s4x7CWCMS8","Evan Gershkovich on What Life Inside Russia’s Prison System Was Like | WSJ","1mo ago"],["i27Q6_kFdSA","How a Speed Boat Carries $200M of Cocaine Into Europe | WSJ","1mo ago"],["qeylyWx9Mk4","How a Nuclear Engineer Is Saving Guitar Center | WSJ","1mo ago"],["etQYQV_hkVA","Why South Korea’s Entertainment Industry Is Betting on Robots | WSJ","1mo ago"],["OjJXTfrjw8c","Michigan Is a Key Midterm Battleground. What Do Voters Want? | WSJ","1mo ago"],["h7qD6QkiYrI","María Corina Machado on Why She's Returning to Venezuela Now | WSJ","1mo ago"],["kerk4XRzTEQ","This Critical Oil Chokepoint Is Now Under Houthi Control | WSJ","1mo ago"],["te_HFbZN1Tw","Why Ireland Is So Vulnerable to Russian Threats | WSJ","1mo ago"],["IabchoqERw0","iOS 27: How Apple’s New Siri AI Can See and Search Your iPhone | WSJ","1mo ago"],["xfl-XZjPFA8","How Burger King’s New Whopper Is Winning Back Customers | WSJ","1mo ago"],["CpVhFVcnx8M","Why These $500 Japanese Jeans Have a Cult Following | WSJ Coveted","1mo ago"],["W8MQZKNnJok","How One Woman Escaped Epstein’s Abuse | WSJ","1mo ago"],["HBuixfZC-Ao","Why 10K People Are Waiting to Search the Thames | WSJ","1mo ago"],["RhCXhWQ4kvU","The Life-Saving Secrets Behind Emergency Room Design | WSJ Pro Perfected","1mo ago"]]};
+  var KEY = "wsj-video-seen", seen = [];
+  try{ seen = JSON.parse(localStorage.getItem(KEY) || "[]") || []; }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(seen.slice(-300))); }catch(e){} }
+  function markSeen(id){ if(id && seen.indexOf(id) < 0){ seen.push(id); save(); } }
+  var inClaude = !!(window.claude && window.claude.use);
+  var cur = null, player = null, apiReady = false, wantId = null;
+  function pick(){ var list = WSJV.v || []; for(var i = 0; i < list.length; i++){ if(seen.indexOf(list[i][0]) < 0) return {v: list[i], i: i, fresh: true}; }
+    return list.length ? {v: list[0], i: 0, fresh: false} : null; }
+  function clean(t){ return String(t).replace(/\s*\|\s*WSJ\b.*$/, ""); }
+  function left(){ var n = 0; (WSJV.v || []).forEach(function(x){ if(seen.indexOf(x[0]) < 0) n++; }); return n; }
+  function show(){
+    cur = pick();
+    var t = document.getElementById("wsjv-title"), sub = document.getElementById("wsjv-sub"), yt = document.getElementById("wsjv-yt"), nx = document.getElementById("wsjv-next");
+    if(!cur){ t.textContent = "WSJ videos aren\u2019t available right now."; return; }
+    var id = cur.v[0], n = left();
+    t.textContent = clean(cur.v[1]);
+    sub.textContent = "The Wall Street Journal · posted " + cur.v[2] + (cur.fresh ? (cur.i === 0 ? " · newest video" : " · " + n + " unwatched") : " · you\u2019ve seen every recent video — new ones appear here as soon as WSJ posts them");
+    yt.href = "https://www.youtube.com/watch?v=" + id;
+    nx.disabled = !cur.fresh || n <= 1;
+    if(inClaude){
+      var f = document.getElementById("wsjv-frame");
+      f.innerHTML = '<div class="wsjv-ph">Videos play on skiinut.com. <a href="https://www.youtube.com/watch?v=' + id + '" target="_blank" rel="noopener">Watch \u201c' + clean(cur.v[1]).replace(/</g, "&lt;") + '\u201d on YouTube \u2197</a></div>';
+      return;
+    }
+    if(player && player.cueVideoById){ player.cueVideoById(id); }
+    else { wantId = id; if(apiReady) make(); }
+  }
+  function make(){
+    if(player || !wantId) return;
+    var f = document.getElementById("wsjv-frame"); f.innerHTML = '<div id="wsjv-player"></div>';
+    player = new YT.Player("wsjv-player", {videoId: wantId, playerVars: {rel: 0, modestbranding: 1, playsinline: 1},
+      events: {onStateChange: function(e){
+        if(e.data === 1 && cur) markSeen(cur.v[0]);                 /* started playing = watched */
+        if(e.data === 0){ show(); }                                    /* finished: line up the next unwatched video */
+      }}});
+  }
+  document.getElementById("wsjv-next").addEventListener("click", function(){ if(cur) markSeen(cur.v[0]); show(); });
+  document.getElementById("wsjv-yt").addEventListener("click", function(){ if(cur) markSeen(cur.v[0]); });
+  if(!inClaude){
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function(){ apiReady = true; if(prev) try{ prev(); }catch(e){} make(); };
+    if(window.YT && window.YT.Player){ apiReady = true; }
+    else { var sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.async = true;
+      sc.onerror = function(){ var f = document.getElementById("wsjv-frame"); if(cur) f.innerHTML = '<div class="wsjv-ph"><a href="https://www.youtube.com/watch?v=' + cur.v[0] + '" target="_blank" rel="noopener">Watch on YouTube \u2197</a></div>'; };
+      document.head.appendChild(sc); }
+  }
+  show();
+  if(apiReady) make();
+})();
+</script>
+<style>
 /* Radar header (Mark, Oct 28, 2026): the resort dropdown has a fixed, narrow width and the radar time readout has its own fixed slot,
    so the dropdown never stretches or moves as the loop's time text changes. */
 #snow .radar-pick{flex:0 0 auto!important; width:140px!important; min-width:0; max-width:140px; margin-left:0!important; text-overflow:ellipsis;}
@@ -3466,7 +3551,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 <script>
 (function(){
   var root = document.documentElement;
-  var NEWS = ["news","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","sports","daily-word"];
+  var NEWS = ["news","wsjv","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","sports","daily-word"];
   var SKI = ["ski","snow","weather","weather-more","models","shopping","sbmap"];
   function setView(v, jump){
     var was = root.classList.contains("view-news"), news = v === "news";
