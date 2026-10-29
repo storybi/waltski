@@ -890,6 +890,9 @@ html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 .wt-clock-ap{font-size:.32em; font-weight:700; letter-spacing:.08em; margin-left:.3em; vertical-align:.95em;}
 .wt-clock-d{margin-top:.45em; font:800 clamp(11px,2.2vw,18px)/1.2 "Montserrat", var(--font-body), sans-serif; letter-spacing:.14em; text-transform:uppercase;}
 html.banner-lock .wt-clock{visibility:hidden;}
+/* Night clock (Mark, Oct 29, 2026): from 9 p.m. to 7 a.m. by the reader's clock, the time is twice as large (date line unchanged) */
+html.clock-night .wt-clock-t{font-size:clamp(64px,16vw,152px);}
+html.clock-night #wt-head-end{height:clamp(110px,22vw,230px);}
 /* SKIINUT title over the locked photo band (Mark, Oct 27, 2026): left-justified, lined up with the page's title, only while the band is locked */
 .wt-lock-name{position:fixed; top:0; left:calc(max(16px, env(safe-area-inset-left,0px)) + max(0px, (100vw - 1212px) / 2) + 12px); z-index:4; height:var(--lock-h,0px); display:flex; align-items:center; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s;
   font-family:"Montserrat","Helvetica Neue",Arial,sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.12em; font-size:clamp(13px,4.2vw,40px); line-height:1; white-space:nowrap; color:#F4EFE3; text-shadow:0 2px 10px rgba(0,0,0,.75), 0 1px 3px rgba(0,0,0,.8);}
@@ -3661,6 +3664,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
     var n=new Date(), parts={};
     try{ new Intl.DateTimeFormat("en-US",{timeZone:tz,hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(n).forEach(function(p){parts[p.type]=p.value;}); }
     catch(e){ var h=n.getHours(); parts={hour:String(h%12||12),minute:("0"+n.getMinutes()).slice(-2),dayPeriod:h<12?"AM":"PM"}; }
+    var hh=n.getHours(); document.documentElement.classList.toggle("clock-night", hh>=21 || hh<7);
     hm.textContent=parts.hour+":"+parts.minute;
     ap.textContent=(parts.dayPeriod||"").toUpperCase();
     try{ dd.textContent=n.toLocaleDateString("en-US",{timeZone:tz,weekday:"long",month:"long",day:"numeric",year:"numeric"}); }
