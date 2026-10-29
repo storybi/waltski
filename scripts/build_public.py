@@ -243,8 +243,15 @@ video_js = r"""<script>
       busy = false;
       if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
       fails = 0;
-      img.src = probe.src;
-      img.classList.add("on"); L[front].classList.remove("on"); front = next;
+      /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
+      var old = L[front];
+      img.onload = function(){
+        img.onload = null;
+        img.style.transition = "none"; img.classList.remove("on"); img.style.zIndex = 2; old.style.zIndex = 1; void img.offsetWidth; img.style.transition = "";
+        img.classList.add("on");
+        setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
+      };
+      img.src = probe.src; front = next;
       root.classList.add("has-banner", "has-video");
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };

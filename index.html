@@ -857,6 +857,13 @@ html.banner-lock .askbar{top:var(--lock-h,0px);}
 html.banner-lock .wt-dock{top:calc(var(--ask-h,0px) + var(--lock-h,0px));}
 </style>
 <style>
+/* Smooth banner transitions (Mark, Oct 29, 2026): photos crossfade slowly, new over old, with no dip to dark between them. */
+#wt-banner::after{z-index:3!important;}
+#wt-banner .wt-banner-cap, #wt-banner .wt-vid-cap{z-index:4!important;}
+#wt-banner .bl, #wt-banner img.wt-live, #wt-banner .dv-layer{transition:opacity 2.4s ease-in-out;}
+#wt-banner .dv-ghost{transition:none!important;}
+</style>
+<style>
 /* Waltski title + peak logo at the very top of the page, above the dateline (Mark, Oct 26, 2026) */
 #top > .wt-name{margin-top:0; padding-top:4px; padding-bottom:6px;}
 #top > .wt-edition{margin-top:2px;}
@@ -2071,8 +2078,12 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     var f = frames[i]; if(!f) return;
     var next = 1 - front, img = new Image();
     img.onload = function(){
-      L[next].style.backgroundImage = 'url("' + f.src + '")';
-      var old = L[front], had = old.classList.contains("on"), nl = L[next]; old.classList.remove("on"); front = next; setTimeout(function(){ nl.classList.add("on"); }, had ? 1000 : 0);
+      /* Smooth crossfade (Mark, Oct 29, 2026): the new photo fades in ON TOP of the old one (no dip to dark), then the old layer is cleared. */
+      var nl = L[next], old = L[front];
+      nl.style.transition = "none"; nl.classList.remove("on"); nl.style.backgroundImage = 'url("' + f.src + '")';
+      nl.style.zIndex = 2; old.style.zIndex = 1; void nl.offsetWidth; nl.style.transition = "";
+      nl.classList.add("on"); front = next;
+      setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
       label(f.k); root.classList.add("has-banner");
     };
     img.src = f.src;
@@ -3057,7 +3068,12 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   function linkTo(f){ var c = CAMS[mode]; if(!c || !f) return; var play = getPlay(); if(play){ play.href = f.watch; play.title = c.title; } if(own){ own.href = f.watch; own.title = c.title; } }
   function show(src, f, at, m){
     if(m !== mode) return;
-    if(lay.style.backgroundImage && lay.style.backgroundImage !== "none"){ lay.classList.add("fading"); setTimeout(function(){ if(m !== mode) return; lay.style.backgroundImage = 'url("' + src + '")'; lay.classList.remove("fading"); }, 1000); }
+    /* Smooth crossfade (Mark, Oct 29, 2026): a copy of the current picture stays underneath while the new one fades in over it. */
+    if(lay.style.backgroundImage && lay.style.backgroundImage !== "none"){
+      var gh = document.createElement("div"); gh.className = "dv-layer dv-ghost"; gh.style.backgroundImage = lay.style.backgroundImage; lay.parentNode.insertBefore(gh, lay);
+      lay.style.transition = "none"; lay.classList.add("fading"); void lay.offsetWidth; lay.style.backgroundImage = 'url("' + src + '")';
+      var pre = new Image(); pre.onload = pre.onerror = function(){ if(m !== mode){ if(gh.parentNode) gh.parentNode.removeChild(gh); lay.style.transition = ""; lay.classList.remove("fading"); return; } lay.style.transition = ""; lay.classList.remove("fading"); setTimeout(function(){ if(gh.parentNode) gh.parentNode.removeChild(gh); }, 2700); }; pre.src = src;
+    }
     else lay.style.backgroundImage = 'url("' + src + '")';
     cap.textContent = f.cap || (CAMS[m].resort + " · " + f.name + " live cam" + (at ? " · " + hm(new Date(at)) : ""));
     root.classList.add("has-banner"); linkTo(f);
@@ -3859,8 +3875,15 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       busy = false;
       if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
       fails = 0;
-      img.src = probe.src;
-      img.classList.add("on"); L[front].classList.remove("on"); front = next;
+      /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
+      var old = L[front];
+      img.onload = function(){
+        img.onload = null;
+        img.style.transition = "none"; img.classList.remove("on"); img.style.zIndex = 2; old.style.zIndex = 1; void img.offsetWidth; img.style.transition = "";
+        img.classList.add("on");
+        setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
+      };
+      img.src = probe.src; front = next;
       root.classList.add("has-banner", "has-video");
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
