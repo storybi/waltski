@@ -3407,6 +3407,11 @@ html:not(.view-news) #wsjv{display:none!important;}
 .wsjv-yt,.wsjv-next{font:700 11px var(--font-body); letter-spacing:.06em; text-transform:uppercase; padding:6px 10px; border:1px solid var(--fg); background:var(--surface); color:var(--fg); text-decoration:none; cursor:pointer; border-radius:0;}
 .wsjv-next{background:var(--fg); color:var(--bg);}
 .wsjv-next:disabled{opacity:.45; cursor:default;}
+/* Sharp cover picture over the WSJ / Economist players (Mark, Oct 29, 2026) */
+.yt-poster{position:absolute; inset:0; z-index:2; width:100%; height:100%; margin:0; padding:0; border:0; cursor:pointer; background:#000 center/cover no-repeat;}
+.yt-poster.off{display:none;}
+.yt-poster::after{content:""; position:absolute; left:50%; top:50%; width:68px; height:48px; margin:-24px 0 0 -34px; border-radius:12px; background:rgba(200,16,46,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M8 5v14l11-7z'/%3E%3C/svg%3E") center/26px no-repeat; box-shadow:0 2px 10px rgba(0,0,0,.4); transition:transform .15s ease;}
+.yt-poster:hover::after,.yt-poster:focus-visible::after{transform:scale(1.08);}
 </style>
 <script>
 /* WSJ Video — WSJV is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/wsj_videos.py) and by the daily Claude refresh.
@@ -3439,12 +3444,31 @@ html:not(.view-news) #wsjv{display:none!important;}
     }
     if(player && player.cueVideoById){ player.cueVideoById(id); }
     else { wantId = id; if(apiReady) make(); }
+    poster(id);
+  }
+  /* Sharp cover picture (Mark, Oct 29, 2026): YouTube's own player shows a small, blurry thumbnail before playing, so a full-size
+     picture (maxresdefault 1280x720, else sddefault, else hqdefault) covers the player until it is tapped; the tap starts the video. */
+  var wantPlay = false;
+  function poster(id){
+    var f = document.getElementById("wsjv-frame"); if(!f || !id) return;
+    var p = f.querySelector(".yt-poster");
+    if(!p){ p = document.createElement("button"); p.type = "button"; p.className = "yt-poster"; p.setAttribute("aria-label", "Play video");
+      p.addEventListener("click", function(){ p.classList.add("off"); if(player && player.playVideo){ try{ player.playVideo(); }catch(e){} } else wantPlay = true; }); }
+    if(p.parentNode !== f) f.appendChild(p);
+    p.classList.remove("off"); p.style.backgroundImage = ""; p.setAttribute("data-id", id);
+    var N = ["maxresdefault", "sddefault", "hqdefault"];
+    (function load(k){ var im = new Image();
+      im.onload = function(){ if(im.naturalWidth <= 120 && k < N.length - 1) return load(k + 1); if(p.getAttribute("data-id") === id) p.style.backgroundImage = 'url("' + im.src + '")'; };
+      im.onerror = function(){ if(k < N.length - 1) load(k + 1); else p.classList.add("off"); };
+      im.src = "https://i.ytimg.com/vi/" + id + "/" + N[k] + ".jpg"; })(0);
   }
   function make(){
     if(player || !wantId) return;
-    var f = document.getElementById("wsjv-frame"); f.innerHTML = '<div id="wsjv-player"></div>';
+    var f = document.getElementById("wsjv-frame"); f.innerHTML = '<div id="wsjv-player"></div>'; poster(wantId);
     player = new YT.Player("wsjv-player", {videoId: wantId, playerVars: {rel: 0, modestbranding: 1, playsinline: 1},
-      events: {onStateChange: function(e){
+      events: {onReady: function(){ if(wantPlay){ wantPlay = false; try{ player.playVideo(); }catch(e){} } },
+        onStateChange: function(e){
+        if(e.data === 1){ var pp = document.querySelector("#wsjv-frame .yt-poster"); if(pp) pp.classList.add("off"); }
         if(e.data === 1 && cur) markSeen(cur.v[0]);                 /* started playing = watched */
         if(e.data === 0){ show(); }                                    /* finished: line up the next unwatched video */
       }}});
@@ -3499,12 +3523,31 @@ html:not(.view-news) #ecov{display:none!important;}
     }
     if(player && player.cueVideoById){ player.cueVideoById(id); }
     else { wantId = id; if(apiReady) make(); }
+    poster(id);
+  }
+  /* Sharp cover picture (Mark, Oct 29, 2026): YouTube's own player shows a small, blurry thumbnail before playing, so a full-size
+     picture (maxresdefault 1280x720, else sddefault, else hqdefault) covers the player until it is tapped; the tap starts the video. */
+  var wantPlay = false;
+  function poster(id){
+    var f = document.getElementById("eco-frame"); if(!f || !id) return;
+    var p = f.querySelector(".yt-poster");
+    if(!p){ p = document.createElement("button"); p.type = "button"; p.className = "yt-poster"; p.setAttribute("aria-label", "Play video");
+      p.addEventListener("click", function(){ p.classList.add("off"); if(player && player.playVideo){ try{ player.playVideo(); }catch(e){} } else wantPlay = true; }); }
+    if(p.parentNode !== f) f.appendChild(p);
+    p.classList.remove("off"); p.style.backgroundImage = ""; p.setAttribute("data-id", id);
+    var N = ["maxresdefault", "sddefault", "hqdefault"];
+    (function load(k){ var im = new Image();
+      im.onload = function(){ if(im.naturalWidth <= 120 && k < N.length - 1) return load(k + 1); if(p.getAttribute("data-id") === id) p.style.backgroundImage = 'url("' + im.src + '")'; };
+      im.onerror = function(){ if(k < N.length - 1) load(k + 1); else p.classList.add("off"); };
+      im.src = "https://i.ytimg.com/vi/" + id + "/" + N[k] + ".jpg"; })(0);
   }
   function make(){
     if(player || !wantId) return;
-    var f = document.getElementById("eco-frame"); f.innerHTML = '<div id="eco-player"></div>';
+    var f = document.getElementById("eco-frame"); f.innerHTML = '<div id="eco-player"></div>'; poster(wantId);
     player = new YT.Player("eco-player", {videoId: wantId, playerVars: {rel: 0, modestbranding: 1, playsinline: 1},
-      events: {onStateChange: function(e){
+      events: {onReady: function(){ if(wantPlay){ wantPlay = false; try{ player.playVideo(); }catch(e){} } },
+        onStateChange: function(e){
+        if(e.data === 1){ var pp = document.querySelector("#eco-frame .yt-poster"); if(pp) pp.classList.add("off"); }
         if(e.data === 1 && cur) markSeen(cur.v[0]);                 /* started playing = watched */
         if(e.data === 0){ show(); }                                    /* finished: line up the next unwatched video */
       }}});
