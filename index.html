@@ -61,7 +61,7 @@ a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 <body>
 <script>
 /* Dark / light mode (Mark, Oct 27, 2026): apply the saved choice before the page paints */
-(function(){ try{ var t=localStorage.getItem("wsj-theme"); if(t==="dark"||t==="light") document.documentElement.setAttribute("data-theme",t); }catch(e){} })();
+(function(){ var h=new Date().getHours(), t=(h>=21||h<7)?"dark":"light"; try{ var o=JSON.parse(localStorage.getItem("wsj-theme-hold")||"null"); if(o&&o.until>Date.now()&&(o.t==="dark"||o.t==="light")) t=o.t; }catch(e){} document.documentElement.setAttribute("data-theme",t); })();
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3702,15 +3702,22 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 })();
 </script>
 <script>
-/* Dark / light mode button (Oct 27, 2026): in the dateline after Music; follows the device setting until pressed, then remembers the choice on this device */
+/* Dark / light mode button (Oct 27, 2026): in the dateline after Music.
+   Automatic by time of day (Mark, Oct 29, 2026): dark mode from 9 p.m. to 7 a.m. and light mode the rest of the day, by the reader's clock,
+   checked every minute. Pressing the button switches right away and holds that choice until the next 7 a.m. or 9 p.m. switch. Keep as is. */
 (function(){
   var b=document.getElementById("wt-theme"); if(!b) return;
-  var root=document.documentElement, mq=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
-  function isDark(){ var t=root.getAttribute("data-theme"); return t? t==="dark" : !!(mq&&mq.matches); }
+  var root=document.documentElement, KEY="wsj-theme-hold";
+  try{ localStorage.removeItem("wsj-theme"); }catch(e){}
+  function night(d){ var h=d.getHours(); return h>=21 || h<7; }
+  function nextSwitch(d){ var n=new Date(d.getTime()); n.setSeconds(0,0); n.setMinutes(0); var h=d.getHours();
+    if(h<7) n.setHours(7); else if(h<21) n.setHours(21); else { n.setDate(n.getDate()+1); n.setHours(7); } return n.getTime(); }
+  function isDark(){ return root.getAttribute("data-theme")==="dark"; }
   function label(){ var d=isDark(); b.textContent=d?"Light":"Dark"; b.setAttribute("aria-label", d?"Switch to light mode":"Switch to dark mode"); }
-  b.addEventListener("click",function(){ var t=isDark()?"light":"dark"; root.setAttribute("data-theme",t); try{localStorage.setItem("wsj-theme",t);}catch(e){} label(); });
-  if(mq){ try{ mq.addEventListener("change",label); }catch(e){ try{ mq.addListener(label); }catch(_){} } }
-  label();
+  function hold(){ try{ var o=JSON.parse(localStorage.getItem(KEY)||"null"); if(o && o.until>Date.now() && (o.t==="dark"||o.t==="light")) return o.t; }catch(e){} return null; }
+  function apply(){ var d=new Date(), t=hold() || (night(d)?"dark":"light"); if(root.getAttribute("data-theme")!==t) root.setAttribute("data-theme",t); label(); }
+  b.addEventListener("click",function(){ var t=isDark()?"light":"dark"; root.setAttribute("data-theme",t); try{ localStorage.setItem(KEY, JSON.stringify({t:t, until:nextSwitch(new Date())})); }catch(e){} label(); });
+  apply(); setInterval(apply, 60000);
 })();
 </script>
 <script>
