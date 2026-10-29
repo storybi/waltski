@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Newest Wall Street Journal YouTube videos for the WSJ Video section at the top of the Other News page (Mark, Oct 28, 2026).
+"""Newest YouTube videos for the video sections at the top of the Other News page (Mark, Oct 28, 2026):
+WSJ Video (`var WSJV`, @wsj) and, right below it, The Economist (`var ECOV`, @TheEconomist).
 
-Reads the channel's Videos tab (https://www.youtube.com/@wsj/videos — long-form uploads, no Shorts), newest first.
+Reads each channel's Videos tab (e.g. https://www.youtube.com/@wsj/videos — long-form uploads, no Shorts), newest first.
 YouTube's RSS feeds were returning 404 when this was set up, so the page's ytInitialData is used instead.
 
 Used two ways:
-  * scripts/update_data.py imports do_wsj() and rewrites `var WSJV` in index.html (hourly job);
-  * `python3 scripts/wsj_videos.py` prints the `var WSJV = …;` line, for Claude's daily artifact refresh.
+  * scripts/update_data.py imports do_wsj() and rewrites `var WSJV` and `var ECOV` in index.html (hourly job);
+  * `python3 scripts/wsj_videos.py` prints the `var WSJV = …;` and `var ECOV = …;` lines, for Claude's daily artifact refresh.
 
 WSJV = {"asof": "Wed 8:05 p.m. MT", "v": [[videoId, title, "11h ago"], ...]}   (newest first, up to 30)
 """
@@ -18,13 +19,13 @@ import urllib.request
 from zoneinfo import ZoneInfo
 
 MT = ZoneInfo("America/Denver")
-URL = "https://www.youtube.com/@wsj/videos"
+CHANNELS = [("WSJV", "https://www.youtube.com/@wsj/videos"), ("ECOV", "https://www.youtube.com/@TheEconomist/videos")]
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
       "Accept-Language": "en-US,en;q=0.9"}
 
 
-def fetch():
-    t = urllib.request.urlopen(urllib.request.Request(URL, headers=UA), timeout=30).read().decode("utf-8", "ignore")
+def fetch(url=CHANNELS[0][1]):
+    t = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read().decode("utf-8", "ignore")
     m = re.search(r"ytInitialData\s*=\s*(\{.*?\});\s*</script>", t, re.S)
     if not m:
         raise ValueError("ytInitialData not found")
@@ -69,16 +70,21 @@ def fetch():
 
 
 def do_wsj(s, now_mt=None, set_var=None, get_var=None):
-    """Hook for scripts/update_data.py: rewrite WSJV in the page text s (keeps the old list if YouTube fails)."""
-    try:
-        w = fetch()
-    except Exception as e:  # noqa: BLE001
-        print("  wsj videos failed:", e)
-        return s
-    s, ok = set_var(s, "WSJV", json.dumps(w, ensure_ascii=False, separators=(",", ":")))
-    print("  wsj videos: %d (newest %s)" % (len(w["v"]), w["v"][0][0]) if ok else "  wsj videos: WSJV not in page")
+    """Hook for scripts/update_data.py: rewrite WSJV and ECOV in the page text s (keeps an old list if YouTube fails)."""
+    for var, url in CHANNELS:
+        try:
+            w = fetch(url)
+        except Exception as e:  # noqa: BLE001
+            print("  %s videos failed: %s" % (var, e))
+            continue
+        s, ok = set_var(s, var, json.dumps(w, ensure_ascii=False, separators=(",", ":")))
+        print("  %s videos: %d (newest %s)" % (var, len(w["v"]), w["v"][0][0]) if ok else "  %s not in page" % var)
     return s
 
 
 if __name__ == "__main__":
-    print("var WSJV = %s;" % json.dumps(fetch(), ensure_ascii=False, separators=(",", ":")))
+    for var, url in CHANNELS:
+        try:
+            print("var %s = %s;" % (var, json.dumps(fetch(url), ensure_ascii=False, separators=(",", ":"))))
+        except Exception as e:  # noqa: BLE001
+            print("// %s failed: %s" % (var, e), file=sys.stderr)
