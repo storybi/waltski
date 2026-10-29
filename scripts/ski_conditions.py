@@ -8,7 +8,8 @@ For each resort in RESORTS (Utah first, then Colorado, Wyoming, Idaho, Montana, 
 
 Used two ways:
   * scripts/update_data.py imports do_ski() and rewrites `var SKI_ASOF` / `var SKI` in index.html (hourly job);
-  * `python3 scripts/ski_conditions.py` prints the two JavaScript lines, for Claude's daily artifact refresh.
+  * `python3 scripts/ski_conditions.py` prints three JavaScript lines (SKI_ASOF, SKI, OUTLOOK), for Claude's daily artifact refresh.
+OUTLOOK is today's hour-by-hour rain/snow outlook (Open-Meteo) for each radar location, used by the 24-hour outlook chart.
 
 SKI rows: [name, state, onthesnow path, lat, lon, base_in|null, new24_in|null, open(1/0), opening "YYYY-MM-DD"|"",
            lifts_open|null, lifts_total|null, temp_F|null, WMO weather code|null]
@@ -167,6 +168,42 @@ def js(asof, rows):
     return 'var SKI_ASOF = %s;' % json.dumps(asof), "var SKI = [\n    %s\n  ];" % body
 
 
+
+# --------------------------------------------------------------------------------------------- 24-hour outlook
+# Today's hour-by-hour rain and snow outlook for each radar location (Mark, Oct 28, 2026), shown under the resort cams.
+# Keys match the radar menu (sb / dv / sv / hi). Each location uses its own local day, 12 a.m. to 11 p.m.
+OUTLOOK_PLACES = [("sb", "Snowbasin", 41.2160, -111.8569), ("dv", "Deer Valley", 40.6375, -111.4783),
+                  ("sv", "Sun Valley", 43.6710, -114.3640), ("hi", "Kailua", 21.4022, -157.7394)]
+
+
+def fetch_outlook():
+    """{key: {"name", "date", "h": [[chance %, rain in, snow in, temp F] x 24]}, "asof": "..."}  (rain includes showers)"""
+    q = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=precipitation_probability,rain,showers,snowfall,temperature_2m"
+         "&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=1") % (
+        ",".join(str(p[2]) for p in OUTLOOK_PLACES), ",".join(str(p[3]) for p in OUTLOOK_PLACES))
+    data = json.loads(_get(q, {"User-Agent": HTML_UA["User-Agent"], "Accept": "application/json"}).decode("utf-8"))
+    data = data if isinstance(data, list) else [data]
+    out = {}
+    for (key, name, lat, lon), d in zip(OUTLOOK_PLACES, data):
+        h = d.get("hourly") or {}
+        t = h.get("time") or []
+        if len(t) < 24:
+            continue
+        rows = []
+        for i in range(24):
+            pr = h.get("precipitation_probability", [None] * 24)[i]
+            rn = (h.get("rain", [0] * 24)[i] or 0) + (h.get("showers", [0] * 24)[i] or 0)
+            sn = h.get("snowfall", [0] * 24)[i] or 0
+            tp = h.get("temperature_2m", [None] * 24)[i]
+            rows.append([pr if pr is not None else 0, round(rn, 3), round(sn, 2), None if tp is None else int(round(tp))])
+        out[key] = {"name": name, "date": t[0][:10], "h": rows}
+    out["asof"] = dt.datetime.now(MT).strftime("%a %-I:%M %p MT").replace("AM", "a.m.").replace("PM", "p.m.")
+    return out
+
+
+def outlook_js(o):
+    return "var OUTLOOK = %s;" % json.dumps(o, separators=(",", ":"))
+
 def do_ski(s, now_mt=None, set_var=None, get_var=None):
     """Hook for scripts/update_data.py: rewrite SKI_ASOF and SKI in the page text s."""
     prev = None
@@ -178,10 +215,18 @@ def do_ski(s, now_mt=None, set_var=None, get_var=None):
     asof, rows, n_snow, n_wx = fetch(prev)
     print("  ski: %d resorts with snow data, %d with live weather" % (n_snow, n_wx))
     if not n_snow and not n_wx:
-        return s
-    a, b = js(asof, rows)
-    s, _ = set_var(s, "SKI_ASOF", json.dumps(asof))
-    s, _ = set_var(s, "SKI", b[len("var SKI = "):-1])
+        rows = None
+    if rows:
+        a, b = js(asof, rows)
+        s, _ = set_var(s, "SKI_ASOF", json.dumps(asof))
+        s, _ = set_var(s, "SKI", b[len("var SKI = "):-1])
+    try:
+        o = fetch_outlook()
+        if len(o) > 1:
+            s, _ = set_var(s, "OUTLOOK", json.dumps(o, separators=(",", ":")))
+            print("  outlook: %d places" % (len(o) - 1))
+    except Exception as e:  # noqa: BLE001
+        print("  outlook failed:", e)
     return s
 
 
@@ -190,4 +235,8 @@ if __name__ == "__main__":
     a, b = js(asof, rows)
     print(a)
     print(b)
+    try:
+        print(outlook_js(fetch_outlook()))
+    except Exception as e:  # noqa: BLE001
+        print("// outlook failed: %s" % e, file=sys.stderr)
     print("// %d resorts with snow data, %d with live weather" % (n_snow, n_wx), file=sys.stderr)

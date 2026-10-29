@@ -1021,6 +1021,14 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="cams" id="sv-grid"></div>
     </div>
     <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
+    <div class="olk" id="olk" aria-labelledby="olk-h">
+      <div class="olk-head"><h3 id="olk-h">24-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
+        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix</span></div>
+      <p class="olk-sum" id="olk-sum"></p>
+      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today"></div>
+      <div class="olk-x" id="olk-x"></div>
+      <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%). Tap or hover a column for amounts.</p>
+    </div>
     <div class="wxv" id="wxv">
       <div class="radar-head"><h3>Weather With Travis</h3><span class="radar-time" id="wxv-meta">Latest video</span></div>
       <div class="wxv-frame" id="wxv-frame"></div>
@@ -3248,51 +3256,51 @@ html.view-news #ski-ticker{display:none!important;}
    and by the daily Claude refresh. Row: [name, state, onthesnow path, lat, lon, base in, 24h in, open 1/0, opening date, lifts open, lifts total, temp F, WMO code].
    On skiinut.com the temperature and weather icon also refresh live from Open-Meteo every 15 minutes. Keep the variable names. */
 (function(){
-  var SKI_ASOF = "Wed 5:15 p.m. MT";
+  var SKI_ASOF = "Wed 6:04 p.m. MT";
   var SKI = [
-    ["Snowbasin","UT","utah/snowbasin",41.2156,-111.8619,null,0,0,"2026-11-27",0,13,50,0],
-    ["Powder Mountain","UT","utah/powder-mountain",41.3985,-111.763,null,0,0,"2026-12-11",0,8,46,0],
-    ["Nordic Valley","UT","utah/wolf-creek",41.3105,-111.8649,null,0,0,"2026-12-18",0,5,52,0],
-    ["Beaver Mountain","UT","utah/beaver-mountain",41.9682,-111.5413,null,0,0,"2026-12-26",0,6,42,0],
-    ["Snowbird","UT","utah/snowbird",40.5836,-111.6566,6,0,0,"2026-11-27",0,14,43,0],
-    ["Alta","UT","utah/alta-ski-area",40.5885,-111.6386,10,0,0,"2026-11-20",0,8,41,0],
-    ["Brighton","UT","utah/brighton-resort",40.5977,-111.5848,null,0,0,"2026-12-04",null,9,40,0],
-    ["Solitude","UT","utah/solitude-mountain-resort",40.6191,-111.5935,0,0,0,"2026-11-20",0,8,44,0],
-    ["Park City","UT","utah/park-city-mountain-resort",40.6539,-111.5094,null,0,0,"2026-11-20",0,41,51,0],
-    ["Deer Valley","UT","utah/deer-valley-resort",40.6381,-111.4796,null,0,0,"2026-12-05",0,31,48,0],
-    ["Sundance","UT","utah/sundance",40.388,-111.5774,null,0,0,"2026-12-04",0,9,52,0],
-    ["Brian Head","UT","utah/brian-head-resort",37.7013,-112.8464,0,0,0,"2026-11-06",0,11,42,0],
-    ["Eagle Point","UT","utah/eagle-point",38.3203,-112.3838,null,0,0,"2027-12-17",0,5,43,0],
-    ["Vail","CO","colorado/vail",39.643,-106.3785,2,2,0,"2026-11-13",0,33,52,0],
-    ["Beaver Creek","CO","colorado/beaver-creek",39.604,-106.5173,null,1,0,"2026-11-25",0,25,54,0],
-    ["Breckenridge","CO","colorado/breckenridge",39.4812,-106.0477,null,0,0,"2026-11-26",0,35,48,0],
-    ["Keystone","CO","colorado/keystone",39.6047,-105.9539,null,2,0,"2026-10-30",0,21,49,0],
-    ["Arapahoe Basin","CO","colorado/arapahoe-basin-ski-area",39.6417,-105.8791,18,0,1,"2026-10-28",1,9,40,0],
-    ["Copper Mountain","CO","colorado/copper-mountain-resort",39.4998,-106.1571,null,0,0,"2026-11-06",0,24,46,0],
-    ["Loveland","CO","colorado/loveland",39.6801,-105.8979,null,1,0,"2026-11-06",0,10,40,0],
-    ["Winter Park","CO","colorado/winter-park-resort",39.8879,-105.7626,null,0,0,"2026-10-30",0,24,50,0],
-    ["Steamboat","CO","colorado/steamboat",40.4655,-106.7868,null,0,0,"2026-11-21",0,23,54,0],
-    ["Aspen Snowmass","CO","colorado/aspen-snowmass",39.1909,-106.8211,null,0,0,"2026-11-26",null,41,54,3],
-    ["Telluride","CO","colorado/telluride",37.9375,-107.8123,null,0,0,"2026-11-26",0,17,47,0],
-    ["Crested Butte","CO","colorado/crested-butte-mountain-resort",38.8957,-106.9662,null,0,0,"2026-11-25",0,15,47,0],
-    ["Wolf Creek","CO","colorado/wolf-creek-ski-area",37.4671,-106.7774,12,0,0,"2026-11-07",0,11,34,0],
-    ["Purgatory","CO","colorado/durango-mountain-resort",37.6292,-107.8155,null,0,0,"2026-11-20",0,11,44,0],
-    ["Monarch","CO","colorado/monarch-mountain",38.5121,-106.3322,null,0,0,"2026-12-04",0,9,42,0],
-    ["Eldora","CO","colorado/eldora-mountain-resort",39.9372,-105.5807,null,0,0,"2026-11-13",0,10,48,0],
-    ["Jackson Hole","WY","wyoming/jackson-hole",43.5882,-110.8272,null,0,0,"2026-11-27",0,13,40,0],
-    ["Grand Targhee","WY","wyoming/grand-targhee-resort",43.7877,-110.9584,null,0,0,"2026-11-20",0,6,33,1],
-    ["Sun Valley","ID","idaho/sun-valley",43.6707,-114.3681,null,0,0,"2026-11-26",0,17,43,0],
-    ["Big Sky","MT","montana/big-sky-resort",45.2848,-111.4014,6,1,0,"2026-11-25",0,40,33,0],
-    ["Bridger Bowl","MT","montana/bridger-bowl",45.8174,-110.8966,null,0,0,"2026-12-18",0,11,41,0],
+    ["Snowbasin","UT","utah/snowbasin",41.2156,-111.8619,null,0,0,"2026-11-27",0,13,48,0],
+    ["Powder Mountain","UT","utah/powder-mountain",41.3985,-111.763,null,0,0,"2026-12-11",0,8,45,0],
+    ["Nordic Valley","UT","utah/wolf-creek",41.3105,-111.8649,null,0,0,"2026-12-18",0,5,49,0],
+    ["Beaver Mountain","UT","utah/beaver-mountain",41.9682,-111.5413,null,0,0,"2026-12-26",0,6,40,0],
+    ["Snowbird","UT","utah/snowbird",40.5836,-111.6566,6,0,0,"2026-11-27",0,14,41,0],
+    ["Alta","UT","utah/alta-ski-area",40.5885,-111.6386,10,0,0,"2026-11-20",0,8,38,0],
+    ["Brighton","UT","utah/brighton-resort",40.5977,-111.5848,null,0,0,"2026-12-04",null,9,37,0],
+    ["Solitude","UT","utah/solitude-mountain-resort",40.6191,-111.5935,0,0,0,"2026-11-20",0,8,42,0],
+    ["Park City","UT","utah/park-city-mountain-resort",40.6539,-111.5094,null,0,0,"2026-11-20",0,41,48,0],
+    ["Deer Valley","UT","utah/deer-valley-resort",40.6381,-111.4796,null,0,0,"2026-12-05",0,31,46,0],
+    ["Sundance","UT","utah/sundance",40.388,-111.5774,null,0,0,"2026-12-04",0,9,49,0],
+    ["Brian Head","UT","utah/brian-head-resort",37.7013,-112.8464,0,0,0,"2026-11-06",0,11,41,0],
+    ["Eagle Point","UT","utah/eagle-point",38.3203,-112.3838,null,0,0,"2027-12-17",0,5,41,0],
+    ["Vail","CO","colorado/vail",39.643,-106.3785,2,2,0,"2026-11-13",0,33,48,0],
+    ["Beaver Creek","CO","colorado/beaver-creek",39.604,-106.5173,null,1,0,"2026-11-25",0,25,49,3],
+    ["Breckenridge","CO","colorado/breckenridge",39.4812,-106.0477,null,0,0,"2026-11-26",0,35,44,0],
+    ["Keystone","CO","colorado/keystone",39.6047,-105.9539,null,2,0,"2026-10-30",0,21,45,0],
+    ["Arapahoe Basin","CO","colorado/arapahoe-basin-ski-area",39.6417,-105.8791,18,0,1,"2026-10-28",1,9,37,0],
+    ["Copper Mountain","CO","colorado/copper-mountain-resort",39.4998,-106.1571,null,0,0,"2026-11-06",0,24,42,0],
+    ["Loveland","CO","colorado/loveland",39.6801,-105.8979,null,1,0,"2026-11-06",0,10,37,3],
+    ["Winter Park","CO","colorado/winter-park-resort",39.8879,-105.7626,null,0,0,"2026-10-30",0,24,46,0],
+    ["Steamboat","CO","colorado/steamboat",40.4655,-106.7868,null,0,0,"2026-11-21",0,23,49,0],
+    ["Aspen Snowmass","CO","colorado/aspen-snowmass",39.1909,-106.8211,null,0,0,"2026-11-26",null,41,52,3],
+    ["Telluride","CO","colorado/telluride",37.9375,-107.8123,null,0,0,"2026-11-26",0,17,44,0],
+    ["Crested Butte","CO","colorado/crested-butte-mountain-resort",38.8957,-106.9662,null,0,0,"2026-11-25",0,15,44,0],
+    ["Wolf Creek","CO","colorado/wolf-creek-ski-area",37.4671,-106.7774,12,0,0,"2026-11-07",0,11,31,0],
+    ["Purgatory","CO","colorado/durango-mountain-resort",37.6292,-107.8155,null,0,0,"2026-11-20",0,11,42,1],
+    ["Monarch","CO","colorado/monarch-mountain",38.5121,-106.3322,null,0,0,"2026-12-04",0,9,39,0],
+    ["Eldora","CO","colorado/eldora-mountain-resort",39.9372,-105.5807,null,0,0,"2026-11-13",0,10,45,2],
+    ["Jackson Hole","WY","wyoming/jackson-hole",43.5882,-110.8272,null,0,0,"2026-11-27",0,13,38,0],
+    ["Grand Targhee","WY","wyoming/grand-targhee-resort",43.7877,-110.9584,null,0,0,"2026-11-20",0,6,30,0],
+    ["Sun Valley","ID","idaho/sun-valley",43.6707,-114.3681,null,0,0,"2026-11-26",0,17,40,0],
+    ["Big Sky","MT","montana/big-sky-resort",45.2848,-111.4014,6,1,0,"2026-11-25",0,40,31,0],
+    ["Bridger Bowl","MT","montana/bridger-bowl",45.8174,-110.8966,null,0,0,"2026-12-18",0,11,38,0],
     ["Whitefish","MT","montana/whitefish-mountain-resort",48.4806,-114.3501,null,0,0,"2026-12-04",0,14,36,73],
-    ["Red Lodge","MT","montana/red-lodge-mountain",45.1911,-109.3364,null,0,0,"2026-11-27",0,7,39,0],
-    ["Taos","NM","new-mexico/taos-ski-valley",36.596,-105.4544,null,0,0,"2026-11-26",0,13,44,3],
-    ["Ski Santa Fe","NM","new-mexico/ski-santa-fe",35.7966,-105.8013,null,0,0,"2026-11-26",0,7,43,0],
-    ["Lake Louise","AB","alberta/lake-louise",51.4434,-116.1668,null,0,0,"2026-11-06",0,13,26,3],
-    ["Banff Sunshine","AB","alberta/banff-sunshine",51.0786,-115.7765,4,0,0,"2026-11-01",0,12,19,45],
-    ["Mt. Norquay","AB","alberta/ski-banff-norquay",51.2116,-115.603,null,0,0,"2026-11-14",0,7,24,3],
-    ["Marmot Basin","AB","alberta/marmot-basin",52.8014,-118.083,5,0,0,"2026-11-25",0,7,19,3],
-    ["Fernie","BC","british-columbia/fernie-alpine",49.463,-115.0864,null,0,0,"2026-12-05",0,10,43,3]
+    ["Red Lodge","MT","montana/red-lodge-mountain",45.1911,-109.3364,null,0,0,"2026-11-27",0,7,36,0],
+    ["Taos","NM","new-mexico/taos-ski-valley",36.596,-105.4544,null,0,0,"2026-11-26",0,13,41,3],
+    ["Ski Santa Fe","NM","new-mexico/ski-santa-fe",35.7966,-105.8013,null,0,0,"2026-11-26",0,7,40,0],
+    ["Lake Louise","AB","alberta/lake-louise",51.4434,-116.1668,null,0,0,"2026-11-06",0,13,24,3],
+    ["Banff Sunshine","AB","alberta/banff-sunshine",51.0786,-115.7765,4,0,0,"2026-11-01",0,12,18,3],
+    ["Mt. Norquay","AB","alberta/ski-banff-norquay",51.2116,-115.603,null,0,0,"2026-11-14",0,7,23,3],
+    ["Marmot Basin","AB","alberta/marmot-basin",52.8014,-118.083,5,0,0,"2026-11-25",0,7,18,3],
+    ["Fernie","BC","british-columbia/fernie-alpine",49.463,-115.0864,null,0,0,"2026-12-05",0,10,38,3]
   ];
   var ICON = {
     sun:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="6" fill="#f2b632"/><g stroke="#f2b632" stroke-width="2.2" stroke-linecap="round"><line x1="16" y1="3" x2="16" y2="6.5"/><line x1="16" y1="25.5" x2="16" y2="29"/><line x1="3" y1="16" x2="6.5" y2="16"/><line x1="25.5" y1="16" x2="29" y2="16"/><line x1="6.8" y1="6.8" x2="9.2" y2="9.2"/><line x1="22.8" y1="22.8" x2="25.2" y2="25.2"/><line x1="6.8" y1="25.2" x2="9.2" y2="22.8"/><line x1="22.8" y1="9.2" x2="25.2" y2="6.8"/></g></svg>',
@@ -3341,6 +3349,90 @@ html.view-news #ski-ticker{display:none!important;}
     }).catch(function(){}); }catch(e){}
   }
   if(!(window.claude && window.claude.use)){ live(); setInterval(live, 15*60000); }
+})();
+</script>
+<style>
+/* 24-hour rain & snow outlook (Mark, Oct 28, 2026) — under the resort cams, above Weather With Travis; follows the radar location menu. */
+.olk{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); padding:12px 14px 10px;}
+.olk-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 14px;}
+.olk-head h3{font:700 16px/1.25 var(--font-display);}
+.olk-key{font:600 11.5px var(--font-body); color:var(--fg-muted); display:inline-flex; align-items:center; gap:5px;}
+.olk-key i{display:inline-block; width:11px; height:11px; margin-left:6px;}
+.olk-key i:first-child{margin-left:0;}
+.k-rain,.olk-bar.rain{background:#2f9e4c;} .k-snow,.olk-bar.snow{background:#2f6fd0;} .k-mix,.olk-bar.mix{background:#8a54c4;}
+.olk-sum{font:600 13.5px/1.4 var(--font-body); margin:6px 0 10px; color:var(--fg);}
+.olk-sum .dry{color:var(--fg-muted); font-weight:500;}
+.olk-chart{position:relative; display:flex; align-items:flex-end; gap:2px; height:130px; padding-left:34px;
+  background-image:linear-gradient(to top, var(--border) 1px, transparent 1px); background-size:100% 25%; background-position:0 100%; background-origin:content-box; background-clip:content-box; border-bottom:1px solid var(--fg-muted);}
+.olk-y{position:absolute; left:0; font:500 10px/1 var(--font-body); color:var(--fg-faint); transform:translateY(50%);}
+.olk-col{flex:1 1 0; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; position:relative; cursor:default;}
+.olk-col.now::after{content:""; position:absolute; top:0; bottom:0; left:50%; border-left:1px dashed var(--fg-muted);}
+.olk-bar{width:100%; min-height:0; border-radius:2px 2px 0 0;}
+.olk-bar.chance{opacity:.45;}
+.olk-col:hover .olk-bar,.olk-col:focus .olk-bar{outline:2px solid var(--fg); outline-offset:0;}
+.olk-x{display:flex; gap:2px; padding-left:34px; margin-top:3px;}
+.olk-x span{flex:1 1 0; min-width:0; font:600 10px/1 var(--font-body); color:var(--fg-faint); text-align:center; white-space:nowrap; overflow:visible;}
+.olk-tip{font:500 12.5px/1.4 var(--font-body); color:var(--fg-muted); min-height:1.4em; margin:6px 0 0;}
+.olk-note{font:400 11.5px/1.4 var(--font-body); color:var(--fg-faint); margin:4px 0 0;}
+@media (max-width:520px){ .olk-chart{height:110px; padding-left:28px; gap:1px;} .olk-x{padding-left:28px; gap:1px;} .olk-head h3{font-size:15px;} }
+</style>
+<script>
+/* 24-hour rain & snow outlook — OUTLOOK is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/ski_conditions.py)
+   and by the daily Claude refresh; on skiinut.com the page also reloads it live from Open-Meteo every 30 minutes.
+   Per place: {name, date, h:[[chance %, rain in, snow in, temp F] x 24 hours, 12 a.m.–11 p.m. local]}. Keep the variable name. */
+(function(){
+  var OUTLOOK = {"sb":{"name":"Snowbasin","date":"2026-10-28","h":[[31,0.016,0,43],[23,0,0,42],[22,0,0,41],[15,0,0,40],[9,0,0,40],[0,0,0,38],[0,0,0,37],[0,0,0,37],[0,0,0,36],[0,0,0,39],[0,0,0,42],[0,0,0,44],[0,0,0,47],[0,0,0,50],[0,0,0,51],[0,0,0,51],[0,0,0,51],[0,0,0,50],[0,0,0,48],[0,0,0,45],[0,0,0,44],[0,0,0,44],[0,0,0,44],[0,0,0,43]]},"dv":{"name":"Deer Valley","date":"2026-10-28","h":[[4,0,0,42],[10,0,0,41],[9,0,0,41],[1,0,0,38],[2,0,0,36],[1,0,0,36],[1,0,0,36],[0,0,0,36],[0,0,0,37],[0,0,0,38],[0,0,0,42],[0,0,0,44],[0,0,0,45],[0,0,0,47],[0,0,0,50],[0,0,0,50],[0,0,0,50],[0,0,0,48],[0,0,0,46],[0,0,0,44],[0,0,0,43],[0,0,0,43],[0,0,0,43],[0,0,0,42]]},"sv":{"name":"Sun Valley","date":"2026-10-28","h":[[0,0,0,32],[0,0,0,33],[0,0,0,31],[0,0,0,30],[0,0,0,30],[0,0,0,29],[0,0,0,29],[0,0,0,29],[0,0,0,28],[0,0,0,28],[0,0,0,32],[0,0,0,35],[0,0,0,38],[0,0,0,40],[0,0,0,42],[0,0,0,43],[0,0,0,44],[0,0,0,43],[0,0,0,40],[0,0,0,36],[0,0,0,34],[0,0,0,34],[0,0,0,34],[0,0,0,34]]},"hi":{"name":"Kailua","date":"2026-10-28","h":[[100,0.189,0,73],[100,0.268,0,74],[100,0.717,0,74],[100,0.272,0,74],[100,0.205,0,74],[100,0.106,0,74],[99,0.051,0,75],[98,0.059,0,75],[98,0.149,0,74],[99,0.098,0,75],[99,0.055,0,75],[100,0.13,0,75],[100,0.287,0,74],[99,0.35,0,73],[98,0.354,0,73],[97,0.477,0,72],[95,0.26,0,72],[94,0.161,0,72],[94,0.228,0,73],[95,0.24,0,74],[94,0.095,0,73],[90,0.02,0,73],[85,0.008,0,73],[82,0,0,74]]},"asof":"Wed 6:04 p.m. MT"};
+  var PLACES = {sb:[41.2160,-111.8569,"Snowbasin"], dv:[40.6375,-111.4783,"Deer Valley"], sv:[43.6710,-114.3640,"Sun Valley"], hi:[21.4022,-157.7394,"Kailua"]};
+  var TZ = {sb:"America/Denver", dv:"America/Denver", sv:"America/Boise", hi:"Pacific/Honolulu"};
+  var cur = "sb";
+  try{ var pk = document.getElementById("radar-view"); if(pk && PLACES[pk.value]) cur = pk.value; else { var v = localStorage.getItem("wsj-radar-view"); if(PLACES[v]) cur = v; } }catch(e){}
+  function hr(i){ return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? " a.m." : " p.m."); }
+  function hs(i){ return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? "a" : "p"); }
+  function kind(r){ if(r[2] > 0 && r[1] > 0) return "mix"; if(r[2] > 0) return "snow"; if(r[1] > 0) return "rain"; return r[3] != null && r[3] <= 33 ? "snow" : "rain"; }
+  function fmt(x, d){ return x >= 10 ? x.toFixed(0) : x.toFixed(d); }
+  function today(tz){ try{ return new Date().toLocaleDateString("en-CA", {timeZone: tz}); }catch(e){ return ""; } }
+  function nowHour(tz){ try{ return +new Date().toLocaleTimeString("en-US", {timeZone: tz, hour: "2-digit", hour12: false}) % 24; }catch(e){ return -1; } }
+  function render(){
+    var o = OUTLOOK[cur], ch = document.getElementById("olk-chart"), xa = document.getElementById("olk-x"), sum = document.getElementById("olk-sum");
+    if(!ch) return;
+    document.getElementById("olk-name").textContent = PLACES[cur][2];
+    if(!o){ ch.innerHTML = ""; xa.innerHTML = ""; sum.textContent = "Outlook not available right now."; return; }
+    var isToday = o.date === today(TZ[cur]), nh = isToday ? nowHour(TZ[cur]) : -1;
+    var html = '<span class="olk-y" style="bottom:100%">100%</span><span class="olk-y" style="bottom:50%">50%</span><span class="olk-y" style="bottom:0">0%</span>';
+    var rain = 0, snow = 0, peak = 0, peakH = 0;
+    o.h.forEach(function(r, i){
+      rain += r[1]; snow += r[2]; if(r[0] > peak){ peak = r[0]; peakH = i; }
+      var k = kind(r), amt = r[1] + r[2] > 0;
+      var tip = hr(i) + ": " + r[0] + "% chance" + (r[2] > 0 ? ", snow " + fmt(r[2], 1) + "\u2033" : "") + (r[1] > 0 ? ", rain " + fmt(r[1], 2) + "\u2033" : "") + (r[3] != null ? ", " + r[3] + "\u00b0F" : "");
+      html += '<div class="olk-col' + (i === nh ? ' now' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '"><div class="olk-bar ' + k + (amt ? '' : ' chance') + '" style="height:' + Math.max(0, Math.min(100, r[0])) + '%"></div></div>';
+    });
+    ch.innerHTML = html;
+    var xs = ""; for(var i = 0; i < 24; i++) xs += "<span>" + (i % 3 === 0 ? hs(i) : "") + "</span>";
+    xa.innerHTML = xs;
+    var dayTxt = isToday ? "Today" : (function(){ var d = o.date.split("-"); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+d[1]-1] + " " + (+d[2]); })();
+    if(peak === 0) sum.innerHTML = dayTxt + ': <span class="dry">no rain or snow expected.</span>';
+    else sum.textContent = dayTxt + ": " + (snow >= 0.05 ? "snow " + fmt(snow, 1) + "\u2033" : "no snow") + " · " + (rain >= 0.005 ? "rain " + fmt(rain, 2) + "\u2033" : "no rain") + " · highest chance " + peak + "% at " + hr(peakH);
+    var note = document.getElementById("olk-note");
+    ch.onclick = ch.onfocusin = function(e){ var c = e.target.closest && e.target.closest(".olk-col"); if(c && note) note.textContent = c.getAttribute("data-tip"); };
+  }
+  function live(){
+    if(document.hidden) return;
+    var keys = ["sb","dv","sv","hi"];
+    var q = "https://api.open-meteo.com/v1/forecast?latitude=" + keys.map(function(k){ return PLACES[k][0]; }).join(",") + "&longitude=" + keys.map(function(k){ return PLACES[k][1]; }).join(",") +
+            "&hourly=precipitation_probability,rain,showers,snowfall,temperature_2m&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=1";
+    try{ fetch(q).then(function(r){ return r.json(); }).then(function(d){
+      d = Array.isArray(d) ? d : [d];
+      d.forEach(function(x, j){ var h = x && x.hourly; if(!h || !h.time || h.time.length < 24) return;
+        var rows = []; for(var i = 0; i < 24; i++) rows.push([h.precipitation_probability[i] || 0, +(((h.rain[i] || 0) + (h.showers[i] || 0)).toFixed(3)), +((h.snowfall[i] || 0).toFixed(2)), h.temperature_2m[i] == null ? null : Math.round(h.temperature_2m[i])]);
+        OUTLOOK[keys[j]] = {name: PLACES[keys[j]][2], date: h.time[0].slice(0, 10), h: rows}; });
+      render();
+    }).catch(function(){}); }catch(e){}
+  }
+  render();
+  document.addEventListener("wsj-radar", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
+  document.addEventListener("wsj-cam", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
+  setInterval(render, 5 * 60000);
+  if(!(window.claude && window.claude.use)){ live(); setInterval(live, 30 * 60000); }
 })();
 </script>
 <style>
