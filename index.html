@@ -996,7 +996,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     <!-- Live Doppler radar over Mountain Green & Snowbasin (added Oct 25, 2026). Rendered by the "Live radar" script; keep as is. -->
     <div class="radar" id="radar">
       <div class="radar-head">
-        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Mountain Green &amp; Snowbasin</option><option value="dv">Deer Valley Resort</option><option value="sv">Sun Valley Resort</option><option value="hi">Kaneohe &amp; Kailua, Oahu</option></select>
+        <h3>Live Doppler radar</h3><select class="radar-pick" id="radar-view" aria-label="Radar location"><option value="sb">Snowbasin</option><option value="dv">Deer Valley</option><option value="sv">Sun Valley</option><option value="hi">Kailua, Oahu</option></select>
         <span class="radar-time" id="radar-time">Loading radar…</span>
         <span class="radar-now" id="radar-now"></span>
       </div>
@@ -3351,6 +3351,13 @@ html.view-news #ski-ticker{display:none!important;}
   if(!(window.claude && window.claude.use)){ live(); setInterval(live, 15*60000); }
 })();
 </script>
+<style>
+/* Radar header (Mark, Oct 28, 2026): the resort dropdown has a fixed, narrow width and the radar time readout has its own fixed slot,
+   so the dropdown never stretches or moves as the loop's time text changes. */
+#snow .radar-pick{flex:0 0 auto!important; width:140px!important; min-width:0; max-width:140px; margin-left:0!important; text-overflow:ellipsis;}
+#snow .radar-time{flex:0 0 auto; width:19ch; margin-left:auto; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+@media (max-width:640px){ #snow .radar-pick{width:128px!important; max-width:128px;} #snow .radar-time{width:17ch;} }
+</style>
 <style>
 /* 24-hour rain & snow outlook (Mark, Oct 28, 2026) — under the resort cams, above Weather With Travis; follows the radar location menu. */
 .olk{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); padding:12px 14px 10px;}
