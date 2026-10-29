@@ -1034,10 +1034,11 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     </div>
     <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
     <div class="olk" id="olk" aria-labelledby="olk-h">
-      <div class="olk-head"><h3 id="olk-h">24-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
+      <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
         <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix</span></div>
       <p class="olk-sum" id="olk-sum"></p>
-      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today"></div>
+      <div class="olk-days" id="olk-days"></div>
+      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
       <div class="olk-x" id="olk-x"></div>
       <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%). Tap or hover a column for amounts.</p>
     </div>
@@ -3514,7 +3515,7 @@ html:not(.view-news) #ecov{display:none!important;}
 @media (max-width:640px){ #snow .radar-pick{width:128px!important; max-width:128px;} #snow .radar-time{width:17ch;} }
 </style>
 <style>
-/* 24-hour rain & snow outlook (Mark, Oct 28, 2026) — under the resort cams, above Weather With Travis; follows the radar location menu. */
+/* 48-hour rain & snow outlook (Mark, Oct 28, 2026; 24 → 48 hours Oct 29, 2026) — under the resort cams, above Weather With Travis; follows the radar location menu. */
 .olk{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); padding:12px 14px 10px;}
 .olk-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 14px;}
 .olk-head h3{font:700 16px/1.25 var(--font-display);}
@@ -3536,44 +3537,56 @@ html:not(.view-news) #ecov{display:none!important;}
 .olk-x span{flex:1 1 0; min-width:0; font:600 10px/1 var(--font-body); color:var(--fg-faint); text-align:center; white-space:nowrap; overflow:visible;}
 .olk-tip{font:500 12.5px/1.4 var(--font-body); color:var(--fg-muted); min-height:1.4em; margin:6px 0 0;}
 .olk-note{font:400 11.5px/1.4 var(--font-body); color:var(--fg-faint); margin:4px 0 0;}
-@media (max-width:520px){ .olk-chart{height:110px; padding-left:28px; gap:1px;} .olk-x{padding-left:28px; gap:1px;} .olk-head h3{font-size:15px;} }
+.olk-days{display:flex; padding-left:34px; margin:0 0 3px;}
+.olk-days span{flex:1 1 0; min-width:0; font:700 10.5px/1.2 var(--font-body); letter-spacing:.06em; text-transform:uppercase; color:var(--fg-muted); padding-left:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.olk-days span + span{border-left:2px solid var(--fg-muted);}
+.olk-col.day2{box-shadow:-2px 0 0 var(--fg-muted);}
+.olk-sum b{font-weight:700;}
+@media (max-width:520px){ .olk-chart{height:110px; padding-left:28px; gap:1px;} .olk-x{padding-left:28px; gap:1px;} .olk-days{padding-left:28px;} .olk-head h3{font-size:15px;} }
 </style>
 <script>
-/* 24-hour rain & snow outlook — OUTLOOK is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/ski_conditions.py)
+/* 48-hour rain & snow outlook — OUTLOOK is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/ski_conditions.py)
    and by the daily Claude refresh; on skiinut.com the page also reloads it live from Open-Meteo every 30 minutes.
-   Per place: {name, date, h:[[chance %, rain in, snow in, temp F] x 24 hours, 12 a.m.–11 p.m. local]}. Keep the variable name. */
+   Per place: {name, date, h:[[chance %, rain in, snow in, temp F] x 48 hours: today 12 a.m. through tomorrow 11 p.m. local]}
+   (an older 24-hour list still draws). Keep the variable name. */
 (function(){
-  var OUTLOOK = {"sb":{"name":"Snowbasin","date":"2026-10-29","h":[[0,0,0,43],[0,0,0,42],[0,0,0,41],[0,0,0,41],[1,0,0,40],[2,0,0,40],[1,0,0,41],[1,0,0,40],[0,0,0,40],[0,0,0,41],[0,0,0,46],[0,0,0,48],[0,0,0,51],[0,0,0,54],[0,0,0,56],[1,0,0,56],[1,0,0,56],[1,0,0,55],[1,0,0,52],[1,0,0,49],[1,0,0,48],[1,0,0,48],[1,0,0,48],[1,0,0,48]]},"dv":{"name":"Deer Valley","date":"2026-10-29","h":[[0,0,0,39],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,39],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,42],[0,0,0,46],[0,0,0,48],[0,0,0,50],[0,0,0,52],[0,0,0,54],[1,0,0,55],[1,0,0,54],[1,0,0,53],[1,0,0,50],[1,0,0,48],[1,0,0,47],[1,0,0,46],[1,0,0,45],[1,0,0,45]]},"sv":{"name":"Sun Valley","date":"2026-10-29","h":[[0,0,0,30],[0,0,0,30],[0,0,0,30],[0,0,0,30],[0,0,0,28],[0,0,0,26],[0,0,0,26],[0,0,0,27],[0,0,0,28],[0,0,0,30],[0,0,0,33],[0,0,0,39],[0,0,0,43],[0,0,0,46],[0,0,0,48],[0,0,0,50],[0,0,0,50],[0,0,0,50],[0,0,0,46],[0,0,0,41],[0,0,0,40],[1,0,0,39],[1,0,0,37],[2,0,0,37]]},"hi":{"name":"Kailua","date":"2026-10-29","h":[[70,0,0,74],[65,0,0,74],[63,0.004,0,74],[65,0.008,0,74],[69,0.016,0,75],[73,0.028,0,75],[75,0.02,0,75],[77,0.036,0,75],[78,0.051,0,75],[79,0.067,0,75],[80,0.098,0,76],[80,0.098,0,76],[79,0.067,0,76],[78,0.071,0,76],[78,0.071,0,76],[79,0.055,0,75],[81,0.051,0,75],[82,0.012,0,75],[80,0.012,0,75],[77,0.004,0,74],[73,0,0,74],[69,0,0,75],[64,0,0,75],[61,0,0,75]]},"asof":"Thu 7:17 a.m. MT"};
+  var OUTLOOK = {"sb":{"name":"Snowbasin","date":"2026-10-29","h":[[0,0,0,43],[0,0,0,42],[0,0,0,41],[0,0,0,41],[1,0,0,40],[2,0,0,40],[1,0,0,40],[1,0,0,40],[0,0,0,40],[0,0,0,41],[0,0,0,46],[0,0,0,48],[0,0,0,51],[0,0,0,54],[0,0,0,56],[1,0,0,56],[1,0,0,56],[1,0,0,55],[1,0,0,52],[1,0,0,50],[1,0,0,48],[1,0,0,48],[1,0,0,49],[1,0,0,49],[1,0,0,48],[2,0,0,48],[2,0,0,49],[2,0,0,48],[3,0,0,48],[2,0,0,48],[3,0,0,48],[3,0,0,48],[3,0,0,48],[3,0,0,50],[4,0,0,53],[5,0,0,54],[8,0,0,54],[17,0,0,54],[16,0,0,56],[14,0,0,55],[6,0,0,56],[5,0,0,55],[16,0.028,0,51],[24,0.083,0.03,50],[24,0,0,46],[24,0,0,44],[24,0,0,44],[24,0,0,44]]},"dv":{"name":"Deer Valley","date":"2026-10-29","h":[[0,0,0,39],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,39],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,41],[0,0,0,45],[0,0,0,47],[0,0,0,50],[0,0,0,52],[0,0,0,54],[1,0,0,54],[1,0,0,54],[1,0,0,52],[1,0,0,49],[1,0,0,48],[1,0,0,47],[1,0,0,47],[1,0,0,46],[1,0,0,46],[1,0,0,45],[1,0,0,45],[1,0,0,44],[1,0,0,44],[2,0,0,43],[2,0,0,44],[2,0,0,43],[2,0,0,43],[2,0,0,43],[2,0,0,44],[2,0,0,47],[2,0,0,49],[4,0,0,50],[14,0,0,53],[15,0,0,54],[20,0,0,54],[7,0.016,0,50],[6,0,0,46],[17,0,0,44],[27,0,0,43],[27,0,0,42],[27,0,0,42],[27,0,0,43],[27,0,0,42]]},"sv":{"name":"Sun Valley","date":"2026-10-29","h":[[0,0,0,30],[0,0,0,30],[0,0,0,30],[0,0,0,30],[0,0,0,28],[0,0,0,27],[0,0,0,27],[0,0,0,28],[0,0,0,28],[0,0,0,29],[0,0,0,32],[0,0,0,38],[0,0,0,43],[0,0,0,46],[0,0,0,48],[0,0,0,49],[0,0,0,50],[0,0,0,50],[0,0,0,46],[0,0,0,41],[0,0,0,39],[1,0,0,38],[1,0,0,37],[2,0,0,37],[2,0,0,37],[6,0,0,37],[9,0,0,38],[11,0,0,38],[15,0,0,38],[16,0,0,38],[18,0,0,37],[15,0,0,37],[16,0,0,36],[21,0,0,38],[20,0,0,42],[28,0,0,46],[25,0,0,47],[29,0,0,46],[36,0,0,46],[49,0.043,0,43],[54,0.016,0,39],[36,0,0,40],[85,0,0,40],[36,0,0,39],[36,0,0,37],[36,0,0,36],[36,0,0,36],[36,0,0,36]]},"hi":{"name":"Kailua","date":"2026-10-29","h":[[70,0,0,74],[65,0,0,74],[63,0.004,0,74],[65,0.008,0,74],[69,0.016,0,75],[73,0.028,0,75],[75,0.02,0,75],[77,0.036,0,75],[78,0.051,0,75],[79,0.067,0,75],[80,0.098,0,76],[80,0.098,0,76],[79,0.067,0,76],[78,0.071,0,76],[78,0.071,0,76],[79,0.055,0,75],[81,0.051,0,75],[82,0.012,0,75],[80,0.012,0,75],[77,0.004,0,74],[73,0,0,74],[69,0,0,75],[64,0,0,75],[61,0,0,75],[59,0,0,75],[58,0,0,75],[59,0,0,75],[63,0,0,76],[70,0.008,0,75],[76,0.012,0,75],[82,0.016,0,75],[87,0.012,0,75],[90,0.008,0,76],[91,0.012,0,77],[90,0.012,0,78],[86,0.02,0,79],[78,0.028,0,79],[68,0.02,0,80],[59,0.012,0,79],[50,0.016,0,78],[43,0.016,0,78],[39,0.004,0,77],[42,0,0,76],[50,0,0,76],[55,0,0,76],[56,0,0,76],[55,0,0,76],[55,0,0,76]]},"asof":"Thu 7:16 a.m. MT"};
   var PLACES = {sb:[41.2160,-111.8569,"Snowbasin"], dv:[40.6375,-111.4783,"Deer Valley"], sv:[43.6710,-114.3640,"Sun Valley"], hi:[21.4022,-157.7394,"Kailua"]};
   var TZ = {sb:"America/Denver", dv:"America/Denver", sv:"America/Boise", hi:"Pacific/Honolulu"};
   var cur = "sb";
   try{ var pk = document.getElementById("radar-view"); if(pk && PLACES[pk.value]) cur = pk.value; else { var v = localStorage.getItem("wsj-radar-view"); if(PLACES[v]) cur = v; } }catch(e){}
-  function hr(i){ return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? " a.m." : " p.m."); }
-  function hs(i){ return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? "a" : "p"); }
+  function hr(i){ i = i % 24; return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? " a.m." : " p.m."); }
+  function hs(i){ i = i % 24; return (i % 12 === 0 ? 12 : i % 12) + (i < 12 ? "a" : "p"); }
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], WK = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function dayName(date, plus){ var d = date.split("-"), x = new Date(Date.UTC(+d[0], +d[1]-1, +d[2] + plus)); return WK[x.getUTCDay()] + " " + MON[x.getUTCMonth()] + " " + x.getUTCDate(); }
   function kind(r){ if(r[2] > 0 && r[1] > 0) return "mix"; if(r[2] > 0) return "snow"; if(r[1] > 0) return "rain"; return r[3] != null && r[3] <= 33 ? "snow" : "rain"; }
   function fmt(x, d){ return x >= 10 ? x.toFixed(0) : x.toFixed(d); }
   function today(tz){ try{ return new Date().toLocaleDateString("en-CA", {timeZone: tz}); }catch(e){ return ""; } }
   function nowHour(tz){ try{ return +new Date().toLocaleTimeString("en-US", {timeZone: tz, hour: "2-digit", hour12: false}) % 24; }catch(e){ return -1; } }
   function render(){
-    var o = OUTLOOK[cur], ch = document.getElementById("olk-chart"), xa = document.getElementById("olk-x"), sum = document.getElementById("olk-sum");
+    var o = OUTLOOK[cur], ch = document.getElementById("olk-chart"), xa = document.getElementById("olk-x"), sum = document.getElementById("olk-sum"), dz = document.getElementById("olk-days");
     if(!ch) return;
     document.getElementById("olk-name").textContent = PLACES[cur][2];
-    if(!o){ ch.innerHTML = ""; xa.innerHTML = ""; sum.textContent = "Outlook not available right now."; return; }
-    var isToday = o.date === today(TZ[cur]), nh = isToday ? nowHour(TZ[cur]) : -1;
+    if(!o){ ch.innerHTML = ""; xa.innerHTML = ""; if(dz) dz.innerHTML = ""; sum.textContent = "Outlook not available right now."; return; }
+    var n = o.h.length, days = Math.ceil(n / 24), isToday = o.date === today(TZ[cur]), nh = isToday ? nowHour(TZ[cur]) : -1;
+    var labels = []; for(var d = 0; d < days; d++) labels.push(isToday ? (d === 0 ? "Today" : d === 1 ? "Tomorrow" : dayName(o.date, d)) : dayName(o.date, d));
     var html = '<span class="olk-y" style="bottom:100%">100%</span><span class="olk-y" style="bottom:50%">50%</span><span class="olk-y" style="bottom:0">0%</span>';
-    var rain = 0, snow = 0, peak = 0, peakH = 0;
+    var tot = []; for(var d1 = 0; d1 < days; d1++) tot.push({rain: 0, snow: 0, peak: 0, peakH: 0});
     o.h.forEach(function(r, i){
-      rain += r[1]; snow += r[2]; if(r[0] > peak){ peak = r[0]; peakH = i; }
+      var t = tot[Math.floor(i / 24)]; t.rain += r[1]; t.snow += r[2]; if(r[0] > t.peak){ t.peak = r[0]; t.peakH = i; }
       var k = kind(r), amt = r[1] + r[2] > 0;
-      var tip = hr(i) + ": " + r[0] + "% chance" + (r[2] > 0 ? ", snow " + fmt(r[2], 1) + "\u2033" : "") + (r[1] > 0 ? ", rain " + fmt(r[1], 2) + "\u2033" : "") + (r[3] != null ? ", " + r[3] + "\u00b0F" : "");
-      html += '<div class="olk-col' + (i === nh ? ' now' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '"><div class="olk-bar ' + k + (amt ? '' : ' chance') + '" style="height:' + Math.max(0, Math.min(100, r[0])) + '%"></div></div>';
+      var tip = (days > 1 ? labels[Math.floor(i / 24)] + " " : "") + hr(i) + ": " + r[0] + "% chance" + (r[2] > 0 ? ", snow " + fmt(r[2], 1) + "″" : "") + (r[1] > 0 ? ", rain " + fmt(r[1], 2) + "″" : "") + (r[3] != null ? ", " + r[3] + "°F" : "");
+      html += '<div class="olk-col' + (i === nh ? ' now' : '') + (i === 24 ? ' day2' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '"><div class="olk-bar ' + k + (amt ? '' : ' chance') + '" style="height:' + Math.max(0, Math.min(100, r[0])) + '%"></div></div>';
     });
     ch.innerHTML = html;
-    var xs = ""; for(var i = 0; i < 24; i++) xs += "<span>" + (i % 3 === 0 ? hs(i) : "") + "</span>";
+    var step = n > 24 ? 6 : 3, xs = ""; for(var i = 0; i < n; i++) xs += "<span>" + (i % step === 0 ? hs(i) : "") + "</span>";
     xa.innerHTML = xs;
-    var dayTxt = isToday ? "Today" : (function(){ var d = o.date.split("-"); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+d[1]-1] + " " + (+d[2]); })();
-    if(peak === 0) sum.innerHTML = dayTxt + ': <span class="dry">no rain or snow expected.</span>';
-    else sum.textContent = dayTxt + ": " + (snow >= 0.05 ? "snow " + fmt(snow, 1) + "\u2033" : "no snow") + " · " + (rain >= 0.005 ? "rain " + fmt(rain, 2) + "\u2033" : "no rain") + " · highest chance " + peak + "% at " + hr(peakH);
+    if(dz) dz.innerHTML = days > 1 ? labels.map(function(l, d3){ return "<span>" + l + (isToday ? " · " + dayName(o.date, d3) : "") + "</span>"; }).join("") : "";
+    sum.innerHTML = tot.map(function(t, d4){
+      var lab = "<b>" + labels[d4] + ":</b> ";
+      if(t.peak === 0) return lab + '<span class="dry">no rain or snow expected.</span>';
+      return lab + (t.snow >= 0.05 ? "snow " + fmt(t.snow, 1) + "″" : "no snow") + " · " + (t.rain >= 0.005 ? "rain " + fmt(t.rain, 2) + "″" : "no rain") + " · highest chance " + t.peak + "% at " + hr(t.peakH);
+    }).join("<br>");
     var note = document.getElementById("olk-note");
     ch.onclick = ch.onfocusin = function(e){ var c = e.target.closest && e.target.closest(".olk-col"); if(c && note) note.textContent = c.getAttribute("data-tip"); };
   }
@@ -3581,11 +3594,11 @@ html:not(.view-news) #ecov{display:none!important;}
     if(document.hidden) return;
     var keys = ["sb","dv","sv","hi"];
     var q = "https://api.open-meteo.com/v1/forecast?latitude=" + keys.map(function(k){ return PLACES[k][0]; }).join(",") + "&longitude=" + keys.map(function(k){ return PLACES[k][1]; }).join(",") +
-            "&hourly=precipitation_probability,rain,showers,snowfall,temperature_2m&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=1";
+            "&hourly=precipitation_probability,rain,showers,snowfall,temperature_2m&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=2";
     try{ fetch(q).then(function(r){ return r.json(); }).then(function(d){
       d = Array.isArray(d) ? d : [d];
       d.forEach(function(x, j){ var h = x && x.hourly; if(!h || !h.time || h.time.length < 24) return;
-        var rows = []; for(var i = 0; i < 24; i++) rows.push([h.precipitation_probability[i] || 0, +(((h.rain[i] || 0) + (h.showers[i] || 0)).toFixed(3)), +((h.snowfall[i] || 0).toFixed(2)), h.temperature_2m[i] == null ? null : Math.round(h.temperature_2m[i])]);
+        var rows = [], m = Math.min(48, h.time.length); for(var i = 0; i < m; i++) rows.push([h.precipitation_probability[i] || 0, +(((h.rain[i] || 0) + (h.showers[i] || 0)).toFixed(3)), +((h.snowfall[i] || 0).toFixed(2)), h.temperature_2m[i] == null ? null : Math.round(h.temperature_2m[i])]);
         OUTLOOK[keys[j]] = {name: PLACES[keys[j]][2], date: h.time[0].slice(0, 10), h: rows}; });
       render();
     }).catch(function(){}); }catch(e){}

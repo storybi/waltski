@@ -177,9 +177,9 @@ OUTLOOK_PLACES = [("sb", "Snowbasin", 41.2160, -111.8569), ("dv", "Deer Valley",
 
 
 def fetch_outlook():
-    """{key: {"name", "date", "h": [[chance %, rain in, snow in, temp F] x 24]}, "asof": "..."}  (rain includes showers)"""
+    """{key: {"name", "date", "h": [[chance %, rain in, snow in, temp F] x 48]}, "asof": "..."}  (today 12 a.m. through tomorrow 11 p.m.; rain includes showers)"""
     q = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&hourly=precipitation_probability,rain,showers,snowfall,temperature_2m"
-         "&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=1") % (
+         "&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto&forecast_days=2") % (
         ",".join(str(p[2]) for p in OUTLOOK_PLACES), ",".join(str(p[3]) for p in OUTLOOK_PLACES))
     data = json.loads(_get(q, {"User-Agent": HTML_UA["User-Agent"], "Accept": "application/json"}).decode("utf-8"))
     data = data if isinstance(data, list) else [data]
@@ -190,11 +190,12 @@ def fetch_outlook():
         if len(t) < 24:
             continue
         rows = []
-        for i in range(24):
-            pr = h.get("precipitation_probability", [None] * 24)[i]
-            rn = (h.get("rain", [0] * 24)[i] or 0) + (h.get("showers", [0] * 24)[i] or 0)
-            sn = h.get("snowfall", [0] * 24)[i] or 0
-            tp = h.get("temperature_2m", [None] * 24)[i]
+        m = min(48, len(t))
+        for i in range(m):
+            pr = (h.get("precipitation_probability") or [None] * m)[i]
+            rn = ((h.get("rain") or [0] * m)[i] or 0) + ((h.get("showers") or [0] * m)[i] or 0)
+            sn = (h.get("snowfall") or [0] * m)[i] or 0
+            tp = (h.get("temperature_2m") or [None] * m)[i]
             rows.append([pr if pr is not None else 0, round(rn, 3), round(sn, 2), None if tp is None else int(round(tp))])
         out[key] = {"name": name, "date": t[0][:10], "h": rows}
     out["asof"] = dt.datetime.now(MT).strftime("%a %-I:%M %p MT").replace("AM", "a.m.").replace("PM", "p.m.")
