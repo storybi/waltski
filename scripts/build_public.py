@@ -58,14 +58,16 @@ public_css = """<style>
 </style>
 """
 
-# 4b. Free Google search bar at the top of the sticky dock (Mark, Oct 26, 2026) — the public site has no Ask Claude bar, so this
-#     takes its place: "Search" opens Google results, "AI Mode" opens Google's free AI answers (udm=50), both in a new tab.
+# 4b. Suggest-a-resort bar at the top of the sticky dock (Mark, Oct 29, 2026) — replaces the free Google search bar (Oct 26, 2026).
+#     Visitors type a resort they'd like added and press Send; it reaches Mark's phone as a push notification (see 6b below).
+#     It keeps the "gbar" class and id, so the existing bar styling and the 9 p.m.–7 a.m. black-out still apply.
 GBAR_HTML = """
-  <form class="gbar" id="gbar" action="https://www.google.com/search" method="get" target="_blank" rel="noopener" role="search">
-    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-    <input type="search" name="q" placeholder="Search Google…" aria-label="Search Google" autocomplete="off" required>
-    <button type="submit">Search</button>
-    <button type="submit" class="gbar-ai" name="udm" value="50" title="Google AI Mode">AI Mode</button>
+  <form class="gbar sug" id="gbar" autocomplete="off" aria-label="Suggest a resort">
+    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l6.5-11 4 6.5 2.5-4L21 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <input type="text" id="sug-resort" maxlength="80" required placeholder="Suggest a resort here!" aria-label="Suggest a resort">
+    <input type="text" id="sug-web" tabindex="-1" autocomplete="off" aria-hidden="true" class="sug-hp">
+    <button type="submit" class="gbar-ai" id="sug-send">Send</button>
+    <span class="sug-msg" id="sug-msg" role="status" aria-live="polite"></span>
   </form>"""
 GBAR_CSS = """<style>
 /* Public site: free Google search bar at the top of the sticky dock */
@@ -295,7 +297,51 @@ greet_js = """<script>
 })();
 </script>
 """
-page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + "</body>\n</html>\n"
+# 6b. Suggest a resort (Mark, Oct 29, 2026): the bar at the top of the dock (4b) where visitors type a resort they'd like
+#     added. Each suggestion is pushed instantly to Mark's phone through ntfy (free push notifications, no account): he subscribes to
+#     the topic below in the ntfy app. Public site only. Keep the topic name unchanged, or his phone stops getting suggestions.
+SUGGEST_TOPIC = "skiinut-resorts-6eb2b87be4"
+SUGGEST_CSS = """<style>
+/* Suggest-a-resort bar (Mark, Oct 29, 2026): status message shows under the field; honeypot hidden */
+.gbar.sug{position:relative; flex-wrap:wrap;}
+.sug-hp{position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important;}
+.sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 22px;}
+.sug-msg:empty{display:none;}
+.sug-msg.ok{color:#2f9e4c;} .sug-msg.err{color:#c8102e;}
+.gbar button:disabled{opacity:.5; cursor:default;}
+html.clock-night .sug-msg{color:#777;}
+</style>
+"""
+SUGGEST_JS = """<script>
+/* Suggest a resort — sends the suggestion to Mark's phone as an ntfy push notification. Light spam guards: hidden honeypot field,
+   length limits, and at most 3 suggestions per browser per hour. */
+(function(){
+  var TOPIC = "%s", f = document.getElementById("gbar"); if(!f) return;
+  var r = document.getElementById("sug-resort"), hp = document.getElementById("sug-web"),
+      b = document.getElementById("sug-send"), msg = document.getElementById("sug-msg"), KEY = "skiinut-sug-times";
+  function say(t, c){ msg.textContent = t; msg.className = "sug-msg" + (c ? " " + c : ""); }
+  function recent(){ try{ var a = JSON.parse(localStorage.getItem(KEY) || "[]"); return a.filter(function(x){ return Date.now() - x < 3600000; }); }catch(e){ return []; } }
+  f.addEventListener("submit", function(e){
+    e.preventDefault();
+    var name = r.value.replace(/\\s+/g, " ").trim();
+    if(hp.value){ say("Thanks! Your suggestion was sent.", "ok"); f.reset(); return; }
+    if(name.length < 2){ say("Please type a resort name.", "err"); r.focus(); return; }
+    var t = recent(); if(t.length >= 3){ say("Thanks — you\\u2019ve sent a few already. Please try again later.", "err"); return; }
+    b.disabled = true; say("Sending\\u2026");
+    fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: "Resort: " + name,
+      headers: {"Title": "Skiinut: resort suggestion", "Tags": "ski", "Priority": "default"}})
+      .then(function(res){ if(!res.ok) throw new Error(res.status);
+        t.push(Date.now()); try{ localStorage.setItem(KEY, JSON.stringify(t)); }catch(_){}
+        say("Thanks! \\u201c" + name + "\\u201d was sent to Skiinut.", "ok"); f.reset(); setTimeout(function(){ if(msg.className.indexOf("ok") > 0) say(""); }, 8000); })
+      .catch(function(){ say("Sorry, that didn\\u2019t go through. Please try again in a minute.", "err"); })
+      .then(function(){ b.disabled = false; });
+  });
+})();
+</script>
+""" % SUGGEST_TOPIC
+public_css += SUGGEST_CSS
+
+page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + SUGGEST_JS + "</body>\n</html>\n"
 
 # 7. Sunday's sermon (Mark, Oct 26, 2026): Washington Heights Church's latest Sunday sermon plays in an embedded YouTube player at the
 #    top of Morning Devotion (scripts/sermon.py). Keeps the sermon already on the live page so a rebuild never steps back to an older one;
