@@ -26,6 +26,12 @@
 .gbar button:hover{border-color:var(--fg-muted);}
 .gbar .gbar-ai{background:var(--accent); border-color:var(--accent); color:#fff;}
 @media (max-width:420px){ .gbar button{padding:6px 7px; font-size:12px;} }
+/* Night (Mark, Oct 29, 2026): from 9 p.m. to 7 a.m. by the reader's clock (html.clock-night, set by the header clock), the Google bar is blacked out */
+html.clock-night .gbar{background:#000!important; border-color:#000;}
+html.clock-night .gbar-g{color:#444;}
+html.clock-night .gbar input{background:#0d0d0d; border-color:#222; color:#bbb;}
+html.clock-night .gbar input::placeholder{color:#555;}
+html.clock-night .gbar button, html.clock-night .gbar .gbar-ai{background:#111; border-color:#222; color:#777;}
 </style>
 <style>
 /* Public site: live Needles cam picture behind the header (falls back to the rotating cam photos) */
@@ -893,6 +899,9 @@ html.banner-lock .wt-clock{visibility:hidden;}
 /* Night clock (Mark, Oct 29, 2026): from 9 p.m. to 7 a.m. by the reader's clock, the time is four times as large, capped so it fits the screen width (date line unchanged) */
 html.clock-night .wt-clock-t{font-size:clamp(64px,23vw,304px);}
 html.clock-night #wt-head-end{height:clamp(130px,calc(23vw + 60px),370px);}
+/* Music button pulses when the 6 a.m. morning music is waiting for a tap (Mark, Oct 29, 2026) */
+.wt-radio.wt-radio-wake{color:#E2733A!important; animation:wtRadioWake 1.2s ease-in-out infinite;}
+@keyframes wtRadioWake{0%,100%{opacity:1}50%{opacity:.35}}
 /* SKIINUT title over the locked photo band (Mark, Oct 27, 2026): left-justified, lined up with the page's title, only while the band is locked */
 .wt-lock-name{position:fixed; top:0; left:calc(max(16px, env(safe-area-inset-left,0px)) + max(0px, (100vw - 1212px) / 2) + 12px); z-index:4; height:var(--lock-h,0px); display:flex; align-items:center; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .25s ease, visibility .25s;
   font-family:"Montserrat","Helvetica Neue",Arial,sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.12em; font-size:clamp(13px,4.2vw,40px); line-height:1; white-space:nowrap; color:#F4EFE3; text-shadow:0 2px 10px rgba(0,0,0,.75), 0 1px 3px rgba(0,0,0,.8);}
@@ -2966,16 +2975,35 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   var a = null, on = false, blocked = false;
   function label(){ b.textContent = blocked ? "Music ↗" : on ? "Mute Music" : "Music"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
   function stop(){ if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
-  b.addEventListener("click", function(){
-    if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; }
-    if(on){ stop(); return; }
-    if(!a){ a = new Audio(); a.preload = "none"; a.addEventListener("error", function(){ if(on || a.getAttribute("src")){ blocked = true; on = false; label(); } }); }
+  var auto = false, waiting = false, skipDay = "";
+  function play(isAuto){
+    if(!a){ a = new Audio(); a.preload = "none"; a.addEventListener("error", function(){ if(on || a.getAttribute("src")){ blocked = true; on = false; auto = false; label(); } }); }
     a.src = STREAM + "?t=" + Date.now();
-    on = true; label();
+    on = true; auto = !!isAuto; label();
     var p = a.play();
-    if(p && p.catch) p.catch(function(e){ if(e && e.name === "AbortError") return; blocked = true; on = false; label(); window.open(PLAYER, "_blank", "noopener"); });
+    if(p && p.catch) p.catch(function(e){ if(e && e.name === "AbortError") return; on = false; auto = false;
+      if(isAuto && e && e.name === "NotAllowedError"){ a.removeAttribute("src"); wait(); label(); return; }
+      blocked = true; label(); if(!isAuto) window.open(PLAYER, "_blank", "noopener"); });
+  }
+  b.addEventListener("click", function(){
+    unwait();
+    if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; }
+    if(on){ stop(); auto = false; if(inWin(new Date())) skipDay = new Date().toDateString(); return; }
+    play(false);
   });
-  label();
+  /* Morning music (Mark, Oct 29, 2026): Classical KING FM starts by itself at 6:00 a.m. and stops at 6:30 a.m. by the reader's clock,
+     while the page is open. If the browser won't play sound before a tap, the Music button pulses and the first tap or key anywhere
+     on the page starts it. Pressing Mute during the half hour keeps it off until the next morning. Keep as is during routine refreshes. */
+  function inWin(d){ var m = d.getHours()*60 + d.getMinutes(); return m >= 360 && m < 390; }
+  function onTap(ev){ if(ev && ev.target && ev.target.closest && ev.target.closest("#wt-radio")) return; unwait(); if(inWin(new Date()) && !on && !blocked) play(true); }
+  function wait(){ if(waiting) return; waiting = true; b.classList.add("wt-radio-wake"); document.addEventListener("pointerdown", onTap, true); document.addEventListener("keydown", onTap, true); }
+  function unwait(){ if(!waiting) return; waiting = false; b.classList.remove("wt-radio-wake"); document.removeEventListener("pointerdown", onTap, true); document.removeEventListener("keydown", onTap, true); }
+  function check(){
+    var d = new Date();
+    if(inWin(d)){ if(!on && !waiting && !blocked && skipDay !== d.toDateString()) play(true); }
+    else { unwait(); if(on && auto){ stop(); auto = false; } }
+  }
+  label(); check(); setInterval(check, 15000);
 })();
 </script>
 <script>

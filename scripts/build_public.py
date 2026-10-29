@@ -80,6 +80,12 @@ GBAR_CSS = """<style>
 .gbar button:hover{border-color:var(--fg-muted);}
 .gbar .gbar-ai{background:var(--accent); border-color:var(--accent); color:#fff;}
 @media (max-width:420px){ .gbar button{padding:6px 7px; font-size:12px;} }
+/* Night (Mark, Oct 29, 2026): from 9 p.m. to 7 a.m. by the reader's clock (html.clock-night, set by the header clock), the Google bar is blacked out */
+html.clock-night .gbar{background:#000!important; border-color:#000;}
+html.clock-night .gbar-g{color:#444;}
+html.clock-night .gbar input{background:#0d0d0d; border-color:#222; color:#bbb;}
+html.clock-night .gbar input::placeholder{color:#555;}
+html.clock-night .gbar button, html.clock-night .gbar .gbar-ai{background:#111; border-color:#222; color:#777;}
 </style>
 """
 DOCK = '<div class="wt-dock" id="wt-dock">'
