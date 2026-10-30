@@ -3757,11 +3757,11 @@ html:not(.view-news) #ecov{display:none!important;}
     if(d.nh >= 0) marks += '<span class="ro-now" style="left:' + ((d.nh + .5) * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     if(n > 24) marks += '<span class="ro-day" style="left:' + (24 * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     /* Hour markers under the axis every 6 hours (Mark, Oct 30, 2026); midnight is marked by the Today / Tomorrow labels. */
-    var hrs = ""; for(var j = 6; j < n; j += 6){ if(j % 24 === 0) continue; var hh = j % 24; hrs += '<span style="left:' + ((j + .5) * w) + '%">' + (hh === 12 ? "12p" : hh < 12 ? hh + "a" : (hh - 12) + "p") + '</span>'; }
+    var hrs = ""; for(var j = 6; j < n; j += 6){ var hh = j % 24; hrs += '<span style="left:' + ((hh === 0 ? j : j + .5) * w) + '%">' + (hh === 0 ? "12a" : hh === 12 ? "12p" : hh < 12 ? hh + "a" : (hh - 12) + "p") + '</span>'; }
     marks += '<span class="ro-hrs" aria-hidden="true">' + hrs + '</span>';
     var l1 = d.isToday ? "Today" : "Day 1", l2 = d.isToday ? "Tomorrow" : "Day 2";
     box.hidden = false;
-    box.innerHTML = '<span class="ro-cols">' + cols + '</span>' + marks + '<span class="ro-lab"><span>' + l1 + '</span>' + (n > 24 ? '<span style="left:' + (24 * w) + '%">' + l2 + '</span>' : '') + '</span>';
+    box.innerHTML = '<span class="ro-cols">' + cols + '</span>' + marks + '<span class="ro-lab"><span>' + l1 + '</span></span>';
   });
 })();
 </script>
