@@ -1658,10 +1658,10 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   // Closing levels; day = % change vs. prior session (arrow beside the level); chg = % change over 1 mo, 3 mo, 6 mo, 12 mo (vs. close on the same date in the earlier month)
   var MKT_ASOF = "Close Thu, Oct 29, 2026";
   var MKT = [
-    {name:"S&P 500", level:"7,720.39", day:-0.3, chg:[0.6, 5.5, 8.2, 12.0], bg:[32,25,25,16,33,34,31,32,39,34,41,39,38,39,39,32,37,35,25,18,9,0,15,31,52,55,59,71,71,76,83,70,73,78,68,76,83,75,72,77,95,97,90,92,93,88,88,94,93,99,89,86,93,93]},
-    {name:"Dow Jones Industrial", level:"52,342.56", day:-0.3, chg:[1.9, 1.5, 7.1, 9.9], bg:[27,20,22,12,28,31,37,33,40,36,48,47,44,42,55,48,50,43,26,16,5,0,15,31,48,45,48,50,49,60,65,64,67,71,75,86,83,78,76,82,99,96,91,94,92,83,73,74,67,72,76,79,80,80]},
-    {name:"Nasdaq Composite", level:"26,184.72", day:-1.4, chg:[-2.3, 7.1, 6.1, 9.3], bg:[43,32,30,20,37,41,35,36,41,35,42,40,39,39,32,25,30,27,22,18,11,0,14,30,54,60,64,82,81,83,93,73,76,86,67,75,82,71,62,68,89,89,81,84,86,83,86,94,96,99,80,77,81,81]},
-    {name:"Russell 2000", level:"2,859.22", day:1.0, chg:[1.8, -1.6, 4.4, 15.1], bg:[16,9,3,0,19,22,26,23,23,20,36,44,42,35,43,39,42,37,22,16,10,11,23,37,58,59,63,70,60,71,78,66,81,86,91,89,86,84,79,80,94,99,92,85,86,76,70,66,66,62,50,58,69,69]}
+    {name:"S&P 500", level:"7,720.39", day:-0.3, chg:[0.6, 5.5, 8.2, 12.0], bg:[25,25,16,33,34,31,32,39,34,41,39,38,39,39,32,37,35,25,18,9,0,15,31,52,55,59,71,71,76,83,70,73,78,68,76,83,75,72,77,95,97,90,92,93,88,88,94,93,99,89,86,93,93]},
+    {name:"Dow Jones Industrial", level:"52,342.56", day:-0.3, chg:[1.9, 1.5, 7.1, 9.9], bg:[20,22,12,28,31,37,33,40,36,48,47,44,42,55,48,50,43,26,16,5,0,15,31,48,45,48,50,49,60,65,64,67,71,75,86,83,78,76,82,99,96,91,94,92,83,73,74,67,72,76,79,80,80]},
+    {name:"Nasdaq Composite", level:"26,184.72", day:-1.4, chg:[-2.3, 7.1, 6.1, 9.3], bg:[32,30,20,37,41,35,36,41,35,42,40,39,39,32,25,30,27,22,18,11,0,14,30,54,60,64,82,81,83,93,73,76,86,67,75,82,71,62,68,89,89,81,84,86,83,86,94,96,99,80,77,81,81]},
+    {name:"Russell 2000", level:"2,859.22", day:1.0, chg:[1.8, -1.6, 4.4, 15.1], bg:[9,3,0,19,22,26,23,23,20,36,44,42,35,43,39,42,37,22,16,10,11,23,37,58,59,63,70,60,71,78,66,81,86,91,89,86,84,79,80,94,99,92,85,86,76,70,66,66,62,50,58,69,69]}
   ];
   // bg = 1-year weekly closes scaled 0–99 (oldest→newest) for the card's background chart; color follows the 12-mo change. Real indexes (^GSPC, ^DJI, ^IXIC, ^RUT) from Yahoo Finance public data.
   function bgChart(m){
@@ -1727,11 +1727,11 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   };
   window.WX_ICON = ICON;   /* shared with the resort weather card (Mark, Oct 29, 2026) */
   var WX = [
-    {"city":"Morgan, Utah","home":true,"lat":41.0361,"lon":-111.6769,"abbr":"Mor","mid":57,"where":"Morgan County · Wasatch Back","now":"48°","cond":"Mostly cloudy","note":"Today: mostly cloudy then chance light rain, high 65°. Tonight: light rain likely, low 40°, 60% chance of precipitation. Saturday: chance light rain, high 61°, 38% chance of precipitation.","days":[["Fri","rain",65,40,"60%"],["Sat","rain",61,40,"89%"],["Sun","storm",53,34,"98%"],["Mon","rain",51,30,"54%"],["Tue","partly",57,33,""],["Wed","partly",58,33,"21%"],["Thu","rain",56,33,"26%"]]},
-    {"city":"Eugene, Oregon","lat":44.0521,"lon":-123.0868,"abbr":"Eug","mid":52,"where":"Willamette Valley","now":"46°","cond":"Cloudy","note":"Overnight: patchy fog, low 37°, 35% chance of precipitation. Friday: chance light rain, high 56°. Friday Night: partly cloudy then patchy fog, low 33°.","days":[["Fri","rain",56,33,"28%"],["Sat","rain",52,35,"27%"],["Sun","partly",56,34,""],["Mon","cloud",57,39,""],["Tue","cloud",58,37,""],["Wed","rain",60,40,"49%"],["Thu","rain",56,null,"49%"]]},
-    {"city":"Redmond, Washington","lat":47.674,"lon":-122.121,"abbr":"Red","mid":46,"where":"King County · Eastside","now":"46°","cond":"Mostly cloudy","note":"Tonight: mostly cloudy then chance light rain, low 36°. Friday: light rain, high 51°, 75% chance of precipitation. Friday Night: partly cloudy, low 35°.","days":[["Thu","rain",null,36,"26%"],["Fri","rain",51,35,"75%"],["Sat","partly",54,37,""],["Sun","partly",56,37,""],["Mon","cloud",56,42,""],["Tue","partly",58,39,""],["Wed","rain",59,42,"21%"]]},
-    {"city":"Honolulu, Hawaii","lat":21.3069,"lon":-157.8583,"abbr":"Hon","mid":84,"where":"Oʻahu · Honolulu metro","now":"76°","cond":"Scattered rain showers","note":"Tonight: scattered rain showers, low 75°, 38% chance of precipitation. Friday: scattered rain showers, high 84°. Friday Night: scattered rain showers, low 75°, 42% chance of precipitation.","days":[["Thu","rain",null,75,"38%"],["Fri","rain",84,75,"42%"],["Sat","rain",85,74,"38%"],["Sun","rain",84,73,"30%"],["Mon","partly",82,73,""],["Tue","rain",83,73,""],["Wed","rain",83,74,""]]},
-    {"city":"Lakeland, Florida","lat":28.0395,"lon":-81.9498,"abbr":"Lak","mid":82,"where":"Polk County · Central Florida","now":"72°","cond":"Cloudy","note":"Today: mostly sunny, high 86°. Tonight: mostly cloudy, low 71°. Saturday: chance rain showers, high 84°, 35% chance of precipitation.","days":[["Fri","partly",86,71,""],["Sat","rain",84,71,"35%"],["Sun","storm",80,68,"80%"],["Mon","storm",82,66,"48%"],["Tue","rain",83,65,"26%"],["Wed","storm",84,64,""],["Thu","storm",83,61,"22%"]]}
+    {"city":"Morgan, Utah","home":true,"lat":41.0361,"lon":-111.6769,"abbr":"Mor","mid":57,"where":"Morgan County · Wasatch Back","now":"39°","cond":"Mostly cloudy","note":"Mild today near 65 with a chance of rain around midday. The storm arrives tonight and peaks Sunday with a soaking, thundery rain (100%), then lingering rain Monday morning before a drier, cooler stretch.","days":[["Fri","rain",65,40,"30%"],["Sat","rain",61,40,"60%"],["Sun","storm",53,34,"100%"],["Mon","rain",51,30,"50%"],["Tue","sun",57,33,""],["Wed","partly",58,33,""],["Thu","partly",56,null,""]]},
+    {"city":"Eugene, Oregon","lat":44.0521,"lon":-123.0868,"abbr":"Eug","mid":52,"where":"Willamette Valley","now":"47°","cond":"Light rain","note":"Morning rain tapers off before late morning, then gradual clearing with a high near 56. Mostly dry into next week with foggy, frosty mornings and lows in the 30s.","days":[["Fri","rain",56,33,"30%"],["Sat","fog",52,35,"30%"],["Sun","partly",56,34,""],["Mon","cloud",57,39,""],["Tue","cloud",58,37,""],["Wed","partly",60,40,""],["Thu","rain",56,null,""]]},
+    {"city":"Redmond, Washington","lat":47.674,"lon":-122.121,"abbr":"Red","mid":46,"where":"King County · Eastside","now":"39°","cond":"Mostly cloudy","note":"Light rain is likely today (80%), though totals stay under a tenth of an inch, with a cool high near 51. Drier and partly sunny through the weekend, with highs in the mid-50s next week.","days":[["Fri","rain",51,35,"80%"],["Sat","partly",54,37,""],["Sun","partly",56,37,""],["Mon","cloud",56,42,""],["Tue","cloud",58,39,""],["Wed","partly",59,42,""],["Thu","rain",58,null,""]]},
+    {"city":"Honolulu, Hawaii","lat":21.3069,"lon":-157.8583,"abbr":"Hon","mid":84,"where":"Oʻahu · Honolulu metro","now":"78°","cond":"Mostly cloudy","note":"Scattered morning showers give way to partial sun today, high near 84. Trade winds strengthen and turn breezy to windy next week, with only isolated passing showers.","days":[["Fri","rain",84,75,"40%"],["Sat","rain",85,74,"40%"],["Sun","rain",84,73,"30%"],["Mon","partly",82,73,"20%"],["Tue","partly",83,73,"20%"],["Wed","partly",83,74,"20%"],["Thu","sun",84,null,""]]},
+    {"city":"Lakeland, Florida","lat":28.0395,"lon":-81.9498,"abbr":"Lak","mid":82,"where":"Polk County · Central Florida","now":"72°","cond":"Overcast","note":"Breezy and warm today near 86 with a dry forecast. Showers return Saturday, and Sunday looks wettest with showers and storms (80%) before scattered afternoon storms Monday.","days":[["Fri","partly",86,71,""],["Sat","rain",84,71,"40%"],["Sun","storm",80,68,"80%"],["Mon","storm",82,66,"50%"],["Tue","rain",83,65,"30%"],["Wed","partly",84,64,"20%"],["Thu","partly",83,null,"20%"]]}
   ];
   // Weather badge from today's condition. Morgan (home): sun, partly sunny and snow are always favorable.
   var WXRATE = {
@@ -1942,11 +1942,11 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     ["DIA",522.73,524.68],["QQQ",715.34,725.61],["IWM",284.01,281.29],["AAPL",348.91,343.83],
     ["NVDA",213.66,215.38],["AMZN",243.79,254.60],["GOOGL",283.82,324.89],["META",624.52,612.49],
     ["JPM",343.58,339.30],["PPG",120.00,118.44],["SHW",330.10,320.80],["AXTA",33.61,34.64],
-    ["BA",172.65,167.14],["GLD",368.57,373.51],["USO",168.19,166.57],["BTC",77399.98,77775.11],
-    ["ETH",2233.23,2249.50]
+    ["BA",172.65,167.14],["GLD",368.57,373.51],["USO",168.19,166.57],["BTC",77319.18,77775.11],
+    ["ETH",2221.40,2249.50]
   ];
   /* 90-day sparklines: SYMBOL:[90-day % change, closes scaled 0–99 oldest→newest]. Through the Oct 29, 2026 close. */
-  var SPARK_ASOF = "90 days to Oct 30, 2026";
+  var SPARK_ASOF = "90 days to Oct 29, 2026";
   var SPARK = {
     "S&P 500":[3.8,[0,14,42,78,74,71,83,82,75,81,94,90,80,66,70,53,61,56,62,62,76,71,65,50,59,81,73,61,52,40,57,47,38,30,52,55,85,85,70,69,79,64,61,56,59,74,87,99,95,85,97,96,96,73,80,58,66,71,83,59,48,62,74,80,73]],
     "DOW":[0.3,[37,45,65,91,99,86,90,88,83,82,84,81,73,70,74,53,68,72,77,74,77,76,66,54,62,80,72,54,42,33,48,44,34,16,25,22,33,28,17,13,27,17,13,0,1,8,10,18,8,9,22,27,22,21,37,32,30,46,56,56,38,42,42,45,41]],
@@ -1971,8 +1971,8 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     "BA":[-21.8,[73,66,90,95,99,88,91,89,90,87,86,87,80,76,75,65,64,59,60,61,58,58,55,52,57,59,61,59,53,51,59,58,58,47,40,42,46,41,44,40,42,23,28,26,34,36,35,31,29,28,31,30,26,24,29,31,33,32,34,28,29,29,1,0,7]],
     "GLD":[-2.3,[17,8,8,12,37,37,51,58,55,62,52,56,63,51,76,78,91,97,99,88,90,68,67,49,58,70,65,53,59,48,52,42,44,40,51,56,51,54,42,40,43,18,26,23,26,22,21,25,15,19,29,25,24,15,26,25,21,18,20,4,0,2,9,11,3]],
     "USO":[31.9,[23,26,13,2,0,7,6,20,23,22,18,21,28,29,29,36,36,31,20,23,27,27,34,47,48,49,49,56,64,79,72,76,85,75,73,71,60,53,62,69,61,64,52,56,64,59,53,54,53,59,60,65,69,70,77,85,83,83,81,86,99,93,89,94,97]],
-    "BTC":[19.6,[8,0,0,3,3,5,8,6,9,9,9,5,3,3,3,1,1,0,7,8,27,43,65,59,62,67,66,68,73,63,64,62,66,61,60,77,70,71,73,68,65,64,57,60,60,58,64,53,56,57,75,77,76,99,97,90,90,88,90,90,86,87,86,92,90,91,98,96,95,85,79,82,84,87,79,84,78,80,78,77,80,79,84,88,77,76,75,72,72,75,77,62,61]],
-    "ETH":[16.5,[8,2,0,4,2,3,7,6,7,8,7,3,4,4,4,4,4,3,7,8,43,51,71,62,66,68,64,70,71,64,65,61,66,61,58,71,65,68,71,69,68,66,63,71,72,67,71,59,61,64,81,84,85,99,96,89,90,90,90,89,90,88,89,91,88,90,94,92,91,77,67,68,70,73,64,69,61,63,61,59,60,60,64,67,58,57,54,51,51,54,55,43,41]]
+    "BTC":[21.8,[3,3,5,7,6,9,9,8,5,3,2,2,1,1,0,7,8,27,43,65,59,62,67,66,67,73,62,64,62,65,61,60,77,70,71,73,68,65,64,57,60,60,58,64,53,55,57,75,77,76,99,97,90,90,88,90,90,86,87,86,92,90,91,98,96,95,85,78,82,84,87,79,84,78,80,78,77,80,79,84,88,77,76,75,72,72,75,77,62,60]],
+    "ETH":[18.0,[3,0,1,5,5,6,6,5,1,2,2,3,2,2,2,6,6,42,50,71,61,65,67,63,70,70,63,65,60,66,60,57,70,64,67,71,68,68,66,62,71,72,67,71,58,60,63,81,83,85,99,96,89,89,90,90,89,90,88,89,91,87,89,94,92,90,77,66,68,70,73,63,69,60,63,61,58,59,59,63,66,57,57,54,51,50,53,54,42,39]]
   };
   try{
     function spark(sym){
@@ -3062,13 +3062,16 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   b.addEventListener("click", function(){
     unwait();
     if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; }
-    if(on){ stop(); auto = false; if(inWin(new Date())) skipDay = new Date().toDateString(); return; }
+    if(on){ stop(); auto = false; if(inWin(new Date())){ skipDay = new Date().toDateString(); try{ localStorage.setItem("wsj-music-skip", skipDay); }catch(e){} } return; }
     play(false);
   });
-  /* Morning music (Mark, Oct 29, 2026): Classical KING FM starts by itself at 6:00 a.m. and stops at 6:30 a.m. by the reader's clock,
-     while the page is open. If the browser won't play sound before a tap, the Music button pulses and the first tap or key anywhere
-     on the page starts it. Pressing Mute during the half hour keeps it off until the next morning. Keep as is during routine refreshes. */
-  function inWin(d){ var m = d.getHours()*60 + d.getMinutes(); return m >= 360 && m < 390; }
+  /* Morning music (Mark, Oct 30, 2026): the page reloads itself at the top of every hour by the header clock (the reader's own device
+     clock and time zone — see "Hourly page reload"). On the 6 a.m. reload Classical KING FM starts by itself; the 7 a.m. reload stops it,
+     and every other hourly reload leaves the music off until the next 6 a.m. If the browser won't play sound before a tap, the Music
+     button pulses and the first tap or key anywhere on the page starts it. Pressing Mute during the 6 o'clock hour keeps it off until
+     the next morning (remembered across reloads). Keep as is during routine refreshes. */
+  function inWin(d){ return d.getHours() === 6; }
+  try{ skipDay = localStorage.getItem("wsj-music-skip") || ""; }catch(e){}
   function onTap(ev){ if(ev && ev.target && ev.target.closest && ev.target.closest("#wt-radio")) return; unwait(); if(inWin(new Date()) && !on && !blocked) play(true); }
   function wait(){ if(waiting) return; waiting = true; b.classList.add("wt-radio-wake"); document.addEventListener("pointerdown", onTap, true); document.addEventListener("keydown", onTap, true); }
   function unwait(){ if(!waiting) return; waiting = false; b.classList.remove("wt-radio-wake"); document.removeEventListener("pointerdown", onTap, true); document.removeEventListener("keydown", onTap, true); }
@@ -3078,6 +3081,22 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     else { unwait(); if(on && auto){ stop(); auto = false; } }
   }
   label(); check(); setInterval(check, 15000);
+})();
+</script>
+<script>
+/* Hourly page reload (Mark, Oct 30, 2026): reloads the whole page at the top of every hour by the header clock, i.e. the reader's own
+   device clock and time zone (it follows the device when it changes time zones). Checked every 20 seconds, so it also catches up after
+   the computer wakes from sleep. The 6 a.m. reload turns the morning music on and the 7 a.m. reload turns it off (Classical King script).
+   Keep as is during routine refreshes. */
+(function(){
+  function stamp(d){ return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate() + "-" + d.getHours(); }
+  var loaded = stamp(new Date()), going = false;
+  function check(){
+    if(going) return;
+    if(stamp(new Date()) !== loaded){ going = true; try{ location.reload(); }catch(e){ going = false; } }
+  }
+  setInterval(check, 20000);
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) check(); });
 })();
 </script>
 <script>
@@ -3236,7 +3255,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
    in an embedded YouTube player; inside claude.ai (which can't embed outside video) the page fetches the newest video and its thumbnail through
    Composio and links the thumbnail to YouTube. Keep as is. */
 (function(){
-  var TRAVIS = {"id":"Mm0bF8acenI","title":"One Storm, Coast to Coast: What to Expect Next Week","published":"2026-10-30T10:47:47Z"};
+  var TRAVIS = {"id":"ZIgymNZ19aU","title":"A Winter El Niño Storm Is Coming…in October","published":"2026-10-29T21:21:05Z"};
   var CH = "UCTDfJ5sk6bLV_4VOfWV1BuQ", KEY = "wsj-travis";
   var fr = document.getElementById("wxv-frame"), ti = document.getElementById("wxv-title"), me = document.getElementById("wxv-meta");
   if(!fr) return;
@@ -3356,51 +3375,51 @@ html.view-news #ski-ticker{display:none!important;}
    and by the daily Claude refresh. Row: [name, state, onthesnow path, lat, lon, base in, 24h in, open 1/0, opening date, lifts open, lifts total, temp F, WMO code].
    On skiinut.com the temperature and weather icon also refresh live from Open-Meteo every 15 minutes. Keep the variable names. */
 (function(){
-  var SKI_ASOF = "Fri 6:24 a.m. MT";
+  var SKI_ASOF = "Fri 4:10 a.m. MT";
   var SKI = [
-    ["Snowbasin","UT","utah/snowbasin",41.2156,-111.8619,null,0,0,"2026-11-27",0,13,44,3],
-    ["Powder Mountain","UT","utah/powder-mountain",41.3985,-111.763,null,0,0,"2026-12-11",0,8,42,3],
-    ["Nordic Valley","UT","utah/wolf-creek",41.3105,-111.8649,null,0,0,"2026-12-18",0,5,44,2],
-    ["Beaver Mountain","UT","utah/beaver-mountain",41.9682,-111.5413,null,0,0,"2026-12-26",0,6,36,3],
-    ["Snowbird","UT","utah/snowbird",40.5836,-111.6566,6,0,0,"2026-11-27",0,14,36,3],
-    ["Alta","UT","utah/alta-ski-area",40.5885,-111.6386,10,0,0,"2026-11-20",0,8,36,3],
-    ["Brighton","UT","utah/brighton-resort",40.5977,-111.5848,null,0,0,"2026-12-04",null,9,34,3],
-    ["Solitude","UT","utah/solitude-mountain-resort",40.6191,-111.5935,0,0,0,"2026-11-20",0,8,35,3],
-    ["Park City","UT","utah/park-city-mountain-resort",40.6539,-111.5094,null,0,0,"2026-11-20",0,41,40,3],
+    ["Snowbasin","UT","utah/snowbasin",41.2156,-111.8619,null,0,0,"2026-11-27",0,13,45,0],
+    ["Powder Mountain","UT","utah/powder-mountain",41.3985,-111.763,null,0,0,"2026-12-11",0,8,42,0],
+    ["Nordic Valley","UT","utah/wolf-creek",41.3105,-111.8649,null,0,0,"2026-12-18",0,5,45,0],
+    ["Beaver Mountain","UT","utah/beaver-mountain",41.9682,-111.5413,null,0,0,"2026-12-26",0,6,37,2],
+    ["Snowbird","UT","utah/snowbird",40.5836,-111.6566,6,0,0,"2026-11-27",0,14,35,3],
+    ["Alta","UT","utah/alta-ski-area",40.5885,-111.6386,10,0,0,"2026-11-20",0,8,35,3],
+    ["Brighton","UT","utah/brighton-resort",40.5977,-111.5848,null,0,0,"2026-12-04",null,9,33,3],
+    ["Solitude","UT","utah/solitude-mountain-resort",40.6191,-111.5935,0,0,0,"2026-11-20",0,8,34,1],
+    ["Park City","UT","utah/park-city-mountain-resort",40.6539,-111.5094,null,0,0,"2026-11-20",0,41,39,3],
     ["Deer Valley","UT","utah/deer-valley-resort",40.6381,-111.4796,null,0,0,"2026-12-05",0,31,40,3],
-    ["Sundance","UT","utah/sundance",40.388,-111.5774,null,0,0,"2026-12-04",0,9,42,3],
+    ["Sundance","UT","utah/sundance",40.388,-111.5774,null,0,0,"2026-12-04",0,9,42,1],
     ["Brian Head","UT","utah/brian-head-resort",37.7013,-112.8464,0,0,0,"2026-11-06",0,11,36,3],
-    ["Eagle Point","UT","utah/eagle-point",38.3203,-112.3838,null,0,0,"2027-12-17",0,5,32,3],
+    ["Eagle Point","UT","utah/eagle-point",38.3203,-112.3838,null,0,0,"2027-12-17",0,5,34,3],
     ["Vail","CO","colorado/vail",39.643,-106.3785,2,2,0,"2026-11-13",0,33,38,3],
-    ["Beaver Creek","CO","colorado/beaver-creek",39.604,-106.5173,null,1,0,"2026-11-25",0,25,36,3],
-    ["Breckenridge","CO","colorado/breckenridge",39.4812,-106.0477,null,0,0,"2026-11-26",0,35,32,0],
-    ["Keystone","CO","colorado/keystone",39.6047,-105.9539,18,0,1,"2026-10-30",2,21,35,1],
-    ["Arapahoe Basin","CO","colorado/arapahoe-basin-ski-area",39.6417,-105.8791,18,0,1,"2026-10-28",1,9,28,2],
-    ["Copper Mountain","CO","colorado/copper-mountain-resort",39.4998,-106.1571,null,0,0,"2026-11-06",0,24,32,3],
-    ["Loveland","CO","colorado/loveland",39.6801,-105.8979,null,1,0,"2026-11-06",0,10,30,3],
-    ["Winter Park","CO","colorado/winter-park-resort",39.8879,-105.7626,null,0,0,"2026-11-06",0,24,33,2],
-    ["Steamboat","CO","colorado/steamboat",40.4655,-106.7868,null,0,0,"2026-11-21",0,23,41,3],
-    ["Aspen Snowmass","CO","colorado/aspen-snowmass",39.1909,-106.8211,null,0,0,"2026-11-26",null,41,40,0],
-    ["Telluride","CO","colorado/telluride",37.9375,-107.8123,null,0,0,"2026-11-26",0,17,40,3],
-    ["Crested Butte","CO","colorado/crested-butte-mountain-resort",38.8957,-106.9662,null,0,0,"2026-11-25",0,15,35,0],
+    ["Beaver Creek","CO","colorado/beaver-creek",39.604,-106.5173,null,1,0,"2026-11-25",0,25,36,1],
+    ["Breckenridge","CO","colorado/breckenridge",39.4812,-106.0477,null,0,0,"2026-11-26",0,35,32,3],
+    ["Keystone","CO","colorado/keystone",39.6047,-105.9539,null,0,0,"2026-10-30",0,21,34,0],
+    ["Arapahoe Basin","CO","colorado/arapahoe-basin-ski-area",39.6417,-105.8791,18,0,1,"2026-10-28",1,9,29,0],
+    ["Copper Mountain","CO","colorado/copper-mountain-resort",39.4998,-106.1571,null,0,0,"2026-11-06",0,24,33,3],
+    ["Loveland","CO","colorado/loveland",39.6801,-105.8979,null,1,0,"2026-11-06",0,10,29,1],
+    ["Winter Park","CO","colorado/winter-park-resort",39.8879,-105.7626,null,0,0,"2026-10-30",0,24,37,3],
+    ["Steamboat","CO","colorado/steamboat",40.4655,-106.7868,null,0,0,"2026-11-21",0,23,42,0],
+    ["Aspen Snowmass","CO","colorado/aspen-snowmass",39.1909,-106.8211,null,0,0,"2026-11-26",null,41,43,1],
+    ["Telluride","CO","colorado/telluride",37.9375,-107.8123,null,0,0,"2026-11-26",0,17,41,0],
+    ["Crested Butte","CO","colorado/crested-butte-mountain-resort",38.8957,-106.9662,null,0,0,"2026-11-25",0,15,36,0],
     ["Wolf Creek","CO","colorado/wolf-creek-ski-area",37.4671,-106.7774,12,0,0,"2026-11-07",0,11,32,3],
-    ["Purgatory","CO","colorado/durango-mountain-resort",37.6292,-107.8155,null,0,0,"2026-11-20",0,11,36,3],
-    ["Monarch","CO","colorado/monarch-mountain",38.5121,-106.3322,null,0,0,"2026-12-04",0,9,31,3],
-    ["Eldora","CO","colorado/eldora-mountain-resort",39.9372,-105.5807,null,0,0,"2026-11-13",0,10,37,3],
-    ["Jackson Hole","WY","wyoming/jackson-hole",43.5882,-110.8272,null,0,0,"2026-11-27",0,13,32,0],
-    ["Grand Targhee","WY","wyoming/grand-targhee-resort",43.7877,-110.9584,null,0,0,"2026-11-20",0,6,33,0],
-    ["Sun Valley","ID","idaho/sun-valley",43.6707,-114.3681,null,0,0,"2026-11-26",0,17,35,3],
-    ["Big Sky","MT","montana/big-sky-resort",45.2848,-111.4014,5,0,0,"2026-11-25",0,40,29,1],
-    ["Bridger Bowl","MT","montana/bridger-bowl",45.8174,-110.8966,null,0,0,"2026-12-18",0,11,30,1],
-    ["Whitefish","MT","montana/whitefish-mountain-resort",48.4806,-114.3501,null,0,0,"2026-12-04",0,14,37,2],
-    ["Red Lodge","MT","montana/red-lodge-mountain",45.1911,-109.3364,null,0,0,"2026-11-27",0,7,41,3],
-    ["Taos","NM","new-mexico/taos-ski-valley",36.596,-105.4544,null,0,0,"2026-11-26",0,13,36,3],
+    ["Purgatory","CO","colorado/durango-mountain-resort",37.6292,-107.8155,null,0,0,"2026-11-20",0,11,38,0],
+    ["Monarch","CO","colorado/monarch-mountain",38.5121,-106.3322,null,0,0,"2026-12-04",0,9,30,3],
+    ["Eldora","CO","colorado/eldora-mountain-resort",39.9372,-105.5807,null,0,0,"2026-11-13",0,10,38,3],
+    ["Jackson Hole","WY","wyoming/jackson-hole",43.5882,-110.8272,null,0,0,"2026-11-27",0,13,33,0],
+    ["Grand Targhee","WY","wyoming/grand-targhee-resort",43.7877,-110.9584,null,0,0,"2026-11-20",0,6,34,0],
+    ["Sun Valley","ID","idaho/sun-valley",43.6707,-114.3681,null,0,0,"2026-11-26",0,17,37,3],
+    ["Big Sky","MT","montana/big-sky-resort",45.2848,-111.4014,5,0,0,"2026-11-25",0,40,30,1],
+    ["Bridger Bowl","MT","montana/bridger-bowl",45.8174,-110.8966,null,0,0,"2026-12-18",0,11,29,0],
+    ["Whitefish","MT","montana/whitefish-mountain-resort",48.4806,-114.3501,null,0,0,"2026-12-04",0,14,36,2],
+    ["Red Lodge","MT","montana/red-lodge-mountain",45.1911,-109.3364,null,0,0,"2026-11-27",0,7,38,3],
+    ["Taos","NM","new-mexico/taos-ski-valley",36.596,-105.4544,null,0,0,"2026-11-26",0,13,37,3],
     ["Ski Santa Fe","NM","new-mexico/ski-santa-fe",35.7966,-105.8013,null,0,0,"2026-11-26",0,7,36,3],
-    ["Lake Louise","AB","alberta/lake-louise",51.4434,-116.1668,null,0,0,"2026-11-06",0,13,14,0],
-    ["Banff Sunshine","AB","alberta/banff-sunshine",51.0786,-115.7765,9,0,0,"2026-11-06",0,12,15,0],
+    ["Lake Louise","AB","alberta/lake-louise",51.4434,-116.1668,null,0,0,"2026-11-06",0,13,15,0],
+    ["Banff Sunshine","AB","alberta/banff-sunshine",51.0786,-115.7765,4,0,0,"2026-11-01",0,12,15,0],
     ["Mt. Norquay","AB","alberta/ski-banff-norquay",51.2116,-115.603,null,0,0,"2026-11-07",0,7,20,0],
-    ["Marmot Basin","AB","alberta/marmot-basin",52.8014,-118.083,5,0,0,"2026-11-25",0,7,3,45],
-    ["Fernie","BC","british-columbia/fernie-alpine",49.463,-115.0864,8,0,0,"2026-12-05",0,10,30,0]
+    ["Marmot Basin","AB","alberta/marmot-basin",52.8014,-118.083,5,0,0,"2026-11-25",0,7,2,45],
+    ["Fernie","BC","british-columbia/fernie-alpine",49.463,-115.0864,6,0,0,"2026-12-05",0,10,30,0]
   ];
   var ICON = {
     sun:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="6" fill="#f2b632"/><g stroke="#f2b632" stroke-width="2.2" stroke-linecap="round"><line x1="16" y1="3" x2="16" y2="6.5"/><line x1="16" y1="25.5" x2="16" y2="29"/><line x1="3" y1="16" x2="6.5" y2="16"/><line x1="25.5" y1="16" x2="29" y2="16"/><line x1="6.8" y1="6.8" x2="9.2" y2="9.2"/><line x1="22.8" y1="22.8" x2="25.2" y2="25.2"/><line x1="6.8" y1="25.2" x2="9.2" y2="22.8"/><line x1="22.8" y1="9.2" x2="25.2" y2="6.8"/></g></svg>',
@@ -3479,7 +3498,7 @@ html:not(.view-news) #wsjv{display:none!important;}
 /* WSJ Video — WSJV is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/wsj_videos.py) and by the daily Claude refresh.
    WSJV = {asof, v:[[videoId, title, "11h ago"], ...]} newest first (Videos tab, no Shorts). Keep the variable name. */
 (function(){
-  var WSJV = {"asof":"Fri 6:24 a.m. MT","v":[["PkP7NYlEHvg","Why the Iran War Is So Important to Trump’s Midterms | WSJ","21h ago"],["KdzWdQys4wA","Young Men Debate Trump’s Presidency, the Iran War and Midterms | WSJ","1d ago"],["d7saYBHziTI","How the Fuel Crisis Is Driving Cuba to Open Its Economy | WSJ","2d ago"],["ToGXm1r198U","How a U.S. Aircraft Carrier Rearms for Possible Strikes on Iran | WSJ","6d ago"],["zPiJKJuQ7i0","Why California’s $33B Bullet Train Is Now a $231B Problem | WSJ","7d ago"],["9A6YGb9gqJs","I Tested Apple’s iPhone Duo for a Week. Is It Worth $2K? | WSJ","9d ago"],["hW5UjNHCma0","Trump Remade the GOP. How Do the Ultrarich Feel? | WSJ","9d ago"],["oGapuxMg-Cg","The Tiny Robot Solving a Massive Underground Crisis | WSJ","2w ago"],["DMXtPMDJP-4","The Space Force Showed Us Its Weapons Used in Iran and Venezuela | WSJ Equipped","2w ago"],["zsEgP2gvxTs","Young Voters Helped Trump Win. How Do They Feel Now? | WSJ","2w ago"],["Lk8MJWcZrF8","How to Actually Fix the Colorado River Crisis | WSJ Pro Perfected","2w ago"],["Ou-YSLb56zo","Why This Deep Red State Is a Battleground for the GOP’s Future | WSJ","3w ago"],["hK15MsOoFt0","Why the Kushner-Trump $1.4B Albania Resort Is in Trouble | WSJ","3w ago"],["nXw6le320fA","Why Warner Bros. Is Being Sold for $81B | WSJ What Went Wrong","3w ago"],["LLGQ0wstfG0","What Democrats Actually Think of the Party, the DSA and Midterms | WSJ","4w ago"],["R_2Vgv-2e_w","How Arc’teryx Became a $2B+ Luxury Brand Without Intending To | WSJ The Economics Of","4w ago"],["mMx6iYjvTgk","Miami-Dade Voted for Trump. How Do Voters Feel About Him Now? | WSJ","1mo ago"],["-s4x7CWCMS8","Evan Gershkovich on What Life Inside Russia’s Prison System Was Like | WSJ","1mo ago"],["i27Q6_kFdSA","How a Speed Boat Carries $200M of Cocaine Into Europe | WSJ","1mo ago"],["qeylyWx9Mk4","How a Nuclear Engineer Is Saving Guitar Center | WSJ","1mo ago"],["etQYQV_hkVA","Why South Korea’s Entertainment Industry Is Betting on Robots | WSJ","1mo ago"],["OjJXTfrjw8c","Michigan Is a Key Midterm Battleground. What Do Voters Want? | WSJ","1mo ago"],["h7qD6QkiYrI","María Corina Machado on Why She's Returning to Venezuela Now | WSJ","1mo ago"],["kerk4XRzTEQ","This Critical Oil Chokepoint Is Now Under Houthi Control | WSJ","1mo ago"],["te_HFbZN1Tw","Why Ireland Is So Vulnerable to Russian Threats | WSJ","1mo ago"],["IabchoqERw0","iOS 27: How Apple’s New Siri AI Can See and Search Your iPhone | WSJ","1mo ago"],["xfl-XZjPFA8","How Burger King’s New Whopper Is Winning Back Customers | WSJ","1mo ago"],["CpVhFVcnx8M","Why These $500 Japanese Jeans Have a Cult Following | WSJ Coveted","1mo ago"],["W8MQZKNnJok","How One Woman Escaped Epstein’s Abuse | WSJ","1mo ago"],["HBuixfZC-Ao","Why 10K People Are Waiting to Search the Thames | WSJ","1mo ago"]]};
+  var WSJV = {"asof":"Fri 4:10 a.m. MT","v":[["PkP7NYlEHvg","Why the Iran War Is So Important to Trump’s Midterms | WSJ","19h ago"],["KdzWdQys4wA","Young Men Debate Trump’s Presidency, the Iran War and Midterms | WSJ","1d ago"],["d7saYBHziTI","We Went Inside Cuba to See Its Messy Economic Transformation | WSJ","2d ago"],["ToGXm1r198U","This U.S. Aircraft Carrier Is Rearming for Possible Strikes on Iran | WSJ","6d ago"],["zPiJKJuQ7i0","Why California’s $33B Bullet Train Is Now a $231B Problem | WSJ","7d ago"],["9A6YGb9gqJs","I Tested Apple’s iPhone Duo for a Week. Is It Worth $2K? | WSJ","8d ago"],["hW5UjNHCma0","Trump Remade the GOP. How Do the Ultrarich Feel? | WSJ","9d ago"],["oGapuxMg-Cg","The Tiny Robot Solving a Massive Underground Crisis | WSJ","2w ago"],["DMXtPMDJP-4","The Space Force Showed Us Its Weapons Used in Iran and Venezuela | WSJ Equipped","2w ago"],["zsEgP2gvxTs","Young Voters Helped Trump Win. How Do They Feel Now? | WSJ","2w ago"],["Lk8MJWcZrF8","How to Actually Fix the Colorado River Crisis | WSJ Pro Perfected","2w ago"],["Ou-YSLb56zo","Why This Deep Red State Is a Battleground for the GOP’s Future | WSJ","3w ago"],["hK15MsOoFt0","Why the Kushner-Trump $1.4B Albania Resort Is in Trouble | WSJ","3w ago"],["nXw6le320fA","Why Warner Bros. Is Being Sold for $81B | WSJ What Went Wrong","3w ago"],["LLGQ0wstfG0","What Democrats Actually Think of the Party, the DSA and Midterms | WSJ","4w ago"],["R_2Vgv-2e_w","How Arc’teryx Became a $2B+ Luxury Brand Without Intending To | WSJ The Economics Of","4w ago"],["mMx6iYjvTgk","Miami-Dade Voted for Trump. How Do Voters Feel About Him Now? | WSJ","1mo ago"],["-s4x7CWCMS8","Evan Gershkovich on What Life Inside Russia’s Prison System Was Like | WSJ","1mo ago"],["i27Q6_kFdSA","How a Speed Boat Carries $200M of Cocaine Into Europe | WSJ","1mo ago"],["qeylyWx9Mk4","How a Nuclear Engineer Is Saving Guitar Center | WSJ","1mo ago"],["etQYQV_hkVA","Why South Korea’s Entertainment Industry Is Betting on Robots | WSJ","1mo ago"],["OjJXTfrjw8c","Michigan Is a Key Midterm Battleground. What Do Voters Want? | WSJ","1mo ago"],["h7qD6QkiYrI","María Corina Machado on Why She's Returning to Venezuela Now | WSJ","1mo ago"],["kerk4XRzTEQ","This Critical Oil Chokepoint Is Now Under Houthi Control | WSJ","1mo ago"],["te_HFbZN1Tw","Why Ireland Is So Vulnerable to Russian Threats | WSJ","1mo ago"],["IabchoqERw0","iOS 27: How Apple’s New Siri AI Can See and Search Your iPhone | WSJ","1mo ago"],["xfl-XZjPFA8","How Burger King’s New Whopper Is Winning Back Customers | WSJ","1mo ago"],["CpVhFVcnx8M","Why These $500 Japanese Jeans Have a Cult Following | WSJ Coveted","1mo ago"],["W8MQZKNnJok","How One Woman Escaped Epstein’s Abuse | WSJ","1mo ago"],["HBuixfZC-Ao","Why 10K People Are Waiting to Search the Thames | WSJ","1mo ago"]]};
   var KEY = "wsj-video-seen", seen = [];
   try{ seen = JSON.parse(localStorage.getItem(KEY) || "[]") || []; }catch(e){}
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(seen.slice(-300))); }catch(e){} }
@@ -3558,7 +3577,7 @@ html:not(.view-news) #ecov{display:none!important;}
 /* The Economist video — ECOV (same rules as WSJ Video, scripts/wsj_videos.py) is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/wsj_videos.py) and by the daily Claude refresh.
    ECOV = {asof, v:[[videoId, title, "11h ago"], ...]} newest first (Videos tab, no Shorts). Keep the variable name. */
 (function(){
-  var ECOV = {"asof":"Fri 6:24 a.m. MT","v":[["2y4u-6i6pyQ","Should the world fear Trump-Putin-Xi collusion? | The Economist","17h ago"],["AoKo6EujpW8","Will AI cause utopia or disaster? | The Economist","3d ago"],["QPpWpZEmgPA","Why Saudi Arabia and the UAE can't stop the Yemen war | The Economist","5d ago"],["q2uVRZougS8","Will France blow up the euro zone? | The Economist","6d ago"],["_cGGDu8sgXY","AfD co-leader Alice Weidel on Ukraine, migration and Germany’s future | The Economist","9d ago"],["5sorengsI0I","Germany is “wrong” to finance Ukraine war: Alice Weidel interview | The Economist","2w ago"],["J-sMqnzHwI0","AI won’t steal your job: Andrew Ng interview | The Economist","2w ago"],["B8oXVMYXlfM","Will it take a disaster to force AI regulation? | The Economist","2w ago"],["htFXw5Dw3Qk","NATO 3.0: Will America defend Europe against Russia? | The Economist","3w ago"],["e9OAazrjenc","How to reform the tax system | The Economist","3w ago"],["KgJI4Wxqqik","“Russia and Ukraine are inventing the future of war”: former Google CEO Eric Schmidt | The Economist","3w ago"],["a4wrmRXyxlE","Kevin Rudd on the real risk of China and America’s AI race | The Economist","4w ago"],["Qcr74T0rzws","Did America ever have a plan for the Middle East? | The Economist","1mo ago"],["W6dsLthcvzU","Inside an elite Ukrainian drone unit: a special report | The Economist","1mo ago"],["HUo9lj1NUQ4","Why Russia is building its own version of Starlink | The Economist","1mo ago"],["J5phvo3bqGU","The dangers of accidentally creating a conscious AI | The Economist","1mo ago"],["To8r_IWYhZ0","Is Europe facing a \"Muslim takeover\"? The data says otherwise | The Economist","1mo ago"],["VF1JES8Sv5U","Nvidia is funding an AI boom. Will it trigger a financial crash? | The Economist","1mo ago"],["NhzWFLSOCGc","Sweden’s PM on whether NATO can depend on Trump | The Economist","1mo ago"],["phdQ32Go9Iw","How Donald Trump’s immigration crackdown is making America weaker | The Economist","2mo ago"],["FNZhxTtOL-I","The full-length interview with Yuval Noah Harari | The Economist","2mo ago"],["ARdnl2kjmRU","Yuval Noah Harari on the dangers of an AI future | The Economist","2mo ago"],["QBorPsQpEzU","Will Japan bring down the world economy? | The Economist","2mo ago"],["foNQymBqnDA","What’s life like as a woman under the Taliban? | The Economist","2mo ago"],["7CNlGweeN90","How will driverless cars change our cities? | The Economist","2mo ago"],["TugPBKBXIHc","Why China and America see AI differently | The Economist","2mo ago"],["A5yH4PJX__o","Who’s really running Iran? | The Economist","2mo ago"],["MzRgt8Kv7SE","Is billionaire wealth becoming more legitimate? | The Economist","2mo ago"],["thGyYY1wqYk","What can Big Macs tell you about the global economy? | The Economist","2mo ago"],["emUjVtgBGBg","Do billionaires deserve their wealth? | The Economist","2mo ago"]]};
+  var ECOV = {"asof":"Fri 4:10 a.m. MT","v":[["2y4u-6i6pyQ","Should the world fear Trump-Putin-Xi collusion? | The Economist","15h ago"],["AoKo6EujpW8","Will AI cause utopia or disaster? | The Economist","3d ago"],["QPpWpZEmgPA","Why Saudi Arabia and the UAE can't stop the Yemen war | The Economist","5d ago"],["q2uVRZougS8","Will France blow up the euro zone? | The Economist","6d ago"],["_cGGDu8sgXY","AfD co-leader Alice Weidel on Ukraine, migration and Germany’s future | The Economist","9d ago"],["5sorengsI0I","Germany is “wrong” to finance Ukraine war: Alice Weidel interview | The Economist","2w ago"],["J-sMqnzHwI0","AI won’t steal your job: Andrew Ng interview | The Economist","2w ago"],["B8oXVMYXlfM","Will it take a disaster to force AI regulation? | The Economist","2w ago"],["htFXw5Dw3Qk","NATO 3.0: Will America defend Europe against Russia? | The Economist","3w ago"],["e9OAazrjenc","How to reform the tax system | The Economist","3w ago"],["KgJI4Wxqqik","“Russia and Ukraine are inventing the future of war”: former Google CEO Eric Schmidt | The Economist","3w ago"],["a4wrmRXyxlE","Kevin Rudd on the real risk of China and America’s AI race | The Economist","4w ago"],["Qcr74T0rzws","Did America ever have a plan for the Middle East? | The Economist","1mo ago"],["W6dsLthcvzU","Inside an elite Ukrainian drone unit: a special report | The Economist","1mo ago"],["HUo9lj1NUQ4","Why Russia is building its own version of Starlink | The Economist","1mo ago"],["J5phvo3bqGU","The dangers of accidentally creating a conscious AI | The Economist","1mo ago"],["To8r_IWYhZ0","Is Europe facing a \"Muslim takeover\"? The data says otherwise | The Economist","1mo ago"],["VF1JES8Sv5U","Nvidia is funding an AI boom. Will it trigger a financial crash? | The Economist","1mo ago"],["NhzWFLSOCGc","Sweden’s PM on whether NATO can depend on Trump | The Economist","1mo ago"],["phdQ32Go9Iw","How Donald Trump’s immigration crackdown is making America weaker | The Economist","2mo ago"],["FNZhxTtOL-I","The full-length interview with Yuval Noah Harari | The Economist","2mo ago"],["ARdnl2kjmRU","Yuval Noah Harari on the dangers of an AI future | The Economist","2mo ago"],["QBorPsQpEzU","Will Japan bring down the world economy? | The Economist","2mo ago"],["foNQymBqnDA","What’s life like as a woman under the Taliban? | The Economist","2mo ago"],["7CNlGweeN90","How will driverless cars change our cities? | The Economist","2mo ago"],["TugPBKBXIHc","Why China and America see AI differently | The Economist","2mo ago"],["A5yH4PJX__o","Who’s really running Iran? | The Economist","2mo ago"],["MzRgt8Kv7SE","Is billionaire wealth becoming more legitimate? | The Economist","2mo ago"],["thGyYY1wqYk","What can Big Macs tell you about the global economy? | The Economist","2mo ago"],["emUjVtgBGBg","Do billionaires deserve their wealth? | The Economist","2mo ago"]]};
   var KEY = "eco-video-seen", seen = [];
   try{ seen = JSON.parse(localStorage.getItem(KEY) || "[]") || []; }catch(e){}
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(seen.slice(-300))); }catch(e){} }
@@ -3671,7 +3690,7 @@ html:not(.view-news) #ecov{display:none!important;}
    Per place: {name, date, h:[[chance %, rain in, snow in, temp F] x 48 hours: today 12 a.m. through tomorrow 11 p.m. local]}
    (an older 24-hour list still draws). Keep the variable name. */
 (function(){
-  var OUTLOOK = {"sb":{"name":"Snowbasin","date":"2026-10-30","h":[[0,0,0,46],[0,0,0,46],[0,0,0,45],[0,0,0,45],[0,0,0,45],[1,0,0,45],[1,0,0,44],[2,0,0,44],[2,0,0,44],[2,0,0,46],[2,0,0,50],[5,0,0,52],[2,0,0,55],[11,0,0,56],[27,0.028,0,50],[32,0.087,0,48],[36,0.016,0,48],[39,0.185,0,46],[29,0,0,45],[34,0,0,45],[44,0.055,0,44],[42,0.028,0,44],[24,0.028,0,43],[23,0,0,43],[21,0,0,44],[18,0,0,44],[20,0,0,44],[26,0,0,44],[32,0.016,0,44],[37,0,0,44],[31,0,0,44],[35,0,0,43],[30,0,0,43],[19,0,0,44],[15,0,0,45],[14,0,0,48],[8,0,0,49],[9,0,0,49],[10,0,0,50],[10,0,0,50],[10,0,0,50],[3,0,0,49],[39,0,0,46],[20,0,0,44],[20,0,0,44],[20,0,0,45],[20,0,0,45],[20,0,0,44]]},"dv":{"name":"Deer Valley","date":"2026-10-30","h":[[0,0,0,42],[0,0,0,41],[0,0,0,40],[0,0,0,39],[0,0,0,39],[1,0,0,40],[1,0,0,41],[1,0,0,41],[1,0,0,42],[2,0,0,43],[3,0,0,45],[2,0,0,48],[6,0,0,51],[8,0,0,53],[17,0,0,47],[27,0,0,50],[43,0.028,0,47],[48,0.028,0,46],[56,0.016,0,43],[43,0.268,0,41],[51,0.016,0,40],[44,0.055,0,40],[26,0.016,0,39],[24,0,0,40],[26,0,0,41],[20,0,0,40],[18,0,0,41],[14,0,0,41],[13,0,0,41],[13,0,0,41],[8,0,0,41],[9,0.016,0,40],[7,0,0,40],[6,0,0,41],[6,0,0,43],[7,0,0,44],[6,0,0,45],[8,0,0,45],[10,0,0,45],[5,0,0,46],[2,0,0,46],[3,0,0,45],[9,0,0,43],[26,0,0,42],[26,0,0,41],[26,0,0,41],[26,0.016,0,42],[26,0,0,42]]},"sv":{"name":"Sun Valley","date":"2026-10-30","h":[[0,0,0,35],[0,0,0,35],[0,0,0,35],[0,0,0,36],[0,0,0,34],[3,0,0,34],[3,0,0,35],[7,0,0,36],[6,0,0,37],[10,0,0,38],[15,0,0,40],[26,0.016,0,41],[47,0.016,0,45],[65,0.028,0,45],[66,0,0,44],[60,0,0,45],[53,0.268,0,44],[52,0.028,0,42],[48,0,0,42],[35,0,0,42],[18,0,0,41],[13,0,0,41],[11,0,0,41],[13,0,0,39],[12,0,0,38],[10,0,0,38],[9,0,0,39],[9,0,0,39],[9,0,0,40],[9,0,0,39],[8,0,0,39],[7,0.016,0,39],[8,0.016,0,39],[17,0.016,0,39],[21,0.043,0,40],[30,0.028,0,40],[27,0.028,0,40],[21,0,0,41],[25,0,0,42],[24,0,0,44],[19,0,0,44],[11,0,0,45],[52,0,0,43],[91,0,0,42],[91,0,0,42],[91,0,0,42],[91,0.016,0,42],[91,0.055,0,41]]},"hi":{"name":"Kailua","date":"2026-10-30","h":[[47,0.004,0,76],[43,0,0,76],[43,0,0,76],[51,0,0,76],[64,0.004,0,76],[75,0.008,0,76],[81,0.035,0,74],[85,0.024,0,75],[88,0.024,0,75],[92,0.012,0,76],[95,0.008,0,79],[94,0.016,0,80],[87,0.016,0,81],[78,0.024,0,79],[69,0.024,0,78],[64,0.028,0,78],[60,0.028,0,77],[57,0.055,0,75],[56,0.035,0,75],[57,0.02,0,75],[57,0.024,0,75],[54,0.012,0,75],[50,0.004,0,75],[47,0,0,75],[46,0,0,75],[46,0,0,75],[47,0,0,75],[50,0,0,75],[55,0,0,75],[57,0,0,75],[55,0,0,75],[51,0.004,0,76],[49,0.004,0,77],[52,0.012,0,78],[57,0.016,0,79],[59,0.028,0,79],[54,0.02,0,80],[46,0.024,0,80],[41,0.028,0,80],[42,0.02,0,79],[45,0.008,0,79],[49,0.012,0,78],[52,0.004,0,77],[56,0.004,0,76],[57,0.004,0,76],[54,0.004,0,76],[49,0,0,76],[45,0,0,76]]},"asof":"Fri 6:24 a.m. MT"};
+  var OUTLOOK = {"sb":{"name":"Snowbasin","date":"2026-10-30","h":[[0,0,0,46],[0,0,0,46],[0,0,0,45],[0,0,0,45],[0,0,0,45],[0,0,0,45],[0,0,0,45],[0,0,0,45],[0,0,0,45],[0,0,0,47],[0,0,0,50],[8,0,0,53],[0,0,0,55],[1,0,0,55],[32,0.028,0,53],[37,0.016,0,51],[28,0.256,0,47],[28,0.016,0,46],[24,0,0,46],[23,0.071,0,45],[23,0.016,0,44],[21,0,0,44],[23,0,0,43],[22,0,0,43],[20,0,0,44],[18,0,0,44],[19,0,0,44],[24,0,0,44],[31,0.016,0,44],[35,0,0,44],[27,0,0,44],[21,0,0,43],[23,0,0,43],[9,0,0,44],[16,0,0,45],[15,0,0,48],[7,0,0,49],[8,0,0,49],[10,0,0,50],[8,0,0,50],[39,0,0,50],[39,0,0,49],[39,0,0,46],[20,0,0,44],[20,0,0,44],[20,0,0,45],[20,0,0,45],[20,0,0,44]]},"dv":{"name":"Deer Valley","date":"2026-10-30","h":[[0,0,0,42],[0,0,0,41],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,40],[0,0,0,42],[0,0,0,42],[0,0,0,43],[1,0,0,46],[0,0,0,48],[5,0,0,50],[2,0,0,52],[24,0.197,0,46],[24,0,0,49],[19,0,0,48],[54,0,0,46],[58,0,0,43],[40,0.028,0,41],[55,0.016,0,41],[38,0.016,0,39],[38,0,0,40],[26,0,0,40],[30,0,0,41],[23,0,0,40],[17,0,0,41],[8,0,0,41],[8,0,0,41],[6,0,0,41],[3,0,0,41],[12,0.016,0,40],[7,0,0,40],[5,0,0,41],[5,0,0,43],[8,0,0,44],[5,0,0,45],[5,0,0,45],[9,0,0,45],[1,0,0,46],[9,0,0,46],[9,0,0,45],[9,0,0,43],[26,0,0,42],[26,0,0,41],[26,0,0,41],[26,0.016,0,42],[26,0,0,42]]},"sv":{"name":"Sun Valley","date":"2026-10-30","h":[[0,0,0,35],[0,0,0,35],[0,0,0,35],[0,0,0,36],[0,0,0,37],[0,0,0,37],[1,0,0,37],[6,0,0,37],[1,0,0,38],[5,0,0,38],[9,0,0,39],[20,0,0,41],[35,0.028,0,43],[83,0.043,0,43],[89,0.016,0,43],[88,0.016,0,45],[84,0.028,0,46],[76,0.043,0,44],[50,0,0,42],[34,0,0,42],[52,0,0,42],[24,0,0,40],[14,0,0,40],[18,0,0,39],[15,0,0,38],[11,0,0,38],[6,0,0,39],[0,0,0,39],[0,0,0,40],[0,0,0,39],[0,0,0,39],[0,0.016,0,39],[1,0.016,0,39],[16,0.016,0,39],[11,0.043,0,40],[28,0.028,0,40],[27,0.028,0,40],[19,0,0,41],[22,0,0,42],[15,0,0,44],[52,0,0,44],[52,0,0,45],[52,0,0,43],[91,0,0,42],[91,0,0,42],[91,0,0,42],[91,0.016,0,42],[91,0.055,0,41]]},"hi":{"name":"Kailua","date":"2026-10-30","h":[[44,0,0,76],[50,0,0,76],[57,0,0,76],[67,0,0,76],[78,0.008,0,76],[86,0.016,0,75],[90,0.012,0,75],[91,0.008,0,76],[90,0.016,0,75],[86,0.016,0,77],[78,0.012,0,78],[69,0.012,0,79],[56,0.028,0,79],[40,0.036,0,79],[27,0.028,0,78],[18,0.036,0,78],[11,0.024,0,78],[8,0.008,0,77],[11,0.024,0,75],[17,0.036,0,75],[24,0.04,0,75],[30,0.02,0,75],[36,0.008,0,75],[39,0.008,0,75],[36,0,0,75],[31,0.004,0,75],[27,0.004,0,75],[27,0.004,0,75],[28,0.004,0,75],[29,0.004,0,75],[31,0.004,0,75],[32,0.004,0,75],[33,0,0,77],[32,0.004,0,79],[30,0.004,0,80],[27,0.012,0,81],[23,0.012,0,81],[19,0.008,0,81],[16,0,0,81],[16,0.004,0,81],[18,0.008,0,80],[20,0.012,0,78],[22,0.008,0,77],[24,0.008,0,76],[25,0.008,0,76],[26,0.004,0,76],[26,0.004,0,76],[25,0,0,76]]},"asof":"Fri 4:10 a.m. MT"};
   var PLACES = {sb:[41.2160,-111.8569,"Snowbasin"], dv:[40.6375,-111.4783,"Deer Valley"], sv:[43.6710,-114.3640,"Sun Valley"], hi:[21.4022,-157.7394,"Kailua"]};
   var TZ = {sb:"America/Denver", dv:"America/Denver", sv:"America/Boise", hi:"Pacific/Honolulu"};
   var cur = "sb";
@@ -3750,7 +3769,7 @@ html:not(.view-news) #ecov{display:none!important;}
    daily Claude refresh; on skiinut.com the page also reloads it live from Open-Meteo every 30 minutes.
    Per place: {name, where, now °F, code (WMO), day, days:[[date, code, high, low, chance %] x 7]}. Keep the variable name. */
 (function(){
-  var RWX = {"sb":{"name":"Snowbasin","where":"Huntsville, Utah · Ogden Valley","now":44,"code":3,"day":0,"days":[["2026-10-30",61,56,43,44],["2026-10-31",51,50,43,39],["2026-11-01",81,46,35,100],["2026-11-02",61,37,32,93],["2026-11-03",3,47,30,3],["2026-11-04",3,50,35,9],["2026-11-05",3,48,33,18]]},"dv":{"name":"Deer Valley","where":"Park City, Utah · Wasatch Back","now":40,"code":3,"day":0,"days":[["2026-10-30",63,53,39,56],["2026-10-31",51,46,40,26],["2026-11-01",85,43,33,100],["2026-11-02",85,36,26,99],["2026-11-03",3,47,24,4],["2026-11-04",3,50,31,13],["2026-11-05",3,45,30,16]]},"sv":{"name":"Sun Valley","where":"Ketchum, Idaho · Wood River Valley","now":35,"code":3,"day":0,"days":[["2026-10-30",63,45,33,66],["2026-10-31",61,45,38,91],["2026-11-01",81,43,35,97],["2026-11-02",3,46,28,15],["2026-11-03",3,47,30,3],["2026-11-04",3,47,33,3],["2026-11-05",3,47,31,13]]},"hi":{"name":"Kailua, Oʻahu","where":"Windward Oʻahu, Hawaii","now":76,"code":3,"day":0,"days":[["2026-10-30",61,81,74,95],["2026-10-31",53,81,75,59],["2026-11-01",51,80,75,59],["2026-11-02",55,78,74,67],["2026-11-03",51,80,72,51],["2026-11-04",53,77,72,63],["2026-11-05",51,80,75,75]]},"asof":"Fri 6:24 a.m. MT"};
+  var RWX = {"sb":{"name":"Snowbasin","where":"Huntsville, Utah · Ogden Valley","now":45,"code":0,"day":0,"days":[["2026-10-30",63,55,43,37],["2026-10-31",51,50,43,39],["2026-11-01",81,46,34,100],["2026-11-02",53,39,32,93],["2026-11-03",3,45,30,3],["2026-11-04",3,54,35,9],["2026-11-05",51,48,38,18]]},"dv":{"name":"Deer Valley","where":"Park City, Utah · Wasatch Back","now":40,"code":3,"day":0,"days":[["2026-10-30",61,53,39,58],["2026-10-31",51,46,40,30],["2026-11-01",85,42,34,100],["2026-11-02",85,39,27,99],["2026-11-03",3,45,26,4],["2026-11-04",3,51,34,13],["2026-11-05",73,45,31,16]]},"sv":{"name":"Sun Valley","where":"Ketchum, Idaho · Wood River Valley","now":37,"code":3,"day":0,"days":[["2026-10-30",61,46,35,89],["2026-10-31",61,45,38,91],["2026-11-01",63,42,31,97],["2026-11-02",45,45,25,15],["2026-11-03",3,45,30,3],["2026-11-04",3,51,33,3],["2026-11-05",3,48,33,13]]},"hi":{"name":"Kailua, Oʻahu","where":"Windward Oʻahu, Hawaii","now":76,"code":3,"day":0,"days":[["2026-10-30",55,79,75,91],["2026-10-31",51,81,75,36],["2026-11-01",51,80,75,61],["2026-11-02",53,78,72,61],["2026-11-03",51,79,73,55],["2026-11-04",53,78,75,61],["2026-11-05",51,80,75,63]]},"asof":"Fri 4:10 a.m. MT"};
   var PLACES = {sb:[41.2160,-111.8569], dv:[40.6375,-111.4783], sv:[43.6710,-114.3640], hi:[21.4022,-157.7394]};
   var cur = "sb";
   try{ var pk = document.getElementById("radar-view"); if(pk && PLACES[pk.value]) cur = pk.value; else { var v = localStorage.getItem("wsj-radar-view"); if(PLACES[v]) cur = v; } }catch(e){}
