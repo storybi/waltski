@@ -3744,8 +3744,8 @@ html:not(.view-news) #ecov{display:none!important;}
 </style>
 <script>
 /* Mini 48-hour outlook at the bottom of the header resort panel (Mark, Oct 30, 2026): short columns for each hour (green rain, blue snow,
-   purple mix; lighter = a chance with no measurable amount), a small black arrow where the day changes, and a small yellow downward
-   arrow at the current hour. Drawn from the 48-hour outlook script's data ("olk-render" event); tapping it jumps to the full chart. Keep as is. */
+   purple mix; lighter = a chance with no measurable amount), a small black arrow where the day changes, and a small orange upward
+   arrow under the x-axis at the current hour (Mark, Oct 30, 2026). Drawn from the 48-hour outlook script's data ("olk-render" event); tapping it jumps to the full chart. Keep as is. */
 (function(){
   var box = document.getElementById("rs-olk"); if(!box) return;
   document.addEventListener("olk-render", function(e){
@@ -3754,7 +3754,7 @@ html:not(.view-news) #ecov{display:none!important;}
     h.forEach(function(r, i){ var amt = r[1] + r[2] > 0, ht = Math.max(0, Math.min(100, r[0]));
       cols += '<i class="ro-b ' + d.kinds[i] + (amt ? '' : ' ch') + '" style="height:' + (ht ? Math.max(6, ht) : 0) + '%"></i>'; });
     var marks = "";
-    if(d.nh >= 0) marks += '<span class="ro-now" style="left:' + ((d.nh + .5) * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 0h10L5 8z"/></svg></span>';
+    if(d.nh >= 0) marks += '<span class="ro-now" style="left:' + ((d.nh + .5) * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     if(n > 24) marks += '<span class="ro-day" style="left:' + (24 * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     var l1 = d.isToday ? "Today" : "Day 1", l2 = d.isToday ? "Tomorrow" : "Day 2";
     box.hidden = false;
@@ -4400,7 +4400,7 @@ html.clock-night #wt-head-end{height:clamp(14px,3vw,48px)!important;}
   .wt-dock{margin-bottom:14px!important;}
 }
 /* Mini outlook in the header resort panel (Mark, Oct 30, 2026) */
-.rs-olk{position:relative; display:block; margin:12px 0 2px; padding:9px 0 15px; text-decoration:none; color:inherit;}
+.rs-olk{position:relative; display:block; margin:12px 0 2px; padding:0 0 15px; text-decoration:none; color:inherit;}
 .rs-olk[hidden]{display:none!important;}
 .ro-cols{display:flex; align-items:flex-end; gap:1px; height:22px; border-bottom:1px solid rgba(255,255,255,.28);}
 html:not(.has-banner) .ro-cols{border-bottom-color:var(--border);}
@@ -4408,8 +4408,8 @@ html:not(.has-banner) .ro-cols{border-bottom-color:var(--border);}
 .ro-b.rain{background:#2f9e4c;} .ro-b.snow{background:#2f6fd0;} .ro-b.mix{background:#8a54c4;}
 .ro-b.ch{opacity:.42;}
 .ro-now,.ro-day{position:absolute; width:10px; height:8px; margin-left:-5px; pointer-events:none;}
-.ro-now{top:0;} .ro-now svg{fill:#f5c518; filter:drop-shadow(0 1px 1px rgba(0,0,0,.6));}
-.ro-day{top:32px;} .ro-day svg{fill:#000; filter:drop-shadow(0 0 1px rgba(255,255,255,.9));}
+.ro-now{top:23px; z-index:1;} .ro-now svg{fill:#E2733A; filter:drop-shadow(0 0 1px rgba(255,255,255,.7));}
+.ro-day{top:23px;} .ro-day svg{fill:#000; filter:drop-shadow(0 0 1px rgba(255,255,255,.9));}
 .ro-now svg,.ro-day svg{display:block; width:10px; height:8px;}
 .ro-lab{position:absolute; left:0; right:0; bottom:0; height:12px; font:600 9.5px/12px var(--font-body); letter-spacing:.06em; text-transform:uppercase; opacity:.7;}
 .ro-lab span{position:absolute; left:0;}
