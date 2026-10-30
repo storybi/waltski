@@ -1,0 +1,206 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&display=swap");
+/* ===================== Skiinut 2.0 design system (Mark, Oct 30, 2026) =====================
+   A clean, modern ski-weather look for the whole site: alpine navy + glacier blue with the brand orange, Inter for text,
+   Barlow Condensed for titles and big numbers, rounded cards with soft shadows, a full-bleed photo hero with a glass resort
+   panel, and a glassy sticky dock. This block comes last on purpose: it restyles the existing components without changing
+   their markup or scripts. Keep it as is during routine refreshes. */
+:root, :root[data-theme="light"]{
+  --bg:#f3f6fa; --surface:#ffffff; --surface-2:#eef2f7; --border:#e0e6ee; --rule:#d5dde8;
+  --fg:#0d1b2a; --fg-muted:#46566b; --fg-faint:#7a8899;
+  --accent:#1f6fd6; --accent-ink:#0b3d7a; --accent-soft:#e6f0fc; --brand:#e2733a;
+  --good:#12875a; --bad:#d23a4a; --neutral:#b07a0b; --good-bg:#e5f5ee; --bad-bg:#fcebed; --neutral-bg:#fbf2df;
+  --snow:#2f7de1; --snow-bg:#e8f1fd; --nav-fg:#46566b;
+  --font-display:"Inter",system-ui,-apple-system,"Segoe UI",Arial,sans-serif; --font-serif:var(--font-display); --font-body:var(--font-display); --font-mono:var(--font-display);
+  --font-title:"Barlow Condensed","Inter",Arial,sans-serif;
+  --card-r:16px; --shadow:0 1px 2px rgba(13,27,42,.05), 0 10px 28px -16px rgba(13,27,42,.28);
+  --paper:none;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#08111d; --surface:#0f1b2b; --surface-2:#152437; --border:#1f3048; --rule:#1f3048;
+  --fg:#e8eef6; --fg-muted:#a5b3c5; --fg-faint:#7d8ca0; --accent:#5aa2ff; --accent-ink:#cfe3ff; --accent-soft:#132a47;
+  --good:#3ccf8e; --bad:#ff6b7d; --neutral:#e7b54b; --good-bg:#0f2b20; --bad-bg:#33161c; --neutral-bg:#2e2412; --snow:#7fb6ff; --snow-bg:#11233c; --nav-fg:#a5b3c5;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -18px rgba(0,0,0,.8); } }
+:root[data-theme="dark"]{
+  --bg:#08111d; --surface:#0f1b2b; --surface-2:#152437; --border:#1f3048; --rule:#1f3048;
+  --fg:#e8eef6; --fg-muted:#a5b3c5; --fg-faint:#7d8ca0; --accent:#5aa2ff; --accent-ink:#cfe3ff; --accent-soft:#132a47;
+  --good:#3ccf8e; --bad:#ff6b7d; --neutral:#e7b54b; --good-bg:#0f2b20; --bad-bg:#33161c; --neutral-bg:#2e2412; --snow:#7fb6ff; --snow-bg:#11233c; --nav-fg:#a5b3c5;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px -18px rgba(0,0,0,.8);
+}
+html body, html.view-ski body, html:not(.view-news) body{background:var(--bg)!important; background-image:none!important; color:var(--fg); font-family:var(--font-body); -webkit-font-smoothing:antialiased;}
+.askbar::before{background:var(--bg)!important; background-image:none!important;}
+.wrap{max-width:1200px;}
+h1,h2,h3{font-family:var(--font-display); letter-spacing:-.01em;}
+a{color:inherit;}
+
+/* ---------- Hero: photo, brand, toolbar, greeting, resort panel ---------- */
+#wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.55) 0, rgba(5,14,26,.18) 32%, rgba(5,14,26,.12) 60%, rgba(5,14,26,.55) 86%, var(--bg) 100%)!important;}
+.wt-mast#top{text-align:left; padding-top:10px;}
+h1.wt-name{font-family:"Montserrat","Inter",Arial,sans-serif!important; font-weight:800; letter-spacing:.18em; font-size:clamp(20px,4.4vw,40px)!important; justify-content:flex-start!important; margin:6px 0 10px!important; padding:0!important; color:#fff;}
+html.has-banner h1.wt-name{text-shadow:0 2px 14px rgba(0,0,0,.45);}
+.wt-edition{border:0!important; padding:0 0 4px!important; display:flex; align-items:center; justify-content:flex-start!important; gap:8px; flex-wrap:wrap;}
+.wt-edition .wt-ed-line{display:flex; align-items:center; flex-wrap:wrap; gap:6px;}
+.wt-edition .wt-sep2{display:none!important;}
+.wt-edition a.wt-stake{display:none!important;}
+.wt-edition .wt-ed-nm{font:700 11px var(--font-body); letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.82); margin-right:4px;}
+html:not(.has-banner) .wt-edition .wt-ed-nm{color:var(--fg-muted);}
+.wt-edition .wt-next,.wt-edition .wt-play,.wt-edition .wt-dv-watch{font:600 11.5px var(--font-body)!important; letter-spacing:.02em!important; text-transform:none!important; color:#fff!important; text-shadow:none!important;
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28)!important; border-radius:999px!important; padding:5px 11px!important; text-decoration:none!important;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);}
+.wt-edition .wt-next:hover,.wt-edition .wt-play:hover,.wt-edition .wt-dv-watch:hover{background:rgba(255,255,255,.26);}
+html:not(.has-banner) .wt-edition .wt-next{color:var(--fg)!important; background:var(--surface); border-color:var(--border)!important;}
+.wt-edition .wt-radio[aria-pressed="true"]{background:var(--brand)!important; border-color:var(--brand)!important;}
+.wt-greet{font:500 14px/1.4 var(--font-body)!important; font-style:normal!important; text-align:left!important; padding:4px 0 0!important; color:rgba(255,255,255,.92)!important;}
+.wt-greet #wt-greet::before{content:""; display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--brand); margin-right:8px; vertical-align:1px; box-shadow:0 0 0 3px rgba(226,115,58,.25);}
+
+.rs-hero{margin:14px 0 4px; max-width:760px; color:#fff; background:rgba(8,18,32,.46); border:1px solid rgba(255,255,255,.18); border-radius:20px;
+  padding:14px 16px 12px; -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); box-shadow:0 18px 40px -24px rgba(0,0,0,.6);}
+html:not(.has-banner) .rs-hero{background:var(--surface); color:var(--fg); border-color:var(--border); box-shadow:var(--shadow);}
+.rs-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.rs-label{font:700 10.5px var(--font-body); letter-spacing:.14em; text-transform:uppercase; opacity:.75;}
+.rs-pickwrap{position:relative; flex:1 1 220px; min-width:0;}
+.rs-pickwrap::after{content:""; position:absolute; right:4px; top:50%; width:10px; height:10px; margin-top:-8px; border-right:2.5px solid currentColor; border-bottom:2.5px solid currentColor; transform:rotate(45deg); pointer-events:none; opacity:.85;}
+.rs-pick{appearance:none; -webkit-appearance:none; width:100%; background:transparent; border:0; color:inherit; font:700 clamp(22px,5.6vw,38px)/1.05 var(--font-title); letter-spacing:.01em; text-transform:uppercase; padding:2px 26px 2px 0; cursor:pointer; text-overflow:ellipsis;}
+.rs-pick:focus-visible{outline:2px solid var(--brand); outline-offset:4px; border-radius:6px;}
+.rs-pick option,.rs-pick optgroup{color:#0d1b2a; background:#fff; font:500 15px var(--font-body); text-transform:none;}
+.rs-where{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:500 13px var(--font-body); opacity:.88; margin:2px 0 10px;}
+.rs-acc{font:700 10px var(--font-body); letter-spacing:.08em; text-transform:uppercase; background:var(--brand); color:#fff; border-radius:999px; padding:3px 8px;}
+.rs-stats{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px;}
+.rs-stat{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:8px 10px; min-width:0;}
+html:not(.has-banner) .rs-stat{background:var(--surface-2); border-color:var(--border);}
+.rs-stat .v{display:block; font:700 26px/1.05 var(--font-title); font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.rs-stat .v small{font-size:.6em; margin-left:1px; opacity:.8;}
+.rs-stat .l{display:block; font:600 10px var(--font-body); letter-spacing:.1em; text-transform:uppercase; opacity:.72; margin-top:2px;}
+.rs-stat.fresh .v{color:#9fd3ff;}
+.rs-status .v{font-size:18px; line-height:1.45; white-space:normal;}
+.rs-status.open .v{color:#7ef0b2;}
+.rs-links{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.rs-links a{font:600 12px var(--font-body); text-decoration:none; color:inherit; border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:5px 11px; background:rgba(255,255,255,.08);}
+.rs-links a:hover{background:rgba(255,255,255,.22);}
+html:not(.has-banner) .rs-links a{border-color:var(--border); background:var(--surface-2);}
+html.rs-hi .rs-stats, html.rs-hi .rs-links{display:none;}
+@media (max-width:560px){
+  .rs-hero{padding:12px 12px 10px; border-radius:16px;}
+  .rs-stats{grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px;}
+  .rs-stat{padding:7px 9px;}
+  .rs-stat .v{font-size:23px;}
+  .rs-status{grid-column:1/-1; display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .rs-status .v{font-size:17px; line-height:1.2;}
+  .rs-status .l{order:-1; margin:0;}
+  .rs-label{display:none;}
+}
+.wt-clock-t,.wt-clock-d{font-family:var(--font-title)!important;}
+.wt-clock-t{font-weight:600!important; letter-spacing:.02em;}
+
+/* ---------- Sticky dock: weather bar, tickers, section nav ---------- */
+.wt-dock{background:color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%);
+  border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; margin:0 0 22px!important;}
+.wt-dock .wxbar{background:transparent!important; border:0!important; border-bottom:1px solid var(--border)!important; border-radius:0!important; font-family:var(--font-body)!important;}
+.wt-dock .wt-ticker{background:transparent!important; border:0!important; border-bottom:1px solid var(--border)!important; font-family:var(--font-body)!important; border-radius:0!important;}
+.wt-dock .tk-lbl{font:700 10px var(--font-body)!important; letter-spacing:.12em; color:var(--accent)!important; border-right:1px solid var(--border)!important;}
+.wt-dock .tk-it{border-right:1px solid var(--border)!important;}
+.wt-dock .tk-it.tk-sel{background:var(--accent-soft); box-shadow:inset 0 -2px 0 var(--accent);}
+.wt-dock-nav{background:transparent!important; border:0!important; padding:0!important;}
+.wt-nav{border:0!important; justify-content:flex-start!important; gap:6px!important; padding:8px 10px!important; font:600 12.5px var(--font-body)!important;}
+.wt-nav a{color:var(--nav-fg)!important; text-shadow:none!important; padding:4px 10px; border-radius:999px; text-decoration:none!important;}
+.wt-nav a:hover{background:var(--surface-2); color:var(--fg)!important;}
+.wt-nav a.wt-view-link{background:var(--brand); color:#fff!important;}
+.wt-nav a.wt-view-link:hover{background:#c95f29;}
+.gbar,#gbar{border-radius:0!important; background:transparent!important; border:0!important; border-bottom:1px solid var(--border)!important;}
+#gbar input{border-radius:10px!important; border:1px solid var(--border)!important; background:var(--surface-2)!important; color:var(--fg)!important; font-family:var(--font-body)!important;}
+#gbar button{border-radius:10px!important; font-family:var(--font-body)!important; font-weight:600!important;}
+
+/* ---------- Section headings ---------- */
+.section-head{border:0!important; padding:0!important; margin:42px 0 14px!important; display:flex!important; align-items:flex-end; gap:12px;}
+.section-head h2{font:800 clamp(24px,3vw,30px)/1.05 var(--font-title)!important; letter-spacing:.01em!important; text-transform:uppercase; color:var(--fg);}
+.section-head h2::before{content:""; display:block; width:30px; height:4px; border-radius:3px; background:var(--brand); margin-bottom:8px;}
+.section-head .line{display:block!important; flex:1; height:1px; background:var(--border); margin-bottom:6px;}
+.section-sub{font:400 14.5px/1.5 var(--font-body)!important; font-style:normal!important; color:var(--fg-muted)!important; margin:-4px 0 16px!important;}
+
+/* ---------- Cards everywhere ---------- */
+.radar,.olk,.rwx,.wxv,.wx-cams,.wx-card,.snow-card,.models,.table-scroll,.mkt-card,.ind-card,.sp-card,.story-card,.brief,.deal,.wm-card,.sx-grid,.word-lg,.sbmap-frame,.rmap-live,.dv-frame{
+  background:var(--surface)!important; border:1px solid var(--border)!important; border-radius:var(--card-r)!important; box-shadow:var(--shadow);}
+.radar,.olk,.rwx,.wxv,.wx-cams{overflow:hidden; margin:0 0 16px!important;}
+.wx-cams{padding:4px 14px 14px;}
+.radar-head{padding:12px 16px!important; align-items:center!important;}
+.radar-head h3,.olk-head h3,.cams-head h4,.wxv h3{font:700 15px var(--font-body)!important; letter-spacing:0!important; text-transform:none!important; color:var(--fg);}
+.cams-head{border-top:0!important; margin-top:8px!important; padding-top:8px!important; align-items:center!important;}
+.radar-pick{border-radius:999px!important; font:600 12.5px var(--font-body)!important; padding:6px 12px!important; border:1px solid var(--border)!important; background:var(--surface-2)!important; color:var(--fg)!important; color-scheme:inherit!important; box-shadow:none!important;}
+.radar-time{color:var(--accent)!important; font-weight:700!important;}
+.radar-map{border-radius:0;}
+.radar-foot{font-size:11px!important;}
+.cams-refresh,.dv-link{border-radius:999px!important; border:1px solid var(--border)!important; background:var(--surface-2)!important; color:var(--fg)!important; font:600 11.5px var(--font-body)!important; letter-spacing:0!important; text-transform:none!important; padding:5px 12px!important; text-decoration:none!important;}
+.cam .frame{border-radius:12px!important; border:0!important; overflow:hidden;}
+.cam-tag{border-radius:6px; font-family:var(--font-body)!important;}
+.cam figcaption{font:600 12.5px var(--font-body)!important;}
+.ik-cams{display:none;}
+html.cam-ik #snow .ik-cams{display:block;}
+html.cam-ik #snow .wx-cams:not(.ik-cams){display:none!important;}
+.ik-empty{display:flex; flex-direction:column; gap:4px; padding:18px; border-radius:12px; background:var(--surface-2); text-decoration:none; color:var(--fg); grid-column:1/-1;}
+.ik-empty b{font:700 15px var(--font-body);} .ik-empty span{font:500 13px var(--font-body); color:var(--accent);}
+.snow-grid{gap:16px!important;}
+.snow-card{border-left:1px solid var(--border)!important; padding:16px 18px!important;}
+.snow-card .when{color:var(--accent)!important; font:700 11px var(--font-body)!important; letter-spacing:.08em!important;}
+.snow-card h3{font:700 17px/1.3 var(--font-body)!important;}
+.wx-card{padding:16px 18px!important;}
+.wx-top h3{font:700 17px var(--font-body)!important;}
+.wx-now .t{font:700 34px var(--font-title)!important;}
+.wx-day.snowy{border-radius:10px!important;}
+.fx{border-radius:999px!important; font-family:var(--font-body)!important;}
+.trend-pill,.ind-trend,.wl,.tv{border-radius:999px!important;}
+
+/* Weather Elsewhere rolls up by default (Mark, Oct 30, 2026) */
+#weather-more .section-head{cursor:pointer;}
+.wm-toggle{font:600 12.5px var(--font-body); color:var(--accent); background:var(--accent-soft); border:0; border-radius:999px; padding:6px 12px; cursor:pointer; margin-bottom:4px; white-space:nowrap;}
+.wm-toggle::after{content:""; display:inline-block; width:7px; height:7px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); margin-left:8px; vertical-align:2px; transition:transform .2s;}
+#weather-more.open .wm-toggle::after{transform:rotate(-135deg); vertical-align:-2px;}
+#weather-more:not(.open) #wx{display:none!important;}
+.wm-peek{display:flex; flex-wrap:wrap; gap:8px; margin:-4px 0 0;}
+.wm-peek span{font:600 12.5px var(--font-body); color:var(--fg-muted); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:5px 11px;}
+#weather-more.open .wm-peek{display:none;}
+
+/* Trail map: Snowbasin's picture, or an open piste map for other resorts */
+.rmap-live{height:min(62vh,520px); overflow:hidden; display:none;}
+html:not(.map-sb) .rmap-live{display:block;}
+html:not(.map-sb) #sbmap-frame, html:not(.map-sb) .sbmap-src{display:none!important;}
+.rmap-link{display:inline-flex; margin-top:12px; font:600 13px var(--font-body); color:#fff!important; background:var(--accent); border-radius:999px; padding:8px 14px; text-decoration:none;}
+.rmap-link:hover{filter:brightness(1.08);}
+
+/* ---------- Other News ---------- */
+.stories{gap:18px!important; border:0!important;}
+.story-card{padding:0!important; overflow:hidden; border-right:1px solid var(--border)!important;}
+.story-card:hover{transform:translateY(-2px)!important; box-shadow:0 2px 4px rgba(13,27,42,.06), 0 18px 36px -18px rgba(13,27,42,.35);}
+.story-art{border:0!important;}
+.story-source{border-radius:6px!important; font-family:var(--font-body)!important;}
+.story-body{padding:14px 16px 18px!important;}
+.story-body h3,.brief h3,.wm-card h3,.sx-news h3,.deal h3{font:700 18px/1.3 var(--font-body)!important;}
+.story-body p,.brief p,.wm-sum,.sx-news p,.deal p,.ind-take{font:400 14.5px/1.55 var(--font-body)!important;}
+.brief-grid,.deal-grid{gap:16px!important; border:0!important;}
+.brief,.deal{padding:16px 18px!important; border-right:1px solid var(--border)!important;}
+.brief-kick,.wm-src{color:var(--accent)!important; font-family:var(--font-body)!important;}
+.brief .try{border-left:3px solid var(--brand)!important; border-radius:8px; font-style:normal!important; font-family:var(--font-body)!important;}
+.word-more{gap:16px!important; border:0!important;}
+.wm-card{padding:18px!important; border-right:1px solid var(--border)!important;}
+.wm-verse{border-radius:10px; font-family:var(--font-body)!important;}
+.wm-quote{font-family:var(--font-body)!important;}
+.mkt-grid,.ind-grid,.sp-grid,.wx-grid{gap:16px!important;}
+.mkt-card,.ind-card,.sp-card{padding:16px 18px!important; border-top:1px solid var(--border)!important;}
+.ind-card{border-top:3px solid var(--seg, var(--accent))!important;}
+.mkt-top h3,.ind-head h3,.sp-head h3{font:700 16px var(--font-body)!important;}
+.mkt-top .lvl,.sp-rec{font:700 24px var(--font-title)!important;}
+.sx-grid{padding:4px 18px 8px; border-top:1px solid var(--border)!important;}
+.table-scroll{overflow:auto;}
+table{background:transparent!important;}
+thead th{border-bottom:1px solid var(--border)!important; color:var(--fg-muted)!important; font-family:var(--font-body)!important;}
+tbody tr.group td{background:var(--surface-2)!important; color:var(--accent)!important;}
+.yt-poster{border-radius:var(--card-r);}
+footer{border-top:1px solid var(--border)!important; font-family:var(--font-body);}
+.ask-form{border-radius:14px!important; border-color:var(--border)!important; box-shadow:var(--shadow)!important;}
+.ask-form button{border-radius:10px!important;}
+.ask-panel{border-radius:14px!important;}
+@media (max-width:640px){
+  .story-card,.brief,.deal,.wm-card{padding-inline:0;}
+  .story-body,.brief,.deal,.wm-card{padding-left:14px!important; padding-right:14px!important;}
+  .section-head{margin-top:34px!important;}
+}
+@media (prefers-color-scheme: light){ html:not(.view-news):not([data-theme="dark"]){--bg:#f3f6fa;} }
+html:not(.view-news)[data-theme="light"]{--bg:#f3f6fa;}
