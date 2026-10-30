@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rocky Mountain resort conditions for the Ski Weather ticker on www.skiinut.com (Mark, Oct 28, 2026).
+"""Rocky Mountain and US Ikon Pass resort conditions for the Ski Weather ticker on www.skiinut.com (Mark, Oct 28, 2026).
 
 For each resort in RESORTS (Utah first, then Colorado, Wyoming, Idaho, Montana, New Mexico and the Canadian Rockies):
   * base depth, 24-hour new snow, open/closed, opening date and lifts open: OnTheSnow's public region pages
@@ -71,6 +71,58 @@ RESORTS = [
     ["Marmot Basin", "AB", "alberta/marmot-basin", 52.8014, -118.083],
     ["Fernie", "BC", "british-columbia/fernie-alpine", 49.463, -115.0864],
 ]
+
+
+# US Ikon Pass resorts (2026/27 full Ikon Pass), keyed like the page's resort picker (Mark, Oct 30, 2026):
+# key, name, state, lat, lon, onthesnow path, where
+IKON = [
+    ["sb", "Snowbasin", "UT", 41.216, -111.8569, "utah/snowbasin", "Huntsville, Utah · Ogden Valley"],
+    ["alta", "Alta", "UT", 40.5884, -111.6386, "utah/alta-ski-area", "Little Cottonwood Canyon, Utah"],
+    ["snowbird", "Snowbird", "UT", 40.583, -111.6556, "utah/snowbird", "Little Cottonwood Canyon, Utah"],
+    ["brighton", "Brighton", "UT", 40.598, -111.5832, "utah/brighton-resort", "Big Cottonwood Canyon, Utah"],
+    ["solitude", "Solitude", "UT", 40.6199, -111.5919, "utah/solitude-mountain-resort", "Big Cottonwood Canyon, Utah"],
+    ["dv", "Deer Valley", "UT", 40.6375, -111.4783, "utah/deer-valley-resort", "Park City, Utah · Wasatch Back"],
+    ["abasin", "Arapahoe Basin", "CO", 39.6425, -105.8719, "colorado/arapahoe-basin-ski-area", "Summit County, Colorado"],
+    ["aspen", "Aspen Snowmass", "CO", 39.2084, -106.949, "colorado/aspen-snowmass", "Aspen & Snowmass Village, Colorado"],
+    ["copper", "Copper Mountain", "CO", 39.5022, -106.1511, "colorado/copper-mountain-resort", "Summit County, Colorado"],
+    ["eldora", "Eldora", "CO", 39.9372, -105.5827, "colorado/eldora-mountain-resort", "Nederland, Colorado"],
+    ["steamboat", "Steamboat", "CO", 40.4572, -106.8045, "colorado/steamboat", "Steamboat Springs, Colorado"],
+    ["winterpark", "Winter Park", "CO", 39.8868, -105.7625, "colorado/winter-park-resort", "Winter Park, Colorado"],
+    ["bigsky", "Big Sky", "MT", 45.2857, -111.4012, "montana/big-sky-resort", "Big Sky, Montana"],
+    ["jackson", "Jackson Hole", "WY", 43.5875, -110.8279, "wyoming/jackson-hole", "Teton Village, Wyoming"],
+    ["taos", "Taos Ski Valley", "NM", 36.596, -105.4545, "new-mexico/taos-ski-valley", "Taos Ski Valley, New Mexico"],
+    ["sv", "Sun Valley", "ID", 43.671, -114.364, "idaho/sun-valley", "Ketchum, Idaho · Wood River Valley"],
+    ["schweitzer", "Schweitzer", "ID", 48.3677, -116.6227, "idaho/schweitzer", "Sandpoint, Idaho"],
+    ["mammoth", "Mammoth Mountain", "CA", 37.651, -119.027, "california/mammoth-mountain-ski-area", "Mammoth Lakes, California"],
+    ["june", "June Mountain", "CA", 37.7678, -119.0904, "california/june-mountain", "June Lake, California"],
+    ["palisades", "Palisades Tahoe", "CA", 39.1966, -120.2345, "california/palisades-tahoe", "Olympic Valley, California"],
+    ["sierra", "Sierra-at-Tahoe", "CA", 38.8004, -120.0808, "california/sierra-at-tahoe", "Twin Bridges, California"],
+    ["bigbear", "Big Bear Mountain", "CA", 34.2283, -116.8914, "california/snow-summit", "Big Bear Lake, California"],
+    ["snowvalley", "Snow Valley", "CA", 34.2245, -117.0367, "california/snow-valley", "Running Springs, California"],
+    ["crystal", "Crystal Mountain", "WA", 46.9327, -121.4877, "washington/crystal-mountain-wa", "Mount Rainier area, Washington"],
+    ["snoqualmie", "Summit at Snoqualmie", "WA", 47.411, -121.414, "washington/the-summit-at-snoqualmie", "Snoqualmie Pass, Washington"],
+    ["bachelor", "Mt. Bachelor", "OR", 43.9792, -121.6886, "oregon/mt-bachelor", "Bend, Oregon"],
+    ["alyeska", "Alyeska", "AK", 60.9703, -149.0987, "alaska/alyeska-resort", "Girdwood, Alaska"],
+    ["killington", "Killington-Pico", "VT", 43.6262, -72.7965, "vermont/killington-resort", "Killington, Vermont"],
+    ["stratton", "Stratton", "VT", 43.1027, -72.9048, "vermont/stratton-mountain", "Stratton, Vermont"],
+    ["sugarbush", "Sugarbush", "VT", 44.1359, -72.8944, "vermont/sugarbush", "Warren, Vermont"],
+    ["sugarloaf", "Sugarloaf", "ME", 45.0544, -70.3087, "maine/sugarloaf", "Carrabassett Valley, Maine"],
+    ["sundayriver", "Sunday River", "ME", 44.4734, -70.8567, "maine/sunday-river", "Newry, Maine"],
+    ["loon", "Loon Mountain", "NH", 44.0451, -71.6366, "new-hampshire/loon-mountain", "Lincoln, New Hampshire"],
+    ["windham", "Windham Mountain", "NY", 42.2939, -74.2613, "new-york/windham-mountain", "Windham, New York"],
+    ["bluemtn", "Blue Mountain", "PA", 40.8167, -75.5098, "pennsylvania/blue-mountain-ski-area", "Palmerton, Pennsylvania"],
+    ["camelback", "Camelback", "PA", 41.0507, -75.3557, "pennsylvania/camelback-mountain-resort", "Tannersville, Pennsylvania"],
+    ["snowshoe", "Snowshoe", "WV", 38.4117, -79.9947, "west-virginia/snowshoe-mountain-resort", "Snowshoe, West Virginia"],
+    ["boyne", "Boyne Mountain", "MI", 45.164, -84.933, "michigan/boyne-mountain-resort", "Boyne Falls, Michigan"],
+    ["highlands", "The Highlands", "MI", 45.4683, -84.9139, "michigan/boyne-highlands", "Harbor Springs, Michigan"],
+    ["snowriver", "Snowriver", "MI", 46.5002, -89.9758, "michigan/snowriver-mountain-resort", "Wakefield, Michigan"],
+    ["lutsen", "Lutsen Mountains", "MN", 47.656, -90.7251, "minnesota/lutsen-mountains", "Lutsen, Minnesota"],
+    ["granitepeak", "Granite Peak", "WI", 44.9258, -89.6857, "wisconsin/granite-peak-ski-area", "Wausau, Wisconsin"],
+]
+
+# Ikon resorts not already in the Rockies list join the ticker (Mark, Oct 30, 2026), after the Rockies.
+_have = {r[2] for r in RESORTS}
+RESORTS += [[r[1], r[2], r[5], r[3], r[4]] for r in IKON if r[5] not in _have]
 
 
 def _get(url, headers, timeout=30):
@@ -171,9 +223,8 @@ def js(asof, rows):
 
 # --------------------------------------------------------------------------------------------- 24-hour outlook
 # Today's hour-by-hour rain and snow outlook for each radar location (Mark, Oct 28, 2026), shown under the resort cams.
-# Keys match the radar menu (sb / dv / sv / hi). Each location uses its own local day, 12 a.m. to 11 p.m.
-OUTLOOK_PLACES = [("sb", "Snowbasin", 41.2160, -111.8569), ("dv", "Deer Valley", 40.6375, -111.4783),
-                  ("sv", "Sun Valley", 43.6710, -114.3640), ("hi", "Kailua", 21.4022, -157.7394)]
+# Keys match the resort picker (every US Ikon resort, plus hi). Each location uses its own local day, 12 a.m. to 11 p.m.
+OUTLOOK_PLACES = [(r[0], r[1], r[3], r[4]) for r in IKON] + [("hi", "Kailua", 21.4022, -157.7394)]
 
 
 def fetch_outlook():
@@ -202,9 +253,8 @@ def fetch_outlook():
     return out
 
 
-RWX_WHERE = {"sb": "Huntsville, Utah \u00b7 Ogden Valley", "dv": "Park City, Utah \u00b7 Wasatch Back",
-             "sv": "Ketchum, Idaho \u00b7 Wood River Valley", "hi": "Windward O\u02bbahu, Hawaii"}
-RWX_NAME = {"sb": "Snowbasin", "dv": "Deer Valley", "sv": "Sun Valley", "hi": "Kailua, O\u02bbahu"}
+RWX_WHERE = dict([(r[0], r[6]) for r in IKON] + [("hi", "Windward O\u02bbahu, Hawaii")])
+RWX_NAME = dict([(r[0], r[1]) for r in IKON] + [("hi", "Kailua, O\u02bbahu")])
 
 
 def fetch_resort_wx():
