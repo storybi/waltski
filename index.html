@@ -1060,6 +1060,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="olk-x" id="olk-x"></div>
       <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%). Tap or hover a column for amounts.</p>
     </div>
+    <div class="rwx" id="rwx" aria-live="polite"></div>
     <div class="wxv" id="wxv">
       <div class="radar-head"><h3>Weather With Travis</h3><span class="radar-time" id="wxv-meta">Latest video</span></div>
       <div class="wxv-frame" id="wxv-frame"></div>
@@ -1675,6 +1676,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     storm:'<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8,18 h16 a5,5 0 0 0 0,-10 a7.5,7.5 0 0 0 -14,2 a4.3,4.3 0 0 0 -2,8z" fill="#7f8b97"/><path d="M17,19 l-4,6 h3 l-2,5 l6,-7 h-3 l2,-4z" fill="#f2b632"/></svg>',
     fog:'<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="20" cy="11" r="5" fill="#f2b632"/><g stroke="#a9b4bf" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="17" x2="24" y2="17"/><line x1="8" y1="22" x2="27" y2="22"/><line x1="5" y1="27" x2="22" y2="27"/></g></svg>'
   };
+  window.WX_ICON = ICON;   /* shared with the resort weather card (Mark, Oct 29, 2026) */
   var WX = [
     {"city":"Morgan, Utah","home":true,"lat":41.0361,"lon":-111.6769,"abbr":"Mor","mid":63,"where":"Morgan County · Wasatch Back","now":"48°","cond":"Mostly cloudy","note":"This Afternoon: mostly cloudy, high 63°. Tonight: mostly cloudy, low 39°. Friday: partly sunny then slight chance showers and thunderstorms, high 64°.","days":[["Thu","cloud",63,39,""],["Fri","storm",64,40,"55%"],["Sat","storm",61,40,"90%"],["Sun","storm",53,37,"99%"],["Mon","rain",51,33,"66%"],["Tue","partly",54,32,""],["Wed","partly",57,32,""]]},
     {"city":"Eugene, Oregon","lat":44.0521,"lon":-123.0868,"abbr":"Eug","mid":56,"where":"Willamette Valley","now":"54°","cond":"Light rain","note":"This Afternoon: slight chance rain showers, high 56°. Tonight: slight chance rain showers then patchy fog, low 37°. Friday: slight chance rain showers, high 55°.","days":[["Thu","rain",56,37,"21%"],["Fri","rain",55,32,"20%"],["Sat","rain",52,34,""],["Sun","partly",55,33,""],["Mon","cloud",55,36,""],["Tue","partly",59,36,""],["Wed","partly",59,39,"21%"]]},
@@ -3677,6 +3679,83 @@ html:not(.view-news) #ecov{display:none!important;}
   document.addEventListener("wsj-radar", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
   document.addEventListener("wsj-cam", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
   setInterval(render, 5 * 60000);
+  if(!(window.claude && window.claude.use)){ live(); setInterval(live, 30 * 60000); }
+})();
+</script>
+<style>
+/* Resort weather card (Mark, Oct 29, 2026): under the 48-hour outlook, above Weather With Travis; same look as the Morgan card;
+   follows the resort chosen in the radar menu / header cam switch. */
+.rwx{margin:0 0 16px;}
+.rwx .wx-card{border-radius:0;}
+.rwx .wx-top h3{font-size:22px;}
+.rwx .wx-top .where{font-size:13px;}
+.rwx .wx-now .t{font-size:38px;}
+.rwx .wx-now .c{font-size:13px;}
+.rwx .wx-note{font-size:14px;}
+.rwx .wx-day{font-size:13px;} .rwx .wx-day .d{font-size:11.5px;} .rwx .wx-day svg{width:30px; height:30px;} .rwx .wx-day .p{font-size:11.5px;}
+.rwx-src{font:400 11px var(--font-body); color:var(--fg-faint); margin-top:8px;}
+@media (max-width:520px){ .rwx .wx-top h3{font-size:18px;} .rwx .wx-now .t{font-size:30px;} .rwx .wx-note{font-size:13px;} .rwx .wx-day{font-size:11.5px;} .rwx .wx-day svg{width:24px; height:24px;} }
+</style>
+<script>
+/* Resort weather card — RWX is refreshed hourly on skiinut.com by scripts/update_data.py (via scripts/ski_conditions.py) and by the
+   daily Claude refresh; on skiinut.com the page also reloads it live from Open-Meteo every 30 minutes.
+   Per place: {name, where, now °F, code (WMO), day, days:[[date, code, high, low, chance %] x 7]}. Keep the variable name. */
+(function(){
+  var RWX = {"sb":{"name":"Snowbasin","where":"Huntsville, Utah · Ogden Valley","now":51,"code":3,"day":1,"days":[["2026-10-29",3,56,40,2],["2026-10-30",51,54,42,17],["2026-10-31",51,53,42,52],["2026-11-01",80,46,33,99],["2026-11-02",55,42,33,94],["2026-11-03",3,46,30,4],["2026-11-04",3,55,38,8]]},"dv":{"name":"Deer Valley","where":"Park City, Utah · Wasatch Back","now":50,"code":3,"day":1,"days":[["2026-10-29",3,54,39,2],["2026-10-30",61,52,38,43],["2026-10-31",53,50,39,44],["2026-11-01",85,42,32,100],["2026-11-02",85,37,27,97],["2026-11-03",3,47,24,9],["2026-11-04",3,53,35,16]]},"sv":{"name":"Sun Valley","where":"Ketchum, Idaho · Wood River Valley","now":45,"code":2,"day":1,"days":[["2026-10-29",3,49,25,0],["2026-10-30",63,42,36,85],["2026-10-31",51,47,35,83],["2026-11-01",63,42,31,96],["2026-11-02",3,46,28,39],["2026-11-03",3,48,30,2],["2026-11-04",3,50,34,4]]},"hi":{"name":"Kailua, Oʻahu","where":"Windward Oʻahu, Hawaii","now":78,"code":53,"day":1,"days":[["2026-10-29",53,79,74,86],["2026-10-30",55,80,75,96],["2026-10-31",53,80,74,50],["2026-11-01",51,80,73,70],["2026-11-02",53,78,72,73],["2026-11-03",80,78,72,61],["2026-11-04",51,79,75,65]]},"asof":"Thu 6:01 p.m. MT"};
+  var PLACES = {sb:[41.2160,-111.8569], dv:[40.6375,-111.4783], sv:[43.6710,-114.3640], hi:[21.4022,-157.7394]};
+  var cur = "sb";
+  try{ var pk = document.getElementById("radar-view"); if(pk && PLACES[pk.value]) cur = pk.value; else { var v = localStorage.getItem("wsj-radar-view"); if(PLACES[v]) cur = v; } }catch(e){}
+  function esc(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function icon(c){ if(c == null) return "partly"; if(c <= 1) return "sun"; if(c === 2) return "partly"; if(c === 3) return "cloud"; if(c === 45 || c === 48) return "fog";
+    if((c >= 71 && c <= 77) || c === 85 || c === 86) return "snow"; if(c >= 95) return "storm"; return "rain"; }
+  var TXT = {0:"Clear",1:"Mostly clear",2:"Partly cloudy",3:"Mostly cloudy",45:"Fog",48:"Freezing fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",
+    56:"Freezing drizzle",57:"Freezing drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",66:"Freezing rain",67:"Freezing rain",71:"Light snow",73:"Snow",75:"Heavy snow",
+    77:"Snow grains",80:"Rain showers",81:"Rain showers",82:"Heavy showers",85:"Snow showers",86:"Heavy snow showers",95:"Thunderstorms",96:"Thunderstorms, hail",99:"Thunderstorms, hail"};
+  function txt(c){ return TXT[c] || "Mixed skies"; }
+  var RATE = {ski:{sun:"fav", partly:"fav", snow:"fav", cloud:"mix", fog:"mix", rain:"unf", storm:"unf"},
+              beach:{sun:"fav", partly:"fav", cloud:"mix", fog:"mix", snow:"mix", rain:"unf", storm:"unf"}};
+  var FXL = {fav:"Favorable", unf:"Unfavorable", mix:"Mixed"};
+  var WK = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], WKL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  function dow(d, long){ var p = d.split("-"), x = new Date(Date.UTC(+p[0], +p[1]-1, +p[2])); return (long ? WKL : WK)[x.getUTCDay()]; }
+  function note(o){
+    return o.days.slice(0, 3).map(function(d, i){
+      var lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : dow(d[0], true);
+      return lab + ": " + txt(d[1]).toLowerCase() + ", high " + d[2] + "°, low " + d[3] + "°" + (d[4] >= 20 ? ", " + d[4] + "% chance of precipitation" : "") + ".";
+    }).join(" ");
+  }
+  function render(){
+    var box = document.getElementById("rwx"); if(!box) return;
+    var o = RWX[cur], I = window.WX_ICON || {};
+    if(!o || !o.days){ box.innerHTML = ""; return; }
+    var r = (cur === "hi" ? RATE.beach : RATE.ski)[icon(o.days[0][1])] || "mix";
+    var days = o.days.map(function(d){
+      var k = icon(d[1]);
+      return '<div class="wx-day' + (k === "snow" ? " snowy" : "") + '" title="' + esc(dow(d[0], true) + ": " + txt(d[1])) + '"><div class="d">' + dow(d[0]) + '</div>' + (I[k] || "") +
+        '<div class="hi">' + (d[2] == null ? "—" : d[2] + "°") + '</div><div class="lo">' + (d[3] == null ? "—" : d[3] + "°") + '</div><div class="p">' + (d[4] >= 10 ? d[4] + "%" : "") + '</div></div>';
+    }).join("");
+    box.innerHTML = '<div class="wx-card wx-home"><div class="wx-top"><div><h3>' + esc(o.name) + '</h3><div class="where">' + esc(o.where) + '</div>' +
+      '<div class="wx-rate" title="Today’s weather"><span class="fx ' + r + '">' + FXL[r] + '</span></div></div>' +
+      '<div class="wx-now"><div class="t">' + (o.now == null ? "—" : o.now + "°") + '</div><div class="c">' + esc(txt(o.code)) + '</div></div></div>' +
+      '<div class="wx-note">' + esc(note(o)) + '</div><div class="wx-days">' + days + '</div>' +
+      '<div class="rwx-src">Forecast: Open-Meteo' + (RWX.asof ? " · updated " + esc(RWX.asof) : "") + '</div></div>';
+  }
+  function live(){
+    if(document.hidden) return;
+    var keys = ["sb","dv","sv","hi"];
+    var q = "https://api.open-meteo.com/v1/forecast?latitude=" + keys.map(function(k){ return PLACES[k][0]; }).join(",") + "&longitude=" + keys.map(function(k){ return PLACES[k][1]; }).join(",") +
+      "&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=auto&forecast_days=7";
+    try{ fetch(q).then(function(r){ return r.json(); }).then(function(d){
+      d = Array.isArray(d) ? d : [d]; var n = 0;
+      d.forEach(function(x, j){ var o = RWX[keys[j]], c = x && x.current, dl = x && x.daily; if(!o || !c || !dl || !dl.time) return;
+        var rd = function(v){ return v == null ? null : Math.round(v); };
+        o.now = rd(c.temperature_2m); o.code = c.weather_code; o.day = c.is_day;
+        o.days = dl.time.slice(0, 7).map(function(t, i){ return [t, dl.weather_code[i], rd(dl.temperature_2m_max[i]), rd(dl.temperature_2m_min[i]), dl.precipitation_probability_max[i]]; }); n++; });
+      if(n){ try{ RWX.asof = new Date().toLocaleTimeString("en-US", {timeZone: "America/Denver", weekday: "short", hour: "numeric", minute: "2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){} render(); }
+    }).catch(function(){}); }catch(e){}
+  }
+  render();
+  document.addEventListener("wsj-radar", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
+  document.addEventListener("wsj-cam", function(e){ if(PLACES[e.detail]){ cur = e.detail; render(); } });
   if(!(window.claude && window.claude.use)){ live(); setInterval(live, 30 * 60000); }
 })();
 </script>

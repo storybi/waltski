@@ -202,11 +202,41 @@ def fetch_outlook():
     return out
 
 
+RWX_WHERE = {"sb": "Huntsville, Utah \u00b7 Ogden Valley", "dv": "Park City, Utah \u00b7 Wasatch Back",
+             "sv": "Ketchum, Idaho \u00b7 Wood River Valley", "hi": "Windward O\u02bbahu, Hawaii"}
+RWX_NAME = {"sb": "Snowbasin", "dv": "Deer Valley", "sv": "Sun Valley", "hi": "Kailua, O\u02bbahu"}
+
+
+def fetch_resort_wx():
+    """Weather card for the resort picked in the radar menu (Mark, Oct 29, 2026):
+    {key: {"name", "where", "now" (F), "code" (WMO), "days": [[date, code, hi, lo, chance %] x 7]}, "asof": "..."}"""
+    q = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s&current=temperature_2m,weather_code,is_day"
+         "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+         "&temperature_unit=fahrenheit&timezone=auto&forecast_days=7") % (
+        ",".join(str(p[2]) for p in OUTLOOK_PLACES), ",".join(str(p[3]) for p in OUTLOOK_PLACES))
+    data = json.loads(_get(q, {"User-Agent": HTML_UA["User-Agent"], "Accept": "application/json"}).decode("utf-8"))
+    data = data if isinstance(data, list) else [data]
+    out = {}
+    for (key, name, lat, lon), d in zip(OUTLOOK_PLACES, data):
+        c, dl = d.get("current") or {}, d.get("daily") or {}
+        t = dl.get("time") or []
+        if not t:
+            continue
+        rd = lambda v: None if v is None else int(round(v))
+        days = [[t[i], (dl.get("weather_code") or [None] * len(t))[i], rd((dl.get("temperature_2m_max") or [None] * len(t))[i]),
+                 rd((dl.get("temperature_2m_min") or [None] * len(t))[i]), (dl.get("precipitation_probability_max") or [None] * len(t))[i]]
+                for i in range(min(7, len(t)))]
+        out[key] = {"name": RWX_NAME[key], "where": RWX_WHERE[key], "now": rd(c.get("temperature_2m")), "code": c.get("weather_code"),
+                    "day": c.get("is_day", 1), "days": days}
+    out["asof"] = dt.datetime.now(MT).strftime("%a %-I:%M %p MT").replace("AM", "a.m.").replace("PM", "p.m.")
+    return out
+
+
 def outlook_js(o):
     return "var OUTLOOK = %s;" % json.dumps(o, separators=(",", ":"))
 
 def do_ski(s, now_mt=None, set_var=None, get_var=None):
-    """Hook for scripts/update_data.py: rewrite SKI_ASOF and SKI in the page text s."""
+    """Hook for scripts/update_data.py: rewrite SKI_ASOF, SKI, OUTLOOK and RWX in the page text s."""
     prev = None
     try:
         raw = get_var(s, "SKI") if get_var else None
@@ -228,6 +258,13 @@ def do_ski(s, now_mt=None, set_var=None, get_var=None):
             print("  outlook: %d places" % (len(o) - 1))
     except Exception as e:  # noqa: BLE001
         print("  outlook failed:", e)
+    try:
+        w = fetch_resort_wx()
+        if len(w) > 1:
+            s, _ = set_var(s, "RWX", json.dumps(w, ensure_ascii=False, separators=(",", ":")))
+            print("  resort weather: %d places" % (len(w) - 1))
+    except Exception as e:  # noqa: BLE001
+        print("  resort weather failed:", e)
     return s
 
 
@@ -240,4 +277,8 @@ if __name__ == "__main__":
         print(outlook_js(fetch_outlook()))
     except Exception as e:  # noqa: BLE001
         print("// outlook failed: %s" % e, file=sys.stderr)
+    try:
+        print("var RWX = %s;" % json.dumps(fetch_resort_wx(), ensure_ascii=False, separators=(",", ":")))
+    except Exception as e:  # noqa: BLE001
+        print("// resort weather failed: %s" % e, file=sys.stderr)
     print("// %d resorts with snow data, %d with live weather" % (n_snow, n_wx), file=sys.stderr)
