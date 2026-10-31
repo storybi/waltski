@@ -280,23 +280,9 @@ head = """<!doctype html>
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
-# Greeting by the reader's clock (Mark, Oct 26, 2026): from 10:00 a.m. MT the morning edition's "Rise and shine" becomes
-# "Happy mid-morning", and from 5:00 p.m. MT any earlier greeting becomes "Good evening", whether or not a refresh has run.
-# Checked on load and every minute.
-greet_js = """<script>
-(function(){
-  function fix(){
-    var g = document.getElementById("wt-greet"); if(!g) return;
-    var t = g.textContent;
-    var hm = new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"2-digit",minute:"2-digit",hour12:false}).split(":");
-    var m = (+hm[0] % 24) * 60 + (+hm[1]);
-    if(m >= 17 * 60) g.textContent = t.replace(/^(Rise and shine|Happy mid-morning|Good afternoon)/, "Good evening");
-    else if(m >= 10 * 60) g.textContent = t.replace(/^Rise and shine/, "Happy mid-morning");
-  }
-  fix(); setInterval(fix, 60000);
-})();
-</script>
-"""
+# Greeting by the reader's clock: since Oct 31, 2026 the page itself sets the greeting and date from the reader's clock every minute
+# (the "Waltmark Times dateline" script), so the public page needs no extra greeting script. Kept as an empty string.
+greet_js = ""
 # 6b. Suggest a resort (Mark, Oct 29, 2026): the bar at the top of the dock (4b) where visitors type a resort they'd like
 #     added. Each suggestion is pushed instantly to Mark's phone through ntfy (free push notifications, no account): he subscribes to
 #     the topic below in the ntfy app. Public site only. Keep the topic name unchanged, or his phone stops getting suggestions.
