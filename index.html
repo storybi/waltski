@@ -2767,12 +2767,21 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     function miniZ(){ return Math.max(5, V().z - 1); }
     if(mbox){
       mini = L.map(mbox, {zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, touchZoom: false, tap: false}).setView(V().c, miniZ());
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 13, minZoom: 5}).addTo(mini);
+      var miniBase = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 13, minZoom: 5}).addTo(mini);
       mini.createPane("radar"); mini.getPane("radar").style.zIndex = 350; mini.getPane("radar").className += " radar-pane";
       mini.createPane("clouds"); mini.getPane("clouds").style.zIndex = 330; mini.getPane("clouds").style.pointerEvents = "none"; mini.getPane("clouds").style.filter = "blur(2px)";
       mclouds = new Clouds({pane: "clouds", opacity: 0.75, maxZoom: 13, minZoom: 5}).addTo(mini);
       miniDot = L.circleMarker(V().fc, {radius: 4, color: "#ffffff", weight: 1.5, fillColor: "#E2733A", fillOpacity: 1, interactive: false}).addTo(mini);
-      window.miniRadarFit = function(){ if(!mini) return; mini.invalidateSize(); mini.setView(V().c, miniZ(), {animate: false}); miniDot.setLatLng(V().fc); };
+      /* Redraw on rotate (Mark, Oct 31, 2026): the mini map is built while hidden in portrait, so whenever its box gets a real size
+         (turning the phone to landscape) it re-measures, recentres and reloads its tiles. */
+      var miniW = 0, miniH = 0;
+      window.miniRadarFit = function(){ if(!mini) return; var r = mbox.getBoundingClientRect(), w = Math.round(r.width), h = Math.round(r.height);
+        if(w < 20 || h < 20){ miniW = miniH = 0; return; }
+        var grew = !miniW || !miniH; miniW = w; miniH = h;
+        mini.invalidateSize({pan: false}); mini.setView(V().c, miniZ(), {animate: false, reset: true}); miniDot.setLatLng(V().fc);
+        if(grew){ miniBase.redraw(); if(mclouds) mclouds.redraw(); } };
+      if(window.ResizeObserver){ var miniT = null; new ResizeObserver(function(){ clearTimeout(miniT); miniT = setTimeout(window.miniRadarFit, 120); }).observe(mbox); }
+      try{ window.matchMedia("(orientation: landscape)").addEventListener("change", function(){ setTimeout(window.miniRadarFit, 300); setTimeout(window.miniRadarFit, 900); }); }catch(e){}
       window.addEventListener("resize", function(){ setTimeout(window.miniRadarFit, 250); });
       window.addEventListener("orientationchange", function(){ setTimeout(window.miniRadarFit, 400); });
       setTimeout(window.miniRadarFit, 800);
@@ -4569,6 +4578,8 @@ html:not(.view-news) #games-top{display:none!important;}
 .rs-links a.rs-ball{display:inline-flex; align-items:center; justify-content:center; padding:4px 10px!important;}
 .rs-ball svg{display:block; width:22px; height:15px;}
 @media (max-width:440px){ .rs-links{flex-wrap:nowrap!important; gap:6px!important;} .rs-links a{padding:5px 9px!important; font-size:11.5px!important; white-space:nowrap;} .rs-links a.rs-ball{padding:4px 8px!important;} .rs-ball svg{width:20px; height:14px;} }
+/* The mini radar's map box always fills its frame, even if the map was built while hidden in portrait (Oct 31, 2026). */
+#rs-radar-map{position:absolute!important; inset:0!important;}
 </style>
 <script>
 /* Mini radar in claude.ai (Mark, Oct 31, 2026): the paper inside claude.ai shows the big radar as one picture made through Composio,
