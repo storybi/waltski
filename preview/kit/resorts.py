@@ -158,7 +158,7 @@ def select_html(selected="sb"):
     parts = []
     for label, sts in GROUPS:
         keys = [k for k, *_ in R if reg[k]["st"] in sts]
-        opts = "".join('<option value="%s"%s>%s</option>' % (k, " selected" if k == selected else "", reg[k]["name"] + ("" if reg[k]["st"] == "UT" or label == "Utah" else ", " + reg[k]["st"])) for k in keys)
+        opts = "".join('<option value="%s"%s>%s</option>' % (k, " selected" if k == selected else "", reg[k]["name"] + ", " + reg[k]["st"]) for k in keys)
         parts.append('<optgroup label="%s">%s</optgroup>' % (label, opts))
     parts.append('<optgroup label="Beach"><option value="hi">Kailua, Oahu</option></optgroup>')
     return "".join(parts)
