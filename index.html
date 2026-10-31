@@ -4429,6 +4429,20 @@ html:not(.has-banner) .ro-cols{border-bottom-color:var(--border);}
   .rs-hero{margin-top:30px!important;}
   #rs-hero > .rs-olk{margin-top:-35px;}
 }
+/* Phone in landscape (short screens, Mark, Oct 31, 2026): tighter header rows so the resort name shows in full at the bottom of the
+   first screen. The clock keeps its size; only the spacing between rows shrinks. Keep as is. */
+@media (orientation:landscape) and (max-height:500px){
+  .wrap{padding-top:2px!important;}
+  .wt-mast#top{padding-top:4px!important;}
+  .wt-mast#top > h1.wt-name{margin:2px 0 2px!important;}
+  .wt-greet{padding-top:0!important;}
+  .wt-mast .wt-clock{margin-top:0!important;}
+  .wt-mast .wt-clock-t{line-height:.8!important;}
+  .rs-hero{margin-top:28px!important;}
+  #rs-hero > .rs-olk{padding-bottom:31px;}
+  #rs-hero > .rs-olk .ro-hrs{top:30px;}
+  #rs-hero > .rs-olk .ro-tmp{top:40px;}
+}
 </style>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
