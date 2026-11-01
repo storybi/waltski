@@ -83,7 +83,7 @@ window.IKON = {order: ["sb", "alta", "snowbird", "brighton", "solitude", "dv", "
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,400&family=Montserrat:wght@800&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,400&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
 /* Layout concept: a financial broadsheet in the Journal tradition — white paper, black ink,
    a centered nameplate over a dateline, hairline column rules, small-caps section labels. */
@@ -961,11 +961,11 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
 @media (max-width:560px){ .rdl{width:18px;} .rdl span{font-size:10px;} }
 </style>
 <div id="wt-banner" aria-hidden="true"></div>
-<div class="wt-lock-name" id="wt-lock-name" aria-hidden="true"><span>Ski<b class="wt-in">in</b>ut</span></div>
+<div class="wt-lock-name" id="wt-lock-name"><a class="wt-home-logo" href="#ski" title="Skiinut home (Ski Weather)" aria-label="Skiinut home"><span>Ski<b class="wt-in">in</b>ut</span></a></div>
 <div class="wrap">
 
   <header class="wt-mast" id="top">
-    <h1 class="wt-name" aria-label="Skiinut"><span>Ski<b class="wt-in">in</b>ut</span></h1>
+    <h1 class="wt-name" aria-label="Skiinut"><a class="wt-home-logo" href="#ski" title="Skiinut home (Ski Weather)"><span>Ski<b class="wt-in">in</b>ut</span></a></h1>
     <div class="wt-edition">
       <span class="wt-ed-line"><span class="wt-ed-nm">Morgan Edition</span><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake" data-cam="sb" href="#weather" aria-pressed="true" title="SB = Snowbasin: new snow on the snow stake (read Oct 31, 2026 4:13 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 30, 2026). Click to show Snowbasin behind the header.">SB <span class="wt-lab">Day:</span> <b id="wt-stake-in">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-sb">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-dv" data-cam="dv" href="#dv-cams" aria-pressed="false" title="DV = Deer Valley: new snow on the Ontario snow stake (read Oct 31, 2026 4:13 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 30, 2026). Click to show Deer Valley live behind the header.">DV <span class="wt-lab">Day:</span> <b id="wt-stake-dv">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-dv">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-stake-sv" data-cam="sv" href="https://www.sunvalley.com/the-mountain/web-cams/" aria-pressed="false" title="SV = Sun Valley: new snow on the snow stake (read Oct 26, 2026 5:05 a.m. MT) | base depth 0&quot; (OpenSnow, Oct 30, 2026). Click to show Sun Valley live behind the header.">SV <span class="wt-lab">Day:</span> <b id="wt-stake-sv">0&quot;</b><span class="wt-base"> <span class="wt-lab">Base:</span> <b id="wt-base-sv">0&quot;</b></span></a><span class="wt-sep2" aria-hidden="true">|</span><a class="wt-stake wt-hi" data-cam="hi" href="https://www.youtube.com/watch?v=hqfrUk7xUaA&amp;list=PLghrnJ1LqKYmVFZFSlkAqJ-xk-WVW_QCB&amp;index=1" aria-pressed="false" title="HI = Lanikai Beach, Oahu. Click to play it behind the header.">HI</a><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next" id="wt-next" title="Show the next Snowbasin cam photo">Next Photo</button><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next wt-radio" id="wt-radio" aria-pressed="false" title="Play Classical KING FM 98.1 live">Music</button><span class="wt-sep2" aria-hidden="true">|</span><button type="button" class="wt-next wt-theme" id="wt-theme" title="Switch between dark and light mode">Dark</button></span>
       <span class="wt-upd"></span>
@@ -4580,6 +4580,14 @@ html:not(.view-news) #games-top{display:none!important;}
 @media (max-width:440px){ .rs-links{flex-wrap:nowrap!important; gap:6px!important;} .rs-links a{padding:5px 9px!important; font-size:11.5px!important; white-space:nowrap;} .rs-links a.rs-ball{padding:4px 8px!important;} .rs-ball svg{width:20px; height:14px;} }
 /* The mini radar's map box always fills its frame, even if the map was built while hidden in portrait (Oct 31, 2026). */
 #rs-radar-map{position:absolute!important; inset:0!important;}
+
+/* SKIINUT logo in Montserrat bold italic + home link (Mark, Oct 31, 2026): heavy italic caps, tight tracking, orange IN.
+   Clicking the logo (header or locked photo band) returns to the default Ski Weather page at the top. Keep as is. */
+.wt-name, .wt-lock-name{font-family:"Montserrat","Inter",Arial,sans-serif!important; font-style:italic!important; font-weight:800!important; letter-spacing:-.01em!important; text-transform:uppercase;}
+.wt-name > a > span, .wt-lock-name > a > span{margin-right:0!important; padding-right:.08em;}
+a.wt-home-logo{color:inherit!important; text-decoration:none!important; display:inline-flex; align-items:center; cursor:pointer; pointer-events:auto;}
+a.wt-home-logo:hover, a.wt-home-logo:focus-visible{text-decoration:none!important; opacity:.9;}
+a.wt-home-logo .wt-in{color:#E2733A!important;}
 </style>
 <script>
 /* Mini radar in claude.ai (Mark, Oct 31, 2026): the paper inside claude.ai shows the big radar as one picture made through Composio,
@@ -4593,6 +4601,19 @@ html:not(.view-news) #games-top{display:none!important;}
     if(m.src !== im.src) m.src = im.src; }
   new MutationObserver(sync).observe(big, {subtree: true, childList: true, attributes: true, attributeFilter: ["src"]});
   sync();
+})();
+</script>
+<script>
+/* SKIINUT logo = home link (Mark, Oct 31, 2026): back to the default Ski Weather page, scrolled to the top. Keep as is. */
+(function(){
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a.wt-home-logo"); if(!a) return;
+    e.preventDefault();
+    document.documentElement.classList.remove("view-news");
+    try{ history.replaceState(null, "", location.pathname + location.search); }catch(x){}
+    try{ window.dispatchEvent(new Event("resize")); }catch(x){}
+    try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(x){ window.scrollTo(0,0); }
+  });
 })();
 </script>
 <script>
