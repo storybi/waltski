@@ -4808,6 +4808,38 @@ html.rs-local #snow .ik-cams, html.rs-local #sbmap, html.rs-local .wt-nav a[href
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && (!inClaude || want()) && Date.now() - last > 30 * 60000) load(); });
 })();
 </script>
+<style>
+/* Bigger SKIINUT logo (Mark, Nov 1, 2026): about 50% larger on phones, larger on every screen. Keep as is. */
+html .wt-mast h1.wt-name{font-size:clamp(29px,7.6vw,56px)!important;}
+@media (orientation:landscape) and (max-height:500px){ html .wt-mast h1.wt-name{font-size:44px!important;} }
+/* Clock in the resort card on phones held upright (Mark, Nov 1, 2026): the time sits right-aligned on the resort-name row, at the
+   same text size as the resort name on the closed menu (--rs-pick-fs, copied from #rs-pick by the script below). Keep as is. */
+html.clock-in-card #rs-hero .rs-top{align-items:baseline!important; flex-wrap:nowrap!important;}
+html.clock-in-card #rs-hero .rs-pickwrap{flex:0 1 auto; min-width:0;}
+html.clock-in-card #rs-hero .rs-top > .wt-clock{margin:0 0 0 auto!important; padding:0!important; flex:0 0 auto; text-align:right; visibility:visible!important; position:static!important;}
+html.clock-in-card .wt-mast #rs-hero .rs-top .wt-clock-t{font-size:var(--rs-pick-fs,22px)!important; line-height:1.05!important; font-weight:700!important; letter-spacing:.01em!important; white-space:nowrap;}
+html.clock-in-card #rs-hero .rs-top .wt-clock-ap{font-size:.62em; vertical-align:baseline; margin-left:.18em;}
+</style>
+<script>
+/* Clock in the resort card on phones held upright (Mark, Nov 1, 2026): moves #wt-clock onto the resort-name row (.rs-top) in phone
+   portrait and back above the card otherwise. Keep as is. */
+(function(){
+  var clk = document.getElementById("wt-clock"), top = document.querySelector("#rs-hero .rs-top"), hp = document.getElementById("rs-pick");
+  if(!clk || !top || !window.matchMedia) return;
+  var mq = window.matchMedia("(orientation: portrait) and (max-width: 700px)"), home = clk.parentNode, next = clk.nextSibling, root = document.documentElement;
+  function fs(){ if(hp) try{ root.style.setProperty("--rs-pick-fs", getComputedStyle(hp).fontSize); }catch(e){} }
+  function place(){
+    var inCard = mq.matches;
+    if(inCard && clk.parentNode !== top) top.appendChild(clk);
+    else if(!inCard && clk.parentNode === top) home.insertBefore(clk, next);
+    root.classList.toggle("clock-in-card", inCard); fs();
+  }
+  place();
+  if(mq.addEventListener) mq.addEventListener("change", place); else if(mq.addListener) mq.addListener(place);
+  window.addEventListener("resize", fs); window.addEventListener("orientationchange", function(){ setTimeout(place, 300); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fs);
+})();
+</script>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
