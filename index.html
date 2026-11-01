@@ -1103,6 +1103,8 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%). Tap or hover a column for amounts.</p>
     </div>
     <div class="rwx" id="rwx" aria-live="polite"></div>
+    <!-- Suggest-a-resort box (skiinut.com) and resort ticker, moved here from the sticky dock (Mark, Nov 1, 2026); filled by the "Resort feed" script. -->
+    <div class="ski-feed" id="ski-feed"></div>
     <div class="wxv" id="wxv">
       <div class="radar-head"><h3>Weather With Travis</h3><span class="radar-time" id="wxv-meta">Latest video</span></div>
       <div class="wxv-frame" id="wxv-frame"></div>
@@ -4811,7 +4813,7 @@ html.rs-local #snow .ik-cams, html.rs-local #sbmap, html.rs-local .wt-nav a[href
 <style>
 /* Bigger SKIINUT logo (Mark, Nov 1, 2026): about 50% larger on phones, larger on every screen. Keep as is. */
 html .wt-mast h1.wt-name{font-size:clamp(29px,7.6vw,56px)!important;}
-@media (orientation:landscape) and (max-height:500px){ html .wt-mast h1.wt-name{font-size:44px!important;} }
+@media (orientation:landscape) and (max-height:500px){ html .wt-mast h1.wt-name{font-size:22px!important;} }   /* half size in phone landscape (Mark, Nov 1, 2026) */
 /* Clock in the resort card on phones held upright (Mark, Nov 1, 2026): the time sits right-aligned on the resort-name row, at the
    same text size as the resort name on the closed menu (--rs-pick-fs, copied from #rs-pick by the script below). Keep as is. */
 html.clock-in-card #rs-hero .rs-top{align-items:baseline!important; flex-wrap:nowrap!important;}
@@ -4838,6 +4840,25 @@ html.clock-in-card #rs-hero .rs-top .wt-clock-ap{font-size:.62em; vertical-align
   if(mq.addEventListener) mq.addEventListener("change", place); else if(mq.addListener) mq.addListener(place);
   window.addEventListener("resize", fs); window.addEventListener("orientationchange", function(){ setTimeout(place, 300); });
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(fs);
+})();
+</script>
+<style>
+/* Resort feed (Mark, Nov 1, 2026): the "Suggest a resort here!" box (skiinut.com only) and the resort conditions ticker sit in one card
+   just above Weather With Travis, instead of in the sticky dock. Keep as is. */
+.ski-feed{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
+.ski-feed:empty{display:none;}
+.ski-feed .wt-ticker{background:transparent!important; border:0!important; border-radius:0!important; font-family:var(--font-body)!important; margin:0!important; position:static!important;}
+.ski-feed #gbar{border-bottom:1px solid var(--border)!important; margin:0!important;}
+.ski-feed .tk-it.tk-sel{background:var(--accent-soft); box-shadow:inset 0 -2px 0 var(--accent);}
+html.clock-night .ski-feed{background:#000; border-color:#111;}
+</style>
+<script>
+/* Resort feed (Mark, Nov 1, 2026): moves #gbar and #ski-ticker out of the sticky dock into #ski-feed, just above #wxv. Keep as is. */
+(function(){
+  var box = document.getElementById("ski-feed"); if(!box) return;
+  var g = document.getElementById("gbar"), t = document.getElementById("ski-ticker");
+  if(g) box.appendChild(g); if(t) box.appendChild(t);
+  try{ window.dispatchEvent(new Event("resize")); }catch(e){}
 })();
 </script>
 <script>
