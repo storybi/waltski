@@ -4505,7 +4505,8 @@ html:not(.has-banner) .ro-cols{border-bottom-color:var(--border);}
 }
 /* Phone in landscape (short screens, Mark, Oct 31, 2026): tighter header rows so the resort name shows in full at the bottom of the
    first screen. The clock keeps its size; only the spacing between rows shrinks. Keep as is. */
-@media (orientation:landscape) and (max-height:500px){
+/* Phone-landscape rules also apply to iPads in landscape (Mark, Nov 1, 2026): every phone-landscape media query also matches touch screens in landscape up to 1100px tall. Keep as is. */
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
   .wrap{padding-top:2px!important;}
   .wt-mast#top{padding-top:4px!important;}
   .wt-mast#top > h1.wt-name{margin:2px 0 2px!important;}
@@ -4543,7 +4544,7 @@ html:not(.has-banner) #rs-hero .rs-olk .ro-cols{border-bottom-color:var(--border
 #rs-hero .rs-olk .ro-now,#rs-hero .rs-olk .ro-day{top:23px!important;}
 .rs-panel .rs-stats{margin-top:4px!important;}
 @media (max-width:560px){ .rs-hero{margin-top:10px!important;} }
-@media (orientation:landscape) and (max-height:500px){
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
   .rs-hero{margin-top:8px!important; padding-top:10px!important;}
   .rs-hero{padding-top:8px!important;}
   #rs-hero .rs-olk{margin:4px 0 0!important; padding-bottom:26px!important;}
@@ -4576,7 +4577,7 @@ html:not(.has-banner) #rs-hero .rs-olk .ro-cols{border-bottom-color:var(--border
 /* Mini Doppler radar in the resort card — phone landscape only (Mark, Oct 31, 2026). The card becomes two columns: the resort name,
    mini outlook, snow boxes and links on the left, and the radar on the right with the cards' rounded corners. Keep as is. */
 .rs-radar{display:none;}
-@media (orientation:landscape) and (max-height:500px){
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
   .rs-hero{max-width:none!important; display:grid!important; grid-template-columns:minmax(0,1fr) clamp(190px,30%,280px); column-gap:14px; align-items:start;}
   .rs-hero > .rs-top, .rs-hero > .rs-olk, .rs-hero > .rs-panel{grid-column:1; min-width:0;}
   .rs-hero > .rs-radar{display:block; grid-column:2; grid-row:1 / span 3; align-self:stretch; position:relative; min-height:150px; border-radius:12px; overflow:hidden;
@@ -4813,7 +4814,7 @@ html.rs-local #snow .ik-cams, html.rs-local #sbmap, html.rs-local .wt-nav a[href
 <style>
 /* Bigger SKIINUT logo (Mark, Nov 1, 2026): about 50% larger on phones, larger on every screen. Keep as is. */
 html .wt-mast h1.wt-name{font-size:clamp(29px,7.6vw,56px)!important;}
-@media (orientation:landscape) and (max-height:500px){ html .wt-mast h1.wt-name{font-size:22px!important;} }   /* half size in phone landscape (Mark, Nov 1, 2026) */
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){ html .wt-mast h1.wt-name{font-size:22px!important;} }   /* half size in phone landscape (Mark, Nov 1, 2026) */
 /* Clock in the resort card on phones held upright (Mark, Nov 1, 2026): the time sits right-aligned on the resort-name row, at the
    same text size as the resort name on the closed menu (--rs-pick-fs, copied from #rs-pick by the script below). Keep as is. */
 html.clock-in-card #rs-hero .rs-top{align-items:baseline!important; flex-wrap:nowrap!important;}
