@@ -4748,6 +4748,22 @@ html.rs-local #snow .ik-cams, html.rs-local #sbmap, html.rs-local .wt-nav a[href
   if(!R.local) return;
   var Lc = R.local;
 
+  /* Closed menu shows the spot's "City, ST" (Mark, Nov 1, 2026); opening the list shows "My local weather" again as the first choice. */
+  var sels = [pick, hp].filter(Boolean);
+  function label(open){ var ch = false;
+    sels.forEach(function(sel){ var o = sel.querySelector('option[value="local"]'); if(!o) return;
+      var t = (open || sel.value !== "local") ? "My local weather" : Lc.name; if(o.text !== t){ o.text = t; ch = true; } });
+    if(ch){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} } }
+  function closed(){ setTimeout(function(){ label(false); }, 0); }
+  sels.forEach(function(sel){
+    sel.addEventListener("mousedown", function(){ label(true); });
+    sel.addEventListener("touchstart", function(){ label(true); }, {passive: true});
+    sel.addEventListener("keydown", function(e){ if(e.key === "Escape" || e.key === "Tab") closed(); else if(/^(Enter| |ArrowDown|ArrowUp|F4)$/.test(e.key) || e.altKey) label(true); });
+    sel.addEventListener("change", closed); sel.addEventListener("blur", closed);
+  });
+  document.addEventListener("pointerdown", function(e){ if(sels.indexOf(e.target) < 0) closed(); }, true);
+  label(false);
+
   /* ---- local forecast (Open-Meteo), shared by the outlook, the weather card and the header panel ---- */
   var data = null, busy = false, last = 0;
   function rd(v){ return v == null ? null : Math.round(v); }
