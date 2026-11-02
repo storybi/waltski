@@ -77,6 +77,7 @@ RESORTS = [
 # key, name, state, lat, lon, onthesnow path, where
 IKON = [
     ["sb", "Snowbasin", "UT", 41.216, -111.8569, "utah/snowbasin", "Huntsville, Utah · Ogden Valley"],
+    ["powmow", "Powder Mountain", "UT", 41.3797, -111.7805, "utah/powder-mountain", "Eden, Utah · Ogden Valley"],  # not on Ikon; added at Mark's request, Nov 2, 2026
     ["alta", "Alta", "UT", 40.5884, -111.6386, "utah/alta-ski-area", "Little Cottonwood Canyon, Utah"],
     ["snowbird", "Snowbird", "UT", 40.583, -111.6556, "utah/snowbird", "Little Cottonwood Canyon, Utah"],
     ["brighton", "Brighton", "UT", 40.598, -111.5832, "utah/brighton-resort", "Big Cottonwood Canyon, Utah"],
