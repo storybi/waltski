@@ -620,13 +620,41 @@ def do_wsj_videos(s, now_mt):
     return wsj_videos.do_wsj(s, now_mt, set_var=set_var, get_var=get_var)
 
 
+def do_holdings(s, now_mt):
+    """My Holdings chart (Mark, Nov 4, 2026): one week of 30-minute closes for AAPL, MSFT, GOOGL, SPCX -> var HOLD.
+    Share counts are never in the public page; this only refreshes public prices."""
+    if "var HOLD = " not in s:
+        return s
+    syms = ["AAPL", "MSFT", "GOOGL", "SPCX"]
+    raw = {}
+    for sym in syms:
+        meta, bars = ychart(sym, "5d", "30m")
+        raw[sym] = {int(d.timestamp()): round(v, 2) for d, v in bars}
+        if len(raw[sym]) < 10:
+            raise ValueError("short series " + sym)
+    base = sorted(raw["AAPL"])
+    q = {}
+    for sym in syms:
+        last = raw[sym][min(raw[sym])]
+        c = []
+        for t in base:
+            if t in raw[sym]:
+                last = raw[sym][t]
+            c.append(last)
+        q[sym] = {"t": base, "c": c}
+    s, ok = set_var(s, "HOLD", json.dumps({"asof": base[-1], "q": q}, separators=(",", ":")))
+    if ok:
+        log("  holdings: %d points" % len(base))
+    return s
+
+
 def main():
     path = sys.argv[1]
     s = open(path, encoding="utf-8").read()
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001

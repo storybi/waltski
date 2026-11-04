@@ -51,13 +51,11 @@ body = re.sub(r'\s*<!-- =+ SHOPPING[^>]*-->\s*<section id="shopping">.*?</sectio
 body = re.sub(r'<section id="shopping">.*?</section>', "", body, count=1, flags=re.S)
 body = re.sub(r'<a href="#shopping">[^<]*</a>', "", body)
 
-# 3b. Remove My Holdings (private share counts): comment, section, its script and nav link (Mark, Nov 4, 2026).
-body = re.sub(r'\s*<!-- =+ MY HOLDINGS[^>]*-->', "\n", body, count=1)
-body = re.sub(r'<section id="holdings">.*?</section>\s*<script>.*?var HOLD_SH.*?</script>', "", body, count=1, flags=re.S)
-body = re.sub(r'<section id="holdings">.*?</section>', "", body, count=1, flags=re.S)
-body = re.sub(r'<a href="#holdings">[^<]*</a>', "", body)
-if "HOLD_SH" in body or 'id="holdings"' in body:
-    sys.exit("could not remove My Holdings")
+# 3b. My Holdings (Mark, Nov 4, 2026): keep the chart but delete the private share counts.
+#     Without HOLD_SH the page shows % change (default) and Share price only, no dollar totals.
+body = re.sub(r'\nvar HOLD_SH = \{[^}]*\};', "\n", body, count=1)
+if re.search(r'var HOLD_SH\s*=', body) or '"AAPL":38' in body:
+    sys.exit("could not remove My Holdings share counts")
 
 # 4. Hide the Ask Claude bar (its code shares a script with the weather renderer, so only the bar is hidden).
 public_css = """<style>

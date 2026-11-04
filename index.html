@@ -1050,7 +1050,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   <!-- Section links locked under the stock ticker (Mark, Oct 26, 2026) -->
   <div class="wt-mast wt-mast-2 wt-dock-nav">
     <nav class="wt-nav" aria-label="Sections">
-      <a href="#news" class="wt-view-link wt-to-news">Other News</a><a href="#ski" class="wt-view-link wt-to-ski">Ski Weather</a><a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#sbmap">Trail Map</a><a href="#daily-word">Devotion</a><a href="#top" class="wt-home-link">Home</a>
+      <a href="#news" class="wt-view-link wt-to-news">Other News</a><a href="#ski" class="wt-view-link wt-to-ski">Ski Weather</a><a href="#holdings">Holdings</a><a href="#snow">Snow</a><a href="#stories">Stories</a><a href="#markets">Markets</a><a href="#spacex">SpaceX</a><a href="#economy">Economy</a><a href="#industrial">Industry</a><a href="#medical">Medical</a><a href="#claude-tips">Claude</a><a href="#ai-business">AI Biz</a><a href="#sports">Sports</a><a href="#weather">Weather</a><a href="#sbmap">Trail Map</a><a href="#daily-word">Devotion</a><a href="#top" class="wt-home-link">Home</a>
     </nav>
   </div>
   </div>
@@ -1130,6 +1130,116 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
 
 
   <!-- ================= TOP STORIES ================= -->
+  <!-- ================= MY HOLDINGS (share counts stripped on skiinut.com by build_public.py) ================= -->
+  <section id="holdings">
+  <style>
+  #holdings .hd-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:2px 0 8px}
+  #holdings .hd-tot{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1;color:var(--fg)}
+  #holdings .hd-tot small{font-family:var(--font-body);font-size:13px;font-weight:600;margin-left:8px}
+  #holdings .hd-sw{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  #holdings .hd-sw button{font:600 12.5px var(--font-body);padding:6px 13px;border:0;background:transparent;color:var(--fg-muted);cursor:pointer}
+  #holdings .hd-sw button.on{background:var(--accent);color:var(--accent-ink,#fff)}
+  #holdings .hd-chart{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 8px 4px}
+  #holdings svg{display:block;width:100%;height:260px;overflow:visible}
+  #holdings .hd-tip{position:absolute;top:8px;pointer-events:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font:12px/1.45 var(--font-body);color:var(--fg);box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
+  #holdings .hd-leg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+  @media (max-width:640px){#holdings .hd-leg{grid-template-columns:repeat(2,minmax(0,1fr))} #holdings svg{height:220px}}
+  #holdings .hd-k{border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface);font:12px/1.35 var(--font-body);color:var(--fg-muted)}
+  #holdings .hd-k b{display:block;font-size:15px;color:var(--fg)}
+  #holdings .hd-k i{display:inline-block;width:10px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+  #holdings .up{color:var(--good)} #holdings .dn{color:var(--bad)}
+  #holdings .hd-foot{font:11.5px var(--font-body);color:var(--fg-faint);margin-top:8px}
+  </style>
+  <div class="section-head"><h2>My Holdings</h2><div class="line"></div></div>
+  <div class="section-sub" id="hd-sub">One week, 30-minute prices.</div>
+  <div class="hd-bar">
+    <div class="hd-tot" id="hd-tot">—</div>
+    <div class="hd-sw" role="group" aria-label="Chart shows"><button type="button" data-m="v" aria-pressed="false">Total value</button><button type="button" data-m="c" aria-pressed="false">% change</button><button type="button" data-m="p" aria-pressed="false">Share price</button></div>
+  </div>
+  <div class="hd-chart"><svg id="hd-svg" role="img" aria-label="One-week chart of holdings"></svg><div class="hd-tip" id="hd-tip"></div></div>
+  <div class="hd-leg" id="hd-leg"></div>
+  <div class="hd-foot" id="hd-foot"></div>
+  </section>
+<script>
+/* My Holdings (Mark, Nov 4, 2026): one-week chart, one line per stock. Views: Total value (shares × price, default), % change, Share price.
+   HOLD_SH = share counts (claude.ai only; build_public.py deletes that line, so skiinut.com shows % change by default + Share price, no totals).
+   HOLD = Yahoo public chart data (range=5d, interval=30m): live via Composio every 5 min in claude.ai; on skiinut.com refreshed by scripts/update_data.py (do_holdings).
+   Public market data only. Keep the variable names. */
+
+var HOLD = {"asof":1793823767,"q":{"AAPL":{"t":[1793280600,1793282400,1793284200,1793286000,1793287800,1793289600,1793291400,1793293200,1793295000,1793296800,1793298600,1793300400,1793302200,1793367000,1793368800,1793370600,1793372400,1793374200,1793376000,1793377800,1793379600,1793381400,1793383200,1793385000,1793386800,1793388600,1793629800,1793631600,1793633400,1793635200,1793637000,1793638800,1793640600,1793642400,1793644200,1793646000,1793647800,1793649600,1793651400,1793716200,1793718000,1793719800,1793721600,1793723400,1793725200,1793727000,1793728800,1793730600,1793732400,1793734200,1793736000,1793737800,1793802600,1793804400,1793806200,1793808000,1793809800,1793811600,1793813400,1793815200,1793817000,1793818800,1793820600,1793822400,1793823767],"c":[349.71,349.85,349.14,348.92,349.26,349.47,349.77,349.78,349.73,349.88,350.1,350.39,348.94,345.33,346.33,348.5,347.69,346.92,347.5,346.95,346.55,344.58,343.13,343.27,343.52,344.79,340.39,340.33,341.08,341.19,339.18,337.29,338.07,337.13,337.25,336.86,337.55,338.97,339.13,331.29,330.12,329.12,330.89,331.23,331.33,331.28,332.18,332.07,332.29,329.94,331.29,331.74,351.66,353.7,353.82,351.26,353.68,352.84,354.01,352.76,352.83,353.11,352.07,352.7,352.76]},"MSFT":{"t":[1793280600,1793282400,1793284200,1793286000,1793287800,1793289600,1793291400,1793293200,1793295000,1793296800,1793298600,1793300400,1793302200,1793367000,1793368800,1793370600,1793372400,1793374200,1793376000,1793377800,1793379600,1793381400,1793383200,1793385000,1793386800,1793388600,1793629800,1793631600,1793633400,1793635200,1793637000,1793638800,1793640600,1793642400,1793644200,1793646000,1793647800,1793649600,1793651400,1793716200,1793718000,1793719800,1793721600,1793723400,1793725200,1793727000,1793728800,1793730600,1793732400,1793734200,1793736000,1793737800,1793802600,1793804400,1793806200,1793808000,1793809800,1793811600,1793813400,1793815200,1793817000,1793818800,1793820600,1793822400,1793823767],"c":[527.36,526.09,521.17,523.24,523.86,525.22,524.58,525.47,526.27,528.0,528.53,528.46,530.43,523.96,522.1,522.04,521.77,523.1,523.41,521.34,521.19,521.14,519.58,519.63,522.22,521.9,525.78,529.07,525.42,523.2,523.51,520.27,519.7,519.41,517.75,516.97,514.58,511.41,507.13,510.91,514.7,516.78,516.6,516.25,517.23,520.33,519.98,521.13,521.44,522.36,522.34,520.77,553.17,552.6,551.82,552.74,557.52,555.82,552.74,555.38,555.02,555.33,557.66,558.9,558.86]},"GOOGL":{"t":[1793280600,1793282400,1793284200,1793286000,1793287800,1793289600,1793291400,1793293200,1793295000,1793296800,1793298600,1793300400,1793302200,1793367000,1793368800,1793370600,1793372400,1793374200,1793376000,1793377800,1793379600,1793381400,1793383200,1793385000,1793386800,1793388600,1793629800,1793631600,1793633400,1793635200,1793637000,1793638800,1793640600,1793642400,1793644200,1793646000,1793647800,1793649600,1793651400,1793716200,1793718000,1793719800,1793721600,1793723400,1793725200,1793727000,1793728800,1793730600,1793732400,1793734200,1793736000,1793737800,1793802600,1793804400,1793806200,1793808000,1793809800,1793811600,1793813400,1793815200,1793817000,1793818800,1793820600,1793822400,1793823767],"c":[284.55,285.67,284.64,286.92,286.79,285.4,284.52,283.38,282.61,281.91,283.69,282.93,283.75,281.14,280.05,281.33,282.4,282.3,280.82,279.71,278.93,278.65,278.12,277.6,277.8,279.76,285.59,285.69,284.05,283.21,283.06,282.45,282.9,283.86,283.68,282.77,283.01,282.15,279.03,278.17,277.95,279.35,278.8,279.08,280.37,280.39,280.54,279.6,279.37,278.51,279.06,279.91,292.33,294.83,293.66,289.63,292.2,291.46,292.02,291.67,290.44,291.78,291.26,291.35,290.93]},"SPCX":{"t":[1793280600,1793282400,1793284200,1793286000,1793287800,1793289600,1793291400,1793293200,1793295000,1793296800,1793298600,1793300400,1793302200,1793367000,1793368800,1793370600,1793372400,1793374200,1793376000,1793377800,1793379600,1793381400,1793383200,1793385000,1793386800,1793388600,1793629800,1793631600,1793633400,1793635200,1793637000,1793638800,1793640600,1793642400,1793644200,1793646000,1793647800,1793649600,1793651400,1793716200,1793718000,1793719800,1793721600,1793723400,1793725200,1793727000,1793728800,1793730600,1793732400,1793734200,1793736000,1793737800,1793802600,1793804400,1793806200,1793808000,1793809800,1793811600,1793813400,1793815200,1793817000,1793818800,1793820600,1793822400,1793823767],"c":[143.66,143.91,143.58,144.29,144.33,144.02,144.88,144.29,143.67,143.49,143.6,143.66,143.82,138.1,137.02,139.75,138.38,138.38,137.96,137.67,136.69,136.11,135.85,135.76,135.18,134.7,140.68,141.84,140.76,140.43,140.75,140.1,139.39,139.29,138.4,137.88,137.96,137.7,136.34,140.35,142.22,141.99,140.61,141.29,141.84,141.71,141.05,141.4,141.24,140.61,141.01,141.31,136.62,138.16,136.54,135.3,137.17,138.04,136.99,135.46,134.37,134.6,133.87,134.64,134.51]}}};
+(function(){
+  var ORDER=["AAPL","MSFT","GOOGL","SPCX"], NAME={AAPL:"Apple",MSFT:"Microsoft",GOOGL:"Google",SPCX:"SpaceX"};
+  var COL={AAPL:"#2F7FD8",MSFT:"#1FA37A",GOOGL:"#E2733A",SPCX:"#8B5CF6"};
+  var SH=window.HOLD_SH||null, mode=SH?"v":"c", svg=document.getElementById("hd-svg"), tip=document.getElementById("hd-tip");
+  try{ var sm=localStorage.getItem("hold-mode"); if(sm==="p"||sm==="c"||(sm==="v"&&SH)) mode=sm; }catch(e){}
+  function $(s){return document.querySelector(s);}
+  function money(v,d){return "$"+v.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});}
+  function pct(a,b){return (a/b-1)*100;}
+  function cls(x){return x>=0?"up":"dn";}
+  function sgn(x,f){return (x>=0?"+":"−")+f(Math.abs(x));}
+  function fmtT(ts){return new Date(ts*1000).toLocaleString("en-US",{timeZone:"America/Denver",weekday:"short",hour:"numeric",minute:"2-digit"})+" MT";}
+  function day(ts){return new Date(ts*1000).toLocaleDateString("en-US",{timeZone:"America/Denver",weekday:"short"});}
+  function val(s,i){var q=HOLD.q[s].c, c=q[i]; return mode==="v"?c*SH[s]:mode==="c"?(c/q[0]-1)*100:c;}
+  function fy(v,d){return mode==="c"?(v>=0?"+":"−")+Math.abs(v).toFixed(d?2:1)+"%":money(v,d);}
+  function draw(){
+    var t=HOLD.q.AAPL.t, n=t.length; if(!n) return;
+    var W=Math.max(300,svg.clientWidth||600), H=svg.clientHeight||260, L=58, R=10, T=10, B=22;
+    var lo=Infinity, hi=-Infinity;
+    ORDER.forEach(function(s){for(var i=0;i<n;i++){var v=val(s,i); if(v<lo)lo=v; if(v>hi)hi=v;}});
+    var pad=(hi-lo)*.06||1; lo-=pad; hi+=pad;
+    function X(i){return L+(W-L-R)*i/(n-1);} function Y(v){return T+(H-T-B)*(1-(v-lo)/(hi-lo));}
+    var o='', k;
+    for(k=0;k<=4;k++){var v=lo+(hi-lo)*k/4, y=Y(v); o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10.5" fill="var(--fg-faint)">'+fy(v,0)+'</text>';}
+    if(mode==="c"&&lo<0&&hi>0){ var y0=Y(0); o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y0+'" y2="'+y0+'" stroke="var(--fg-faint)" stroke-width="1"/>'; }
+    for(var i=0;i<n;i++){ if(i===0||day(t[i])!==day(t[i-1])){ var x=X(i); if(i) o+='<line x1="'+x+'" x2="'+x+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--border)" stroke-dasharray="3 3"/>'; o+='<text x="'+(x+4)+'" y="'+(H-6)+'" font-size="10.5" fill="var(--fg-faint)">'+day(t[i])+'</text>'; } }
+    ORDER.forEach(function(s){ var d=''; for(var i=0;i<n;i++) d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(val(s,i)).toFixed(1); o+='<path d="'+d+'" fill="none" stroke="'+COL[s]+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>'; o+='<circle cx="'+X(n-1)+'" cy="'+Y(val(s,n-1))+'" r="3.5" fill="'+COL[s]+'"/>'; });
+    o+='<line id="hd-x" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--fg-faint)" stroke-width="1" style="display:none"/><rect x="'+L+'" y="0" width="'+(W-L-R)+'" height="'+H+'" fill="transparent" id="hd-hit"/>';
+    svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.innerHTML=o;
+    var hit=document.getElementById("hd-hit"), xl=document.getElementById("hd-x");
+    function move(ev){ var r=svg.getBoundingClientRect(), cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left, i=Math.round((cx*W/r.width-L)/(W-L-R)*(n-1)); i=Math.max(0,Math.min(n-1,i));
+      var x=X(i); xl.setAttribute("x1",x); xl.setAttribute("x2",x); xl.style.display="";
+      var h='<b>'+fmtT(t[i])+'</b>', tot=0; ORDER.forEach(function(s){ var v=val(s,i); if(SH) tot+=HOLD.q[s].c[i]*SH[s]; h+='<br><span style="color:'+COL[s]+'">●</span> '+s+' '+fy(v,2); }); if(mode==="v") h+='<br><b>Total '+money(tot,0)+'</b>';
+      tip.innerHTML=h; tip.style.display="block"; var px=x*r.width/W; tip.style.left=(px>r.width/2? px-tip.offsetWidth-10 : px+14)+"px"; }
+    function out(){ xl.style.display="none"; tip.style.display="none"; }
+    hit.addEventListener("mousemove",move); hit.addEventListener("touchstart",move,{passive:true}); hit.addEventListener("touchmove",move,{passive:true}); hit.addEventListener("mouseleave",out); hit.addEventListener("touchend",function(){setTimeout(out,1500);});
+    var tot=0, tot0=0, leg='';
+    ORDER.forEach(function(s){ var c=HOLD.q[s].c, a=c[n-1], b=c[0], sh=SH?SH[s]:0; tot+=a*sh; tot0+=b*sh; var p=pct(a,b);
+      leg+='<div class="hd-k"><i style="background:'+COL[s]+'"></i>'+NAME[s]+' · '+s+'<b>'+(mode==="v"?money(a*sh,0):mode==="c"?fy(p,0):money(a,2))+'</b>'+(mode==="c"?'now '+money(a,2):(mode==="v"?sh+' sh × '+money(a,2)+' · ':'')+'<span class="'+cls(p)+'">'+sgn(p,function(x){return x.toFixed(1)+'%';})+' wk</span>')+'</div>'; });
+    document.getElementById("hd-leg").innerHTML=leg;
+    var tp=pct(tot,tot0), tEl=document.getElementById("hd-tot");
+    if(!SH){ tEl.innerHTML='<small style="margin:0">'+(mode==="c"?"Change since "+day(t[0])+" open":"Share price")+'</small>'; }
+    else tEl.innerHTML=money(tot,0)+'<small class="'+cls(tp)+'">'+sgn(tot-tot0,function(x){return money(x,0);})+' ('+sgn(tp,function(x){return x.toFixed(1)+'%';})+') this week</small>';
+    document.getElementById("hd-foot").textContent="As of "+fmtT(HOLD.asof)+" · Yahoo Finance public data"+(window.__holdLive?" · live, updates every 5 min":"");
+  }
+  if(!SH){ var vb=document.querySelector('#holdings .hd-sw button[data-m="v"]'); if(vb) vb.remove(); document.getElementById("hd-sub").textContent="One week, 30-minute prices: Apple, Microsoft, Google and SpaceX."; }
+  else document.getElementById("hd-sub").textContent="One week, 30-minute prices. Total value = shares × price. Share counts and totals stay private (skiinut.com shows % change and share price only).";
+  document.querySelectorAll("#holdings .hd-sw button").forEach(function(b){
+    if(b.getAttribute("data-m")===mode){ b.classList.add("on"); b.setAttribute("aria-pressed","true"); } else { b.classList.remove("on"); b.setAttribute("aria-pressed","false"); }
+    b.addEventListener("click",function(){ mode=b.getAttribute("data-m"); try{localStorage.setItem("hold-mode",mode);}catch(e){}
+      document.querySelectorAll("#holdings .hd-sw button").forEach(function(x){var on=x===b; x.classList.toggle("on",on); x.setAttribute("aria-pressed",on?"true":"false");}); draw(); });
+  });
+  draw(); var rt; window.addEventListener("resize",function(){clearTimeout(rt); rt=setTimeout(draw,150);});
+  document.addEventListener("click",function(e){ var a=e.target.closest&&e.target.closest('a[href="#news"],a[href="#holdings"]'); if(a) setTimeout(draw,60); });
+  /* Live refresh inside claude.ai through Composio */
+  var CMD = "python3 -c \"\nimport json,urllib.request\no={}\nfor s in ['AAPL','MSFT','GOOGL','SPCX']:\n  try:\n    r=json.load(urllib.request.urlopen(urllib.request.Request('https://query1.finance.yahoo.com/v8/finance/chart/'+s+'?range=5d&interval=30m',headers={'User-Agent':'Mozilla/5.0'}),timeout=20))['chart']['result'][0]\n    c=r['indicators']['quote'][0]['close']\n    o[s]=[[t,round(v,2)] for t,v in zip(r['timestamp'],c) if v is not None]\n  except Exception as e: pass\nprint('PF'+json.dumps(o,separators=(',',':')))\n\"";
+  function stdoutOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){ return p; } } return (p && p.data && p.data.stdout) || (p && p.stdout) || ""; }
+  if(!(window.claude && window.claude.use)) return;
+  window.claude.use("mcp").then(function(mcp){
+    if(!mcp) return; var busy=false, timer;
+    function poll(){ if(document.hidden||busy) return; busy=true;
+      mcp.callTool("Composio","COMPOSIO_REMOTE_BASH_TOOL",{command:CMD},{cache:false}).then(function(r){
+        var L=stdoutOf(r).split("\n").filter(function(x){return x.indexOf("PF")===0;})[0]; if(!L) return;
+        var o=JSON.parse(L.slice(2)); if(!ORDER.every(function(s){return o[s]&&o[s].length;})) return;
+        var base=o.AAPL.map(function(p){return p[0];}), q={};
+        ORDER.forEach(function(s){ var m={}; o[s].forEach(function(p){m[p[0]]=p[1];}); var last=o[s][0][1]; q[s]={t:base,c:base.map(function(ts){ if(m[ts]!=null) last=m[ts]; return last; })}; });
+        HOLD={asof:base[base.length-1],q:q}; window.__holdLive=true; draw();
+      }, function(e){ if(e && {not_granted:1,capability_disabled:1,capability_removed:1,user_changed:1}[e.code] && timer){ clearInterval(timer); timer=null; } }).then(function(){busy=false;});
+    }
+    poll(); timer=setInterval(poll,300000);
+    document.addEventListener("visibilitychange",function(){ if(!document.hidden && timer) poll(); });
+  },function(){});
+})();
+</script>
   <section id="wsjv">
   <div class="section-head"><h2>WSJ Video</h2><div class="line"></div></div>
   <div class="wsjv" id="wsjv-box">
@@ -3898,12 +4008,12 @@ html:not(.view-news)[data-theme="light"]{--bg:#ffffff; --paper:none;}
 <style>
 /* Two pages below the header (Mark, Oct 28, 2026): "Ski Weather" (main page) and "Other News" (business & economic news, Sports + Morning Devotion).
    The header, weather bar, ticker and footer show on both. html.view-news picks the news page. Keep as is. */
-html:not(.view-news) #stories, html:not(.view-news) #markets, html:not(.view-news) #spacex, html:not(.view-news) #economy,
+html:not(.view-news) #holdings, html:not(.view-news) #stories, html:not(.view-news) #markets, html:not(.view-news) #spacex, html:not(.view-news) #economy,
 html:not(.view-news) #industrial, html:not(.view-news) #medical, html:not(.view-news) #claude-tips, html:not(.view-news) #ai-business,
 html:not(.view-news) #daily-word, html:not(.view-news) #sports{display:none!important;}
 html.view-news #snow, html.view-news #weather, html.view-news #weather-more, html.view-news #models,
 html.view-news #shopping, html.view-news #sbmap{display:none!important;}
-html:not(.view-news) .wt-nav a:is([href="#stories"],[href="#markets"],[href="#spacex"],[href="#economy"],[href="#industrial"],[href="#medical"],[href="#claude-tips"],[href="#ai-business"],[href="#sports"],[href="#daily-word"]),
+html:not(.view-news) .wt-nav a:is([href="#holdings"],[href="#stories"],[href="#markets"],[href="#spacex"],[href="#economy"],[href="#industrial"],[href="#medical"],[href="#claude-tips"],[href="#ai-business"],[href="#sports"],[href="#daily-word"]),
 html.view-news .wt-nav a:is([href="#snow"],[href="#weather"],[href="#sbmap"],[href="#shopping"]){display:none;}
 html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{display:none;}
 .wt-nav a.wt-view-link{color:#fff!important; background:#E2733A; padding:1px 8px; border-radius:2px; font-weight:700; text-shadow:none!important;}
@@ -3912,7 +4022,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 <script>
 (function(){
   var root = document.documentElement;
-  var NEWS = ["news","wsjv","ecov","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","sports","daily-word"];
+  var NEWS = ["news","holdings","wsjv","ecov","stories","markets","spacex","economy","industrial","medical","claude-tips","ai-business","sports","daily-word"];
   var SKI = ["ski","snow","weather","weather-more","models","shopping","sbmap"];
   function setView(v, jump){
     var was = root.classList.contains("view-news"), news = v === "news";
