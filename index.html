@@ -4109,7 +4109,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   /* Orange down arrow under the resort temperature, pointing at the resort card below (Mark, Nov 5, 2026). */
   .wt-clock #wt-clock-rtmp .n{position:relative; display:inline-block;}
   .wt-clock{position:relative; z-index:3;}
-  .wt-clock #wt-clock-rtmp .n::after{content:""; position:absolute; left:50%; top:calc(100% - .06em); transform:translateX(-50%);
+  .wt-clock #wt-clock-rtmp .n::after{content:""; position:absolute; left:50%; top:var(--arw-top, 100%); transform:translateX(-50%);
     border-left:calc(var(--arw-h, 14px) * .8) solid transparent; border-right:calc(var(--arw-h, 14px) * .8) solid transparent;
     border-top:var(--arw-h, 14px) solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)); pointer-events:none;}
 }
@@ -4167,12 +4167,16 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       if(room > 40) clkT.style.setProperty("font-size", Math.floor(fs * room / r.width) + "px", "important");
     }
   }
-  /* Arrow under the resort temperature: tall enough that its tip just touches the top of the resort card (Mark, Nov 5, 2026). */
+  /* Arrow under the resort temperature (Mark, Nov 5, 2026): starts just below the digits' baseline so it never covers the number,
+     and may run down into the resort card. A zero-size baseline marker inside the number finds where the digits end. */
   function arrow(){
-    var n = document.querySelector("#wt-clock-rtmp .n"), card = document.getElementById("rs-hero");
-    if(!n || !card || !mq.matches) return;
-    var fs = parseFloat(getComputedStyle(n).fontSize) || 40, gap = card.getBoundingClientRect().top - (n.getBoundingClientRect().bottom - .06 * fs);
-    n.style.setProperty("--arw-h", Math.max(8, Math.min(Math.round(gap), Math.round(.3 * fs))) + "px");
+    var n = document.querySelector("#wt-clock-rtmp .n");
+    if(!n || !mq.matches) return;
+    var bl = n.querySelector(".bl");
+    if(!bl){ bl = document.createElement("span"); bl.className = "bl"; bl.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline;"; n.appendChild(bl); }
+    var fs = parseFloat(getComputedStyle(n).fontSize) || 40, nr = n.getBoundingClientRect(), base = bl.getBoundingClientRect().bottom;
+    n.style.setProperty("--arw-top", Math.round(base - nr.top + .05 * fs) + "px");
+    n.style.setProperty("--arw-h", Math.max(9, Math.round(.17 * fs)) + "px");
   }
   var fit0 = fit; fit = function(){ fit0(); arrow(); };
   window.addEventListener("resize", function(){ setTimeout(fit, 60); });
