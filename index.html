@@ -4106,6 +4106,12 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   .wt-clock .wt-clock-ap{display:none!important;}
   .wt-clock .wt-clock-tmp:not(:empty){display:inline; margin-left:.4em; font:inherit; letter-spacing:inherit;}
   .wt-clock .wt-clock-tmp .deg{font-size:.42em; vertical-align:.95em; margin-left:.03em; letter-spacing:0;}
+  /* Orange down arrow under the resort temperature, pointing at the resort card below (Mark, Nov 5, 2026). */
+  .wt-clock #wt-clock-rtmp .n{position:relative; display:inline-block;}
+  .wt-clock{position:relative; z-index:3;}
+  .wt-clock #wt-clock-rtmp .n::after{content:""; position:absolute; left:50%; top:calc(100% - .06em); transform:translateX(-50%);
+    border-left:calc(var(--arw-h, 14px) * .8) solid transparent; border-right:calc(var(--arw-h, 14px) * .8) solid transparent;
+    border-top:var(--arw-h, 14px) solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)); pointer-events:none;}
 }
 </style>
 <script>
@@ -4144,7 +4150,8 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       if(l && v && /^\s*now\s*$/i.test(l.textContent)){ var m = v.textContent.match(/-?\d+(\.\d+)?/); if(m) t = Math.round(+m[0]); break; } }
     rOut.className = "wt-clock-tmp";
     if(t == null){ rOut.textContent = ""; return; }
-    rOut.innerHTML = t + '<span class="deg">°</span>'; var c = window.tempCls ? window.tempCls(t) : ""; if(c) rOut.classList.add(c);
+    rOut.innerHTML = '<span class="n">' + t + '</span><span class="deg">°</span>'; var c = window.tempCls ? window.tempCls(t) : ""; if(c) rOut.classList.add(c);
+    if(typeof arrow === "function") setTimeout(arrow, 0);
   }
   /* Keep the whole line (time + both temps) inside the header photo: in landscape, shrink the clock's font just enough that its
      right edge stays inside the page's safe margin (clear of the iPhone notch) (Mark, Nov 4, 2026). */
@@ -4160,6 +4167,14 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       if(room > 40) clkT.style.setProperty("font-size", Math.floor(fs * room / r.width) + "px", "important");
     }
   }
+  /* Arrow under the resort temperature: tall enough that its tip just touches the top of the resort card (Mark, Nov 5, 2026). */
+  function arrow(){
+    var n = document.querySelector("#wt-clock-rtmp .n"), card = document.getElementById("rs-hero");
+    if(!n || !card || !mq.matches) return;
+    var fs = parseFloat(getComputedStyle(n).fontSize) || 40, gap = card.getBoundingClientRect().top - (n.getBoundingClientRect().bottom - .06 * fs);
+    n.style.setProperty("--arw-h", Math.max(8, Math.min(Math.round(gap), Math.round(.3 * fs))) + "px");
+  }
+  var fit0 = fit; fit = function(){ fit0(); arrow(); };
   window.addEventListener("resize", function(){ setTimeout(fit, 60); });
   window.addEventListener("orientationchange", function(){ setTimeout(fit, 350); });
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
