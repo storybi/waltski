@@ -3,11 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Skiinut</title>
-<meta name="description" content="Skiinut — markets, economy, top stories, Wasatch snow and weather, refreshed twice a day.">
-<meta property="og:title" content="Skiinut">
-<meta property="og:description" content="Markets, economy, top stories, Wasatch snow and weather — refreshed twice a day.">
-<meta name="theme-color" content="#000000">
+<title>Skiinut — live snow, radar & forecasts for every Ikon resort</title>
+<meta name="description" content="Live snow totals, Doppler radar, 48-hour rain & snow outlooks, resort cams and conditions for Utah and every US Ikon Pass resort.">
+<link rel="canonical" href="https://www.skiinut.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Skiinut">
+<meta property="og:url" content="https://www.skiinut.com/">
+<meta property="og:title" content="Skiinut — live snow, radar & forecasts">
+<meta property="og:description" content="Live snow totals, radar, outlooks, cams and conditions for Utah and every US Ikon Pass resort.">
+<meta property="og:image" content="https://www.skiinut.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Skiinut logo over snowy mountains">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.skiinut.com/og.png">
+<meta name="theme-color" content="#f6f9fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1628" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-title" content="Skiinut">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&display=swap">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23E2733A'/%3E%3Ctext x='20' y='28' font-family='Montserrat,Arial,sans-serif' font-weight='800' font-size='20' fill='%23fff' text-anchor='middle'%3EIN%3C/text%3E%3C/svg%3E">
 <style>
 /* Public site: no Ask Claude bar */
@@ -99,9 +116,6 @@ window.IKON = {order: ["sb", "powmow", "alta", "snowbird", "brighton", "solitude
 })();
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=Fraunces:opsz,wght@9..144,400&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&family=Playfair+Display:wght@400;500&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <style>
 /* Layout concept: a financial broadsheet in the Journal tradition — white paper, black ink,
    a centered nameplate over a dateline, hairline column rules, small-caps section labels. */
@@ -992,7 +1006,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     <p class="wt-greet"><span id="wt-greet">Good evening, it’s Wednesday, November 4, 2026</span><span class="wt-stamp" hidden><span class="wt-sep"> &middot; </span>Updated <span id="wt-upd">Nov. 4, 2026 7:59 p.m. MT</span><span id="wt-ago"></span></span></p>
     <!-- Resort panel (Mark, Oct 30, 2026): pick any US Ikon resort; the header photo, radar, cams, outlook, weather card and trail map follow. Rendered by the "Resort hub" script. -->
     <!-- Header clock (Mark, Oct 30, 2026): sits just above the resort panel; no date line under it. -->
-    <div class="wt-clock" id="wt-clock" role="timer" aria-live="off"><div class="wt-clock-t"><span id="wt-clock-hm">--:--</span><span class="wt-clock-ap" id="wt-clock-ap"></span></div></div>
+    <div class="wt-clock" id="wt-clock" role="timer" aria-live="off"><div class="wt-clock-t"><span id="wt-clock-hm">--:--</span><span class="wt-clock-ap" id="wt-clock-ap"></span><span class="wt-clock-tmp" id="wt-clock-tmp" aria-label="Current temperature"></span></div></div>
     <div class="rs-hero" id="rs-hero">
       <div class="rs-top"><label class="rs-label" for="rs-pick">Resort</label><div class="rs-pickwrap"><select class="rs-pick" id="rs-pick" aria-label="Choose a resort"></select></div><span class="rs-city" id="rs-city"></span></div>
       <!-- Mini outlook under the resort name, above the snow stat boxes (Mark, Oct 31, 2026). -->
@@ -4040,6 +4054,42 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   }, function(){});
 })();
 </script>
+<style>
+/* Landscape clock + temperature (Mark, Nov 4, 2026): on phones and iPads held sideways, the header clock drops AM/PM and shows the
+   picked resort's current temperature (the resort card's "Now") right after the time, in the clock's own font and size.
+   Color: 60°F and up red, 40–59 yellow, below 40 blue. Keep as is. */
+.wt-clock-tmp{display:none;}
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  .wt-clock .wt-clock-ap{display:none!important;}
+  .wt-clock .wt-clock-tmp:not(:empty){display:inline; margin-left:.4em; font:inherit; letter-spacing:inherit;}
+}
+.wt-clock-tmp.t-hot{color:#ff4d4d;} .wt-clock-tmp.t-mild{color:#ffd23f;} .wt-clock-tmp.t-cold{color:#4da3ff;}
+</style>
+<script>
+/* Landscape clock + temperature (Mark, Nov 4, 2026): copies the "Now" temperature from the resort card (#rs-panel) into
+   #wt-clock-tmp whenever the card changes (resort picked, live refresh), and colors it by temperature. Keep as is. */
+(function(){
+  var out = document.getElementById("wt-clock-tmp"), panel = document.getElementById("rs-panel");
+  if(!out || !panel) return;
+  function now(){
+    var st = panel.querySelectorAll(".rs-stat");
+    for(var i = 0; i < st.length; i++){
+      var l = st[i].querySelector(".l"), v = st[i].querySelector(".v");
+      if(l && v && /^\s*now\s*$/i.test(l.textContent)){ var m = v.textContent.match(/-?\d+(\.\d+)?/); return m ? Math.round(+m[0]) : null; }
+    }
+    return null;
+  }
+  function draw(){
+    var t = now();
+    out.classList.remove("t-hot", "t-mild", "t-cold");
+    if(t == null){ out.textContent = ""; return; }
+    out.textContent = t + "°F";
+    out.classList.add(t >= 60 ? "t-hot" : t >= 40 ? "t-mild" : "t-cold");
+  }
+  draw();
+  try{ new MutationObserver(draw).observe(panel, {childList:true, subtree:true, characterData:true}); }catch(e){ setInterval(draw, 5000); }
+})();
+</script>
 <script>
 /* Header clock (Oct 27, 2026): ticks every second in the viewer's own device time zone (Mark, Oct 27, 2026) */
 (function(){
@@ -4229,7 +4279,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 })();
 </script>
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&display=swap");
+
 /* ===================== Skiinut 2.0 design system (Mark, Oct 30, 2026) =====================
    A clean, modern ski-weather look for the whole site: alpine navy + glacier blue with the brand orange, Inter for text,
    Barlow Condensed for titles and big numbers, rounded cards with soft shadows, a full-bleed photo hero with a glass resort
