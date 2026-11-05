@@ -57,6 +57,13 @@ body = re.sub(r'\nvar HOLD_SH = \{[^}]*\};', "\n", body, count=1)
 if re.search(r'var HOLD_SH\s*=', body) or '"AAPL":38' in body:
     sys.exit("could not remove My Holdings share counts")
 
+# 3c. Faster fonts (Mark, Nov 4, 2026): the Skiinut 2.0 design uses only Inter, Barlow Condensed, Montserrat (nameplate) and
+#     Newsreader italic (greeting). The head (above) loads exactly those, early. Drop the page's old 8-family link and the late
+#     @import in the design-system <style> so the browser doesn't fetch unused fonts or wait for Inter.
+body = re.sub(r'<link rel="preconnect" href="https://fonts\.(?:googleapis|gstatic)\.com"(?: crossorigin)?>\s*', "", body)
+body = re.sub(r'<link href="https://fonts\.googleapis\.com/css2\?family=Archivo\+Narrow[^"]*" rel="stylesheet">\s*', "", body, count=1)
+body = re.sub(r'@import url\("https://fonts\.googleapis\.com/css2\?family=Inter[^"]*"\);', "", body, count=1)
+
 # 4. Hide the Ask Claude bar (its code shares a script with the weather renderer, so only the bar is hidden).
 public_css = """<style>
 /* Public site: no Ask Claude bar */
@@ -277,11 +284,28 @@ head = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Skiinut</title>
-<meta name="description" content="Skiinut — markets, economy, top stories, Wasatch snow and weather, refreshed twice a day.">
-<meta property="og:title" content="Skiinut">
-<meta property="og:description" content="Markets, economy, top stories, Wasatch snow and weather — refreshed twice a day.">
-<meta name="theme-color" content="#000000">
+<title>Skiinut — live snow, radar & forecasts for every Ikon resort</title>
+<meta name="description" content="Live snow totals, Doppler radar, 48-hour rain & snow outlooks, resort cams and conditions for Utah and every US Ikon Pass resort.">
+<link rel="canonical" href="https://www.skiinut.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Skiinut">
+<meta property="og:url" content="https://www.skiinut.com/">
+<meta property="og:title" content="Skiinut — live snow, radar & forecasts">
+<meta property="og:description" content="Live snow totals, radar, outlooks, cams and conditions for Utah and every US Ikon Pass resort.">
+<meta property="og:image" content="https://www.skiinut.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Skiinut logo over snowy mountains">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.skiinut.com/og.png">
+<meta name="theme-color" content="#f6f9fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1628" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-title" content="Skiinut">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&display=swap">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23E2733A'/%3E%3Ctext x='20' y='28' font-family='Montserrat,Arial,sans-serif' font-weight='800' font-size='20' fill='%23fff' text-anchor='middle'%3EIN%3C/text%3E%3C/svg%3E">
 """
 
