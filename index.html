@@ -4079,7 +4079,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 }
 </style>
 <script>
-/* Landscape clock + temperatures (Mark, Nov 4, 2026): local temperature (device location), then the picked resort's, no "F":
+/* Landscape clock + temperatures (Mark, Nov 4, 2026): local temperature (device location), then the picked resort's, plain numbers (no ° or F), shrunk to fit the photo:
    when the device is held sideways, ask the browser for the device's location (once; the browser remembers the answer), then load
    the current temperature there from Open-Meteo every 15 minutes — directly on skiinut.com, through the Composio connector inside
    claude.ai. If the location isn't available (refused, or blocked inside claude.ai), it uses the last location this device gave,
@@ -4103,7 +4103,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   function show(t){
     out.className = "wt-clock-tmp";
     if(t == null){ out.textContent = ""; return; }
-    out.textContent = t + "°"; var c = window.tempCls ? window.tempCls(t) : ""; if(c) out.classList.add(c);
+    out.textContent = String(t); var c = window.tempCls ? window.tempCls(t) : ""; if(c) out.classList.add(c);
   }
   /* Resort temperature (Mark, Nov 4, 2026): the picked resort's "Now" from the resort card, right after the local one. */
   var rOut = document.getElementById("wt-clock-rtmp"), panel = document.getElementById("rs-panel");
@@ -4114,8 +4114,27 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       if(l && v && /^\s*now\s*$/i.test(l.textContent)){ var m = v.textContent.match(/-?\d+(\.\d+)?/); if(m) t = Math.round(+m[0]); break; } }
     rOut.className = "wt-clock-tmp";
     if(t == null){ rOut.textContent = ""; return; }
-    rOut.textContent = t + "°"; var c = window.tempCls ? window.tempCls(t) : ""; if(c) rOut.classList.add(c);
+    rOut.textContent = String(t); var c = window.tempCls ? window.tempCls(t) : ""; if(c) rOut.classList.add(c);
   }
+  /* Keep the whole line (time + both temps) inside the header photo: in landscape, shrink the clock's font just enough that its
+     right edge stays inside the page's safe margin (clear of the iPhone notch) (Mark, Nov 4, 2026). */
+  var clkT = document.querySelector(".wt-clock-t");
+  function fit(){
+    if(!clkT) return;
+    clkT.style.fontSize = "";
+    if(!mq.matches) return;
+    clkT.style.whiteSpace = "nowrap";
+    var rg = document.createRange(); rg.selectNodeContents(clkT); var r = rg.getBoundingClientRect(), bs = getComputedStyle(document.body), right = Math.min((document.documentElement.clientWidth || window.innerWidth) - 14, document.body.getBoundingClientRect().right - (parseFloat(bs.paddingRight) || 0));
+    if(r.width > 0 && r.right > right){
+      var fs = parseFloat(getComputedStyle(clkT).fontSize) || 40, room = right - r.left;
+      if(room > 40) clkT.style.setProperty("font-size", Math.floor(fs * room / r.width) + "px", "important");
+    }
+  }
+  window.addEventListener("resize", function(){ setTimeout(fit, 60); });
+  window.addEventListener("orientationchange", function(){ setTimeout(fit, 350); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  setInterval(fit, 30000);
+  try{ new MutationObserver(function(){ setTimeout(fit, 0); }).observe(out, {childList:true, characterData:true, subtree:true}); if(rOut) new MutationObserver(function(){ setTimeout(fit, 0); }).observe(rOut, {childList:true, characterData:true, subtree:true}); }catch(e){}
   resort();
   if(panel) try{ new MutationObserver(resort).observe(panel, {childList:true, subtree:true, characterData:true}); }catch(e){}
   function load(){
@@ -4138,7 +4157,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   function check(){ if(!mq.matches || document.hidden) return; if(!asked) locate(); else if(Date.now() - last > 15 * 60000) load(); }
   var c0 = saved(); if(c0 && mq.matches) load();
   check();
-  if(mq.addEventListener) mq.addEventListener("change", check); else if(mq.addListener) mq.addListener(check);
+  if(mq.addEventListener) mq.addEventListener("change", function(){ check(); setTimeout(fit, 60); }); else if(mq.addListener) mq.addListener(function(){ check(); setTimeout(fit, 60); });
   document.addEventListener("visibilitychange", check);
   setInterval(function(){ asked = false; check(); }, 15 * 60000);
 })();
