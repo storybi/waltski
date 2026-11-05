@@ -632,9 +632,16 @@ def do_holdings(s, now_mt):
         raw[sym] = {int(d.timestamp()): round(v, 2) for d, v in bars}
         if len(raw[sym]) < 10:
             raise ValueError("short series " + sym)
+    try:  # Nasdaq Composite benchmark line (optional)
+        meta, bars = ychart("^IXIC", "5d", "30m")
+        nq = {int(d.timestamp()): round(v, 2) for d, v in bars}
+        if len(nq) >= 10:
+            raw["IXIC"] = nq
+    except Exception as e:  # noqa: BLE001
+        log("  holdings: no Nasdaq", e)
     base = sorted(raw["AAPL"])
     q = {}
-    for sym in syms:
+    for sym in list(raw):
         last = raw[sym][min(raw[sym])]
         c = []
         for t in base:
