@@ -1149,7 +1149,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="olk-days" id="olk-days"></div>
       <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
       <div class="olk-x" id="olk-x"></div>
-      <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%, left axis). Orange line = temperature (°F, right axis). Tap or hover a column for amounts.</p>
+      <p class="olk-note" id="olk-note">Orange column = temperature, rising above or dropping below the 32°F freezing line (right axis). Rain or snow stacks on top: short = light, medium = moderate, tall = heavy; a faint sliver = a chance with no measurable amount. Tap or hover a column for details.</p>
     </div>
     <div class="rwx" id="rwx" aria-live="polite"></div>
     <!-- Suggest-a-resort box (skiinut.com) and resort ticker, moved here from the sticky dock (Mark, Nov 1, 2026); filled by the "Resort feed" script. -->
@@ -3884,8 +3884,15 @@ html:not(.view-news) #ecov{display:none!important;}
   document.addEventListener("olk-render", function(e){
     var d = e.detail; if(!d || !d.o || !d.o.h || !d.o.h.length){ box.innerHTML = ""; box.hidden = true; return; }
     var h = d.o.h, n = h.length, w = 100 / n, cols = "";
-    h.forEach(function(r, i){ var amt = r[1] + r[2] > 0, ht = Math.max(0, Math.min(100, r[0]));
-      cols += '<i class="ro-b ' + d.kinds[i] + (amt ? '' : ' ch') + '" style="height:' + (ht ? Math.max(6, ht) : 0) + '%"></i>'; });
+    /* Stacked columns (Mark, Nov 6, 2026): orange temperature column from the 32°F axis, rain / snow on top sized light / moderate / heavy. */
+    var tv = h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; });
+    var tmin = tv.length ? Math.min.apply(null, tv) : 32, tmax = tv.length ? Math.max.apply(null, tv) : 32;
+    var lo = Math.min(30, Math.floor((tmin - 2) / 5) * 5), hi = Math.max(35, Math.ceil((tmax + 2) / 5) * 5), TA = 58;
+    var ty = function(v){ return (v - lo) / (hi - lo) * TA; }, z = ty(32), SEG = [0, 14, 28, 42];
+    var lvf = window.OLK_LEVEL || function(r){ return r[1] + r[2] > 0 ? 1 : 0; };
+    h.forEach(function(r, i){ var lv = lvf(r), seg = lv ? SEG[lv] : (r[0] >= 30 ? 7 : 0), tb = r[3] == null ? z : ty(r[3]);
+      cols += '<span class="ro-c">' + (r[3] != null ? '<i class="ro-t' + (r[3] < 32 ? ' cold' : '') + '" style="bottom:' + Math.min(z, tb).toFixed(1) + '%;height:' + Math.max(1, Math.abs(tb - z)).toFixed(1) + '%"></i>' : '') +
+        (seg ? '<i class="ro-b ' + d.kinds[i] + (lv ? '' : ' ch') + '" style="bottom:' + Math.max(z, tb).toFixed(1) + '%;height:' + seg + '%"></i>' : '') + '</span>'; });
     var marks = "";
     if(d.nh >= 0) marks += '<span class="ro-now" style="left:' + ((d.nh + .5) * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     if(n > 24) marks += '<span class="ro-day" style="left:' + (24 * w) + '%"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
@@ -3897,15 +3904,8 @@ html:not(.view-news) #ecov{display:none!important;}
     marks += '<span class="ro-hrs ro-tmp" aria-hidden="true">' + tmp + '</span>';
     var l1 = d.isToday ? "Today" : "Day 1", l2 = d.isToday ? "Tomorrow" : "Day 2";
     box.hidden = false;
-    /* Orange temperature line with a small right-side °F axis (Mark, Nov 6, 2026). */
-    var tv = h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; }), tl = "", ya = "";
-    if(tv.length > 1){
-      var lo = Math.floor((Math.min.apply(null, tv) - 2) / 5) * 5, hi = Math.ceil((Math.max.apply(null, tv) + 2) / 5) * 5; if(hi - lo < 10) hi = lo + 10;
-      var pts = []; h.forEach(function(r, i){ if(r[3] != null) pts.push((i + .5).toFixed(2) + "," + (100 - (r[3] - lo) / (hi - lo) * 100).toFixed(1)); });
-      tl = '<svg class="ro-tline" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(" ") + '"/></svg>';
-      ya = '<span class="ro-yr hi" aria-hidden="true">' + hi + '°</span><span class="ro-yr lo" aria-hidden="true">' + lo + '°</span>';
-    }
-    box.innerHTML = '<span class="ro-in"><span class="ro-cols">' + cols + '</span>' + tl + marks + '</span>' + ya + '<span class="ro-lab"><span>' + l1 + '</span></span>';
+    var ya = '<span class="ro-frz" style="bottom:' + z.toFixed(1) + '%"></span><span class="ro-yr frz" style="bottom:' + z.toFixed(1) + '%">32°</span>';
+    box.innerHTML = '<span class="ro-in"><span class="ro-cols">' + cols + '</span>' + ya + marks + '</span><span class="ro-lab"><span>' + l1 + '</span></span>';
   });
 })();
 </script>
@@ -3927,6 +3927,10 @@ html:not(.view-news) #ecov{display:none!important;}
   function dayName(date, plus){ var d = date.split("-"), x = new Date(Date.UTC(+d[0], +d[1]-1, +d[2] + plus)); return WK[x.getUTCDay()] + " " + MON[x.getUTCMonth()] + " " + x.getUTCDate(); }
   function kind(r){ if(r[2] > 0 && r[1] > 0) return "mix"; if(r[2] > 0) return "snow"; if(r[1] > 0) return "rain"; return r[3] != null && r[3] <= 33 ? "snow" : "rain"; }
   function fmt(x, d){ return x >= 10 ? x.toFixed(0) : x.toFixed(d); }
+  /* Intensity per hour (Mark, Nov 6, 2026): 1 light, 2 moderate, 3 heavy. Snow in/hr: <0.3 / 0.3–1 / 1+. Rain in/hr: <0.1 / 0.1–0.3 / 0.3+. */
+  function olkLevel(r){ var sn = r[2] || 0, rn = r[1] || 0;
+    var a = sn >= 1 ? 3 : sn >= 0.3 ? 2 : sn > 0 ? 1 : 0, b = rn >= 0.3 ? 3 : rn >= 0.1 ? 2 : rn > 0 ? 1 : 0; return Math.max(a, b); }
+  window.OLK_LEVEL = olkLevel;
   function today(tz){ try{ return new Date().toLocaleDateString("en-CA", {timeZone: tz}); }catch(e){ return ""; } }
   function nowHour(tz){ try{ return +new Date().toLocaleTimeString("en-US", {timeZone: tz, hour: "2-digit", hour12: false}) % 24; }catch(e){ return -1; } }
   function render(){
@@ -3938,28 +3942,29 @@ html:not(.view-news) #ecov{display:none!important;}
     /* Mini outlook in the header resort panel (Mark, Oct 30, 2026) draws from the same data. */
     document.dispatchEvent(new CustomEvent("olk-render", {detail: {o: o, nh: nh, isToday: isToday, kinds: o.h.map(kind)}}));
     var labels = []; for(var d = 0; d < days; d++) labels.push(isToday ? (d === 0 ? "Today" : d === 1 ? "Tomorrow" : dayName(o.date, d)) : dayName(o.date, d));
-    var html = '<span class="olk-y" style="bottom:100%">100%</span><span class="olk-y" style="bottom:50%">50%</span><span class="olk-y" style="bottom:0">0%</span>';
+    /* Stacked columns (Mark, Nov 6, 2026): an orange temperature column from the 32°F freezing axis (up when above, down when below),
+       with rain / snow stacked on top: short = light, medium = moderate, tall = heavy (by the hour's amount). */
+    var html = "", tv = o.h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; });
+    var tmin = tv.length ? Math.min.apply(null, tv) : 32, tmax = tv.length ? Math.max.apply(null, tv) : 32;
+    var tlo = Math.min(30, Math.floor((tmin - 2) / 5) * 5), thi = Math.max(35, Math.ceil((tmax + 2) / 5) * 5), TA = 62;
+    var ty = function(v){ return (v - tlo) / (thi - tlo) * TA; }, z = ty(32), SEG = [0, 12, 24, 36];
     var tot = []; for(var d1 = 0; d1 < days; d1++) tot.push({rain: 0, snow: 0, peak: 0, peakH: 0});
     o.h.forEach(function(r, i){
       var t = tot[Math.floor(i / 24)]; t.rain += r[1]; t.snow += r[2]; if(r[0] > t.peak){ t.peak = r[0]; t.peakH = i; }
       var k = kind(r), amt = r[1] + r[2] > 0;
       var tip = (days > 1 ? labels[Math.floor(i / 24)] + " " : "") + hr(i) + ": " + r[0] + "% chance" + (r[2] > 0 ? ", snow " + fmt(r[2], 1) + "″" : "") + (r[1] > 0 ? ", rain " + fmt(r[1], 2) + "″" : "") + (r[3] != null ? ", " + r[3] + "°F" : "");
-      html += '<div class="olk-col' + (i === nh ? ' now' : '') + (i === 24 ? ' day2' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '"><div class="olk-bar ' + k + (amt ? '' : ' chance') + '" style="height:' + Math.max(0, Math.min(100, r[0])) + '%"></div></div>';
+      var lv = olkLevel(r), seg = lv ? SEG[lv] : (r[0] >= 30 ? 5 : 0), tb = r[3] == null ? z : ty(r[3]);
+      if(lv) tip += " · " + ["", "light", "moderate", "heavy"][lv] + " " + (k === "mix" ? "mix" : k);
+      html += '<div class="olk-col' + (i === nh ? ' now' : '') + (i === 24 ? ' day2' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '">' +
+        (r[3] != null ? '<div class="olk-tb' + (r[3] < 32 ? ' cold' : '') + '" style="bottom:' + Math.min(z, tb).toFixed(1) + '%;height:' + Math.abs(tb - z).toFixed(1) + '%"></div>' : '') +
+        (seg ? '<div class="olk-bar ' + k + (lv ? '' : ' chance') + '" style="bottom:' + Math.max(z, tb).toFixed(1) + '%;height:' + seg + '%"></div>' : '') + '</div>';
     });
     /* Arrows under the x-axis like the header's mini chart (Mark, Oct 31, 2026): orange = now, black = the day change. */
     if(nh >= 0) html += '<span class="olk-arw now" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl) - var(--olk-pr, 0px)) * ' + ((nh + .5) / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
     if(n > 24) html += '<span class="olk-arw day" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl) - var(--olk-pr, 0px)) * ' + (24 / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
-    /* Temperature line on a right-side °F axis (Mark, Nov 6, 2026): orange, layered over the rain/snow columns. */
-    var tv = o.h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; });
-    if(tv.length > 1){
-      var tlo = Math.floor((Math.min.apply(null, tv) - 2) / 5) * 5, thi = Math.ceil((Math.max.apply(null, tv) + 2) / 5) * 5;
-      if(thi - tlo < 10) thi = tlo + 10;
-      var ty = function(v){ return (100 - (v - tlo) / (thi - tlo) * 100).toFixed(1); }, pts = [];
-      o.h.forEach(function(r, i){ if(r[3] != null) pts.push((i + .5).toFixed(2) + "," + ty(r[3])); });
-      html += '<svg class="olk-tline" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(" ") + '"/></svg>';
-      var tmid = Math.round((tlo + thi) / 2);
-      html += '<span class="olk-yr" style="bottom:100%">' + thi + '°</span><span class="olk-yr" style="bottom:50%">' + tmid + '°</span><span class="olk-yr" style="bottom:0">' + tlo + '°</span>';
-    }
+    html += '<span class="olk-frz" style="bottom:' + z.toFixed(1) + '%"></span><span class="olk-yr frz" style="bottom:' + z.toFixed(1) + '%">32°</span>';
+    if(TA - z >= 12) html += '<span class="olk-yr" style="bottom:' + TA + '%">' + thi + '°</span>';
+    if(z >= 12) html += '<span class="olk-yr" style="bottom:0">' + tlo + '°</span>';
     ch.innerHTML = html;
     var step = n > 24 ? 6 : 3, xs = ""; for(var i = 0; i < n; i++) xs += "<span>" + (i % step === 0 ? hs(i) : "") + "</span>";
     xa.innerHTML = xs;
@@ -4460,24 +4465,33 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 })();
 </script>
 <style>
-/* Temperature on the 48-hour outlook (Mark, Nov 6, 2026): an orange line on a right-side °F axis, layered over the rain/snow columns,
-   in both the full chart (#olk-chart) and the mini header chart (#rs-olk). Keep as is. */
-.k-temp{background:none!important; width:14px!important; height:0!important; border-top:2.5px solid #E2733A; border-radius:2px; vertical-align:middle;}
-.olk-chart{--olk-pr:32px; padding-right:var(--olk-pr)!important; background-clip:content-box;}
-.olk-x,.olk-days{padding-right:32px!important;}
-.olk-tline{position:absolute; top:0; bottom:0; left:var(--olk-pl,34px); right:var(--olk-pr,32px); width:calc(100% - var(--olk-pl,34px) - var(--olk-pr,32px)); height:100%; overflow:visible; pointer-events:none; z-index:1;}
-.olk-tline polyline,.ro-tline polyline{fill:none; stroke:#E2733A; stroke-width:2.25; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke;}
+/* Temperature on the 48-hour outlook (Mark, Nov 6, 2026): stacked columns in both the full chart (#olk-chart) and the mini header chart
+   (#rs-olk). The x-axis is 32°F (freezing): an orange temperature column rises above it or drops below it (lighter orange below
+   freezing), and rain / snow stacks on top, short / medium / tall = light / moderate / heavy. °F labels on the right. Keep as is. */
+.k-temp{background:#E2733A!important;}
+#olk .olk-chart{--olk-pl:6px; --olk-pr:32px; padding-left:6px!important; padding-right:32px!important; background-image:none!important; border-bottom:0!important;}
+#olk .olk-x,#olk .olk-days{padding-left:6px!important; padding-right:32px!important;}
+#olk .olk-col{position:relative;}
+#olk .olk-tb,#olk .olk-col .olk-bar{position:absolute; left:0; right:0; width:auto;}
+#olk .olk-tb{background:#E2733A; border-radius:1px;}
+#olk .olk-tb.cold{background:#f2b48c;}
+#olk .olk-col .olk-bar{border-radius:2px 2px 0 0;}
+#olk .olk-col .olk-bar.chance{opacity:.4;}
+.olk-frz{position:absolute; left:var(--olk-pl,6px); right:var(--olk-pr,32px); height:0; border-top:1.5px solid var(--fg-muted); pointer-events:none; z-index:1;}
 .olk-yr{position:absolute; right:0; font:700 10px/1 var(--font-body); color:#E2733A; transform:translateY(50%);}
-@media (max-width:520px){ .olk-chart{--olk-pr:26px;} .olk-x,.olk-days{padding-right:26px!important;} }
+.olk-yr.frz{color:var(--fg-muted);}
+@media (max-width:520px){ #olk .olk-chart{--olk-pr:26px; padding-right:26px!important;} #olk .olk-x,#olk .olk-days{padding-right:26px!important;} }
 .ro-in{position:relative; display:block; margin-right:24px;}
-.ro-tline{position:absolute; left:0; top:0; width:100%; height:22px; overflow:visible; pointer-events:none; filter:drop-shadow(0 0 1px rgba(0,0,0,.45));}
-.ro-tline polyline{stroke-width:1.75;}
-.ro-yr{position:absolute; right:0; font:700 8.5px/1 var(--font-body); color:#E2733A; text-shadow:0 0 2px rgba(0,0,0,.5); pointer-events:none;}
-.ro-yr.hi{top:-1px;} .ro-yr.lo{top:15px;}
-html:not(.has-banner) .ro-tline{filter:none;} html:not(.has-banner) .ro-yr{text-shadow:none;}
-@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  #rs-hero .rs-olk .ro-tline{height:16px;} #rs-hero .rs-olk .ro-yr.lo{top:9px;}
-}
+#rs-hero #rs-olk .ro-cols,#rs-olk .ro-cols{border-bottom:0!important;}
+.ro-c{flex:1 1 0; min-width:0; height:100%; position:relative; display:block;}
+.ro-c .ro-t,.ro-c .ro-b{position:absolute; left:0; right:0; display:block;}
+.ro-t{background:#E2733A; opacity:.9; border-radius:1px;}
+.ro-t.cold{background:#f2b48c;}
+.ro-frz{position:absolute; left:0; right:0; height:0; border-top:1px solid rgba(255,255,255,.55); pointer-events:none;}
+html:not(.has-banner) .ro-frz{border-top-color:var(--fg-muted);}
+.ro-yr{position:absolute; right:-24px; width:22px; text-align:right; transform:translateY(50%); font:700 8.5px/1 var(--font-body); color:#E2733A; text-shadow:0 0 2px rgba(0,0,0,.5); pointer-events:none;}
+.ro-yr.frz{color:inherit; opacity:.85;}
+html:not(.has-banner) .ro-yr{text-shadow:none;}
 </style>
 <style>
 
