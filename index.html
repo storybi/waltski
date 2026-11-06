@@ -87,6 +87,27 @@ a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 </head>
 <body>
 <script>
+/* Reload at the top (Mark, Nov 6, 2026): every page reload — the hourly reload or a manual refresh — opens at the very top so the
+   header temperatures are always showing. The browser's own scroll restore is switched off, and the page is pinned to the top through
+   load and the late layout shifts (photo banner, landscape re-measure) until the reader touches, scrolls or types. Keep as is. */
+(function(){
+  try{ if("scrollRestoration" in history) history.scrollRestoration = "manual"; }catch(e){}
+  var nav = "";
+  try{ var en = performance.getEntriesByType("navigation"); nav = en && en[0] ? en[0].type : (performance.navigation && performance.navigation.type === 1 ? "reload" : ""); }catch(e){}
+  var flag = false; try{ flag = sessionStorage.getItem("skiinut-top") === "1"; sessionStorage.removeItem("skiinut-top"); }catch(e){}
+  if(!(nav === "reload" || flag || !location.hash)) return;
+  var user = false, stopAt = Date.now() + 4000;
+  function mine(){ user = true; }
+  ["touchstart","wheel","keydown","mousedown"].forEach(function(t){ window.addEventListener(t, mine, {passive: true, once: true}); });
+  function top(){ if(!user && Date.now() < stopAt && (window.scrollY || document.documentElement.scrollTop)) window.scrollTo(0, 0); }
+  top();
+  document.addEventListener("DOMContentLoaded", top);
+  window.addEventListener("load", function(){ top(); [100, 300, 700, 1500, 3000].forEach(function(ms){ setTimeout(top, ms); }); });
+  window.addEventListener("pageshow", function(e){ if(e.persisted) window.scrollTo(0, 0); top(); });
+  window.addEventListener("orientationchange", function(){ if(!user) setTimeout(top, 300); });
+})();
+</script>
+<script>
 /* Dark / light mode (Mark, Oct 27, 2026): apply the saved choice before the page paints */
 /* Theme by time of day (Mark, Oct 29, 2026): dark 9 p.m.–7 a.m., light otherwise, by the reader's clock; a press of the Dark/Light button holds until the next switch */
 (function(){ var h=new Date().getHours(), t=(h>=21||h<7)?"dark":"light"; try{ var o=JSON.parse(localStorage.getItem("wsj-theme-hold")||"null"); if(o&&o.until>Date.now()&&(o.t==="dark"||o.t==="light")) t=o.t; }catch(e){} document.documentElement.setAttribute("data-theme",t); })();
@@ -3231,7 +3252,7 @@ var HOLD = {"asof":1793912400,"q":{"AAPL":{"t":[1793367000,1793368800,1793370600
   var loaded = stamp(new Date()), going = false;
   function check(){
     if(going) return;
-    if(stamp(new Date()) !== loaded){ going = true; try{ location.reload(); }catch(e){ going = false; } }
+    if(stamp(new Date()) !== loaded){ going = true; try{ try{ if(location.hash) history.replaceState(null, "", location.pathname + location.search); }catch(x){} try{ sessionStorage.setItem("skiinut-top", "1"); }catch(x){} window.scrollTo(0, 0); location.reload(); }catch(e){ going = false; } }
   }
   setInterval(check, 20000);
   document.addEventListener("visibilitychange", function(){ if(!document.hidden) check(); });
