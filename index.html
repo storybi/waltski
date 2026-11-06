@@ -1144,12 +1144,12 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
     <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
     <div class="olk" id="olk" aria-labelledby="olk-h">
       <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
-        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix</span></div>
+        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix <i class="k-temp"></i>Temp °F</span></div>
       <p class="olk-sum" id="olk-sum"></p>
       <div class="olk-days" id="olk-days"></div>
       <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
       <div class="olk-x" id="olk-x"></div>
-      <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%). Tap or hover a column for amounts.</p>
+      <p class="olk-note" id="olk-note">Column height = chance of rain or snow that hour (0–100%, left axis). Orange line = temperature (°F, right axis). Tap or hover a column for amounts.</p>
     </div>
     <div class="rwx" id="rwx" aria-live="polite"></div>
     <!-- Suggest-a-resort box (skiinut.com) and resort ticker, moved here from the sticky dock (Mark, Nov 1, 2026); filled by the "Resort feed" script. -->
@@ -3897,7 +3897,15 @@ html:not(.view-news) #ecov{display:none!important;}
     marks += '<span class="ro-hrs ro-tmp" aria-hidden="true">' + tmp + '</span>';
     var l1 = d.isToday ? "Today" : "Day 1", l2 = d.isToday ? "Tomorrow" : "Day 2";
     box.hidden = false;
-    box.innerHTML = '<span class="ro-cols">' + cols + '</span>' + marks + '<span class="ro-lab"><span>' + l1 + '</span></span>';
+    /* Orange temperature line with a small right-side °F axis (Mark, Nov 6, 2026). */
+    var tv = h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; }), tl = "", ya = "";
+    if(tv.length > 1){
+      var lo = Math.floor((Math.min.apply(null, tv) - 2) / 5) * 5, hi = Math.ceil((Math.max.apply(null, tv) + 2) / 5) * 5; if(hi - lo < 10) hi = lo + 10;
+      var pts = []; h.forEach(function(r, i){ if(r[3] != null) pts.push((i + .5).toFixed(2) + "," + (100 - (r[3] - lo) / (hi - lo) * 100).toFixed(1)); });
+      tl = '<svg class="ro-tline" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(" ") + '"/></svg>';
+      ya = '<span class="ro-yr hi" aria-hidden="true">' + hi + '°</span><span class="ro-yr lo" aria-hidden="true">' + lo + '°</span>';
+    }
+    box.innerHTML = '<span class="ro-in"><span class="ro-cols">' + cols + '</span>' + tl + marks + '</span>' + ya + '<span class="ro-lab"><span>' + l1 + '</span></span>';
   });
 })();
 </script>
@@ -3939,8 +3947,19 @@ html:not(.view-news) #ecov{display:none!important;}
       html += '<div class="olk-col' + (i === nh ? ' now' : '') + (i === 24 ? ' day2' : '') + '" tabindex="0" title="' + tip + '" data-tip="' + tip + '"><div class="olk-bar ' + k + (amt ? '' : ' chance') + '" style="height:' + Math.max(0, Math.min(100, r[0])) + '%"></div></div>';
     });
     /* Arrows under the x-axis like the header's mini chart (Mark, Oct 31, 2026): orange = now, black = the day change. */
-    if(nh >= 0) html += '<span class="olk-arw now" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl)) * ' + ((nh + .5) / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
-    if(n > 24) html += '<span class="olk-arw day" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl)) * ' + (24 / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
+    if(nh >= 0) html += '<span class="olk-arw now" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl) - var(--olk-pr, 0px)) * ' + ((nh + .5) / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
+    if(n > 24) html += '<span class="olk-arw day" style="left:calc(var(--olk-pl) + (100% - var(--olk-pl) - var(--olk-pr, 0px)) * ' + (24 / n).toFixed(4) + ')"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 0l5 8H0z"/></svg></span>';
+    /* Temperature line on a right-side °F axis (Mark, Nov 6, 2026): orange, layered over the rain/snow columns. */
+    var tv = o.h.map(function(r){ return r[3]; }).filter(function(v){ return v != null; });
+    if(tv.length > 1){
+      var tlo = Math.floor((Math.min.apply(null, tv) - 2) / 5) * 5, thi = Math.ceil((Math.max.apply(null, tv) + 2) / 5) * 5;
+      if(thi - tlo < 10) thi = tlo + 10;
+      var ty = function(v){ return (100 - (v - tlo) / (thi - tlo) * 100).toFixed(1); }, pts = [];
+      o.h.forEach(function(r, i){ if(r[3] != null) pts.push((i + .5).toFixed(2) + "," + ty(r[3])); });
+      html += '<svg class="olk-tline" viewBox="0 0 ' + n + ' 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(" ") + '"/></svg>';
+      var tmid = Math.round((tlo + thi) / 2);
+      html += '<span class="olk-yr" style="bottom:100%">' + thi + '°</span><span class="olk-yr" style="bottom:50%">' + tmid + '°</span><span class="olk-yr" style="bottom:0">' + tlo + '°</span>';
+    }
     ch.innerHTML = html;
     var step = n > 24 ? 6 : 3, xs = ""; for(var i = 0; i < n; i++) xs += "<span>" + (i % step === 0 ? hs(i) : "") + "</span>";
     xa.innerHTML = xs;
@@ -4440,6 +4459,26 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
   set(false); peek(); setTimeout(peek, 1500);
 })();
 </script>
+<style>
+/* Temperature on the 48-hour outlook (Mark, Nov 6, 2026): an orange line on a right-side °F axis, layered over the rain/snow columns,
+   in both the full chart (#olk-chart) and the mini header chart (#rs-olk). Keep as is. */
+.k-temp{background:none!important; width:14px!important; height:0!important; border-top:2.5px solid #E2733A; border-radius:2px; vertical-align:middle;}
+.olk-chart{--olk-pr:32px; padding-right:var(--olk-pr)!important; background-clip:content-box;}
+.olk-x,.olk-days{padding-right:32px!important;}
+.olk-tline{position:absolute; top:0; bottom:0; left:var(--olk-pl,34px); right:var(--olk-pr,32px); width:calc(100% - var(--olk-pl,34px) - var(--olk-pr,32px)); height:100%; overflow:visible; pointer-events:none; z-index:1;}
+.olk-tline polyline,.ro-tline polyline{fill:none; stroke:#E2733A; stroke-width:2.25; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke;}
+.olk-yr{position:absolute; right:0; font:700 10px/1 var(--font-body); color:#E2733A; transform:translateY(50%);}
+@media (max-width:520px){ .olk-chart{--olk-pr:26px;} .olk-x,.olk-days{padding-right:26px!important;} }
+.ro-in{position:relative; display:block; margin-right:24px;}
+.ro-tline{position:absolute; left:0; top:0; width:100%; height:22px; overflow:visible; pointer-events:none; filter:drop-shadow(0 0 1px rgba(0,0,0,.45));}
+.ro-tline polyline{stroke-width:1.75;}
+.ro-yr{position:absolute; right:0; font:700 8.5px/1 var(--font-body); color:#E2733A; text-shadow:0 0 2px rgba(0,0,0,.5); pointer-events:none;}
+.ro-yr.hi{top:-1px;} .ro-yr.lo{top:15px;}
+html:not(.has-banner) .ro-tline{filter:none;} html:not(.has-banner) .ro-yr{text-shadow:none;}
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  #rs-hero .rs-olk .ro-tline{height:16px;} #rs-hero .rs-olk .ro-yr.lo{top:9px;}
+}
+</style>
 <style>
 
 /* ===================== Skiinut 2.0 design system (Mark, Oct 30, 2026) =====================
