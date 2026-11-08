@@ -5120,6 +5120,21 @@ html.clock-in-card #rs-hero .rs-top .wt-clock-ap{font-size:.62em; vertical-align
 a.wt-home-logo .wt-logo{width:1.15em; height:1.15em; flex:0 0 auto; margin-right:.32em; display:block; border-radius:22%; box-shadow:0 2px 8px rgba(0,0,0,.35); font-style:normal;}
 </style>
 <style>
+/* Show image / Show card (Mark, Nov 8, 2026): the top-row button that used to read Watch Live (Next Photo in claude.ai) is now a toggle.
+   "Show image" hides the resort card and stretches the header photo to the full cam frame; "Show card" brings the card back.
+   The old Watch Live / Next Photo buttons are hidden. Keep as is. */
+#wt-next, .wt-edition a.wt-play, .wt-edition a.wt-dv-watch{display:none!important;}
+html.show-image #rs-hero{display:none!important;}
+html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.45) 0, rgba(5,14,26,0) 26%, rgba(5,14,26,0) 88%, var(--bg) 100%)!important;}
+html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.show-image #wt-banner .dv-layer{background-position:center center!important;}
+@media (orientation:portrait) and (max-width:700px){
+  html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.show-image #wt-banner .dv-layer{background-size:100% auto!important; background-position:center bottom!important;}
+  html.show-image #wt-banner img.wt-live{object-fit:contain!important; object-position:center bottom!important;}
+  html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,0) 0, rgba(5,14,26,0) 96%, var(--bg) 100%)!important;}
+}
+#wt-imgtog[aria-pressed="true"]{background:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
+</style>
+<style>
 /* Resort feed (Mark, Nov 1, 2026): the "Suggest a resort here!" box (skiinut.com only) and the resort conditions ticker sit in one card
    just above Weather With Travis, instead of in the sticky dock. Keep as is. */
 .ski-feed{margin:0 0 16px; background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
@@ -5320,6 +5335,42 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
   if(ti) ti.textContent = SERMON.title || "";
   try{ if(da && SERMON.date) da.textContent = new Date(SERMON.date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short", month:"short", day:"numeric"}); }catch(e){}
   fr.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(SERMON.id) + '?rel=0&modestbranding=1&playsinline=1" title="' + esc(SERMON.title) + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+})();
+</script>
+<script>
+/* Show image / Show card toggle (Mark, Nov 8, 2026). Keep as is. */
+(function(){
+  var root = document.documentElement, he = document.getElementById("wt-head-end");
+  var anchor = document.getElementById("wt-next") || document.getElementById("wt-radio");
+  if(!anchor || !anchor.parentNode) return;
+  var b = document.createElement("button");
+  b.type = "button"; b.id = "wt-imgtog"; b.className = "wt-next wt-imgtog";
+  anchor.parentNode.insertBefore(b, anchor);
+  var busy = false;
+  function fit(){
+    if(!he || busy) return;
+    busy = true;
+    he.style.removeProperty("height");
+    if(root.classList.contains("show-image")){
+      var top = he.getBoundingClientRect().top + window.scrollY;
+      var phone = window.matchMedia && window.matchMedia("(orientation:portrait) and (max-width:700px)").matches;
+      var target = phone ? top + 34 + window.innerWidth * 9 / 16 : Math.min(window.innerWidth * 9 / 16, window.innerHeight * 0.92);
+      he.style.setProperty("height", Math.max(40, Math.round(target - top - 16)) + "px", "important");
+    }
+    try{ window.dispatchEvent(new Event("resize")); }catch(e){}
+    busy = false;
+  }
+  function set(on){
+    root.classList.toggle("show-image", on);
+    b.textContent = on ? "Show card" : "Show image";
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.title = on ? "Bring back the resort card" : "Hide the resort card and show the full cam picture";
+    fit();
+  }
+  b.addEventListener("click", function(){ set(!root.classList.contains("show-image")); });
+  window.addEventListener("resize", function(){ if(root.classList.contains("show-image")) fit(); });
+  window.addEventListener("orientationchange", function(){ setTimeout(fit, 300); });
+  set(false);
 })();
 </script>
 </body>
