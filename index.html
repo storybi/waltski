@@ -3217,7 +3217,7 @@ var HOLD = {"asof":1794258000,"q":{"AAPL":{"t":[1793716200,1793718000,1793719800
   var STREAM = "https://classicalking.streamguys1.com/king-fm-aac-128k", PLAYER = "https://player.streamguys.com/classicalking/king-fm/sgplayer/player.php?l=layout-small+single-stream-metadata";
   var b = document.getElementById("wt-radio"); if(!b) return;
   var a = null, on = false, blocked = false;
-  function label(){ b.textContent = blocked ? "Music ↗" : on ? "Mute Music" : "Music"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
+  function label(){ b.textContent = blocked ? "Music ↗" : on ? "Mute" : "Music"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
   function stop(){ if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
   var auto = false, waiting = false, skipDay = "";
   function play(isAuto){
