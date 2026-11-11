@@ -137,9 +137,9 @@ window.IKON = {order: ["sb", "powmow", "alta", "snowbird", "brighton", "solitude
 })();
 </script>
 <script>
-/* Temperature colors (Mark, Nov 4, 2026): 60°F and up red, 40–59 yellow, below 40 blue. Used by the landscape clock, the resort
-   card's "Now" box and the resort conditions ticker. Keep as is. */
-window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; t = +t; return t >= 60 ? "tc-hot" : t >= 40 ? "tc-mild" : "tc-cold"; };
+/* Temperature colors (Mark, Nov 11, 2026; replaces the Nov 4 ranges): 32°F and lower blue, 33–45 green, 46–55 yellow, above 55 red.
+   Used by the landscape clock, the resort card's "Now" box and the resort conditions ticker. Keep as is. */
+window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; t = Math.round(+t); return t > 55 ? "tc-hot" : t > 45 ? "tc-mild" : t > 32 ? "tc-cool" : "tc-cold"; };
 </script>
 <style>
 .tc-hot:not(.rs-stat), .rs-stat.tc-hot .v{color:#d1203a!important;}
@@ -148,7 +148,9 @@ window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; 
 :root[data-theme="dark"] .tc-mild:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-mild .v, html.has-banner #rs-hero .tc-mild:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-mild .v{color:#ffd23f!important;}
 .tc-cold:not(.rs-stat), .rs-stat.tc-cold .v{color:#1a66c9!important;}
 :root[data-theme="dark"] .tc-cold:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cold .v, html.has-banner #rs-hero .tc-cold:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cold .v{color:#5aaeff!important;}
-.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;}
+.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#1e8a3c!important;}
+:root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#4fd67a!important;}
+.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#4fd67a!important;}
 </style>
 
 <style>
