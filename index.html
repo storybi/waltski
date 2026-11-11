@@ -148,9 +148,9 @@ window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; 
 :root[data-theme="dark"] .tc-mild:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-mild .v, html.has-banner #rs-hero .tc-mild:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-mild .v{color:#ffd23f!important;}
 .tc-cold:not(.rs-stat), .rs-stat.tc-cold .v{color:#1a66c9!important;}
 :root[data-theme="dark"] .tc-cold:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cold .v, html.has-banner #rs-hero .tc-cold:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cold .v{color:#5aaeff!important;}
-.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#7a3cc4!important;}
-:root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#c38bff!important;}
-.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#c38bff!important;}
+.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#552a89!important;}
+:root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#8961b3!important;}
+.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#8961b3!important;}
 </style>
 
 <style>
@@ -5173,9 +5173,9 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 <style>
 /* Clock + temperatures at the bottom of the photo in landscape Show image (Mark, Nov 10, 2026): on phones and iPads held sideways
    with Show image on, the time and both temperatures slide down to the bottom of the header photo so more of the top of the picture
-   shows. The orange arrow under the resort temperature is hidden there (the resort card is hidden). Keep as is. */
+   shows. The orange arrow under the resort temperature shrinks to a tiny one there (Mark, Nov 11, 2026). Keep as is. */
 @media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  html.show-image .wt-clock #wt-clock-rtmp .n::after{display:none!important;}
+  html.show-image .wt-clock #wt-clock-rtmp .n::after{display:block!important; top:calc(var(--arw-top, 100%) + 2px)!important; border-left:6px solid transparent!important; border-right:6px solid transparent!important; border-top:8px solid #E2733A!important;}
   html.show-image .wt-clock{will-change:transform;}
   .wt-clock{pointer-events:none;}   /* taps go through the big clock to the top-row buttons (Mark, Nov 11, 2026) */
 }
@@ -5192,7 +5192,7 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
     if(!mq.matches || !root.classList.contains("show-image")) return;
     var c = clk.getBoundingClientRect(), stop = he.getBoundingClientRect().bottom;
     if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
-    var d = Math.round(stop - 10 - c.bottom);
+    var d = Math.round(stop - 24 - c.bottom);   /* room for the tiny orange arrow under the resort temp (Nov 11, 2026) */
     if(d > 0) clk.style.setProperty("transform", "translateY(" + d + "px)", "important");
   }
   function q(){ if(!raf) raf = requestAnimationFrame(place); }
