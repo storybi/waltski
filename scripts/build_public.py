@@ -247,6 +247,8 @@ video_js = r"""<script>
   function list(){
     var l = [{src: SNAP, name: "Needles"}];
     ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
+    /* Every scenic Snowbasin cam (Mark, Nov 11, 2026): the other HDRelay cams from snowbasin.com's webcam page (snow stake left out). */
+    [["62101a0b8db58d080b9eac83", "Middle Bowl Base"], ["6192dd615233cdcad76d7dba", "Earl's Plaza"], ["65652b36eb0e282336694064", "Strawberry Patio"], ["621944828db58d080b9eac8b", "Base Area"]].forEach(function(c){ l.push({src: "https://img.hdrelay.com/camera/" + c[0] + "/snapshot", name: c[1]}); });
     return l;
   }
   function load(){

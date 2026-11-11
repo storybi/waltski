@@ -137,7 +137,7 @@ window.IKON = {order: ["sb", "powmow", "alta", "snowbird", "brighton", "solitude
 })();
 </script>
 <script>
-/* Temperature colors (Mark, Nov 11, 2026; replaces the Nov 4 ranges): 32°F and lower blue, 33–45 green, 46–55 yellow, above 55 red.
+/* Temperature colors (Mark, Nov 11, 2026; replaces the Nov 4 ranges): 32°F and lower blue, 33–45 purple, 46–55 yellow, above 55 red.
    Used by the landscape clock, the resort card's "Now" box and the resort conditions ticker. Keep as is. */
 window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; t = Math.round(+t); return t > 55 ? "tc-hot" : t > 45 ? "tc-mild" : t > 32 ? "tc-cool" : "tc-cold"; };
 </script>
@@ -148,9 +148,9 @@ window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; 
 :root[data-theme="dark"] .tc-mild:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-mild .v, html.has-banner #rs-hero .tc-mild:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-mild .v{color:#ffd23f!important;}
 .tc-cold:not(.rs-stat), .rs-stat.tc-cold .v{color:#1a66c9!important;}
 :root[data-theme="dark"] .tc-cold:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cold .v, html.has-banner #rs-hero .tc-cold:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cold .v{color:#5aaeff!important;}
-.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#1e8a3c!important;}
-:root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#4fd67a!important;}
-.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#4fd67a!important;}
+.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#7a3cc4!important;}
+:root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#c38bff!important;}
+.wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#c38bff!important;}
 </style>
 
 <style>
@@ -5147,10 +5147,12 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
     b.title = on ? "Bring back the resort card" : "Hide the resort card and show the full cam picture";
     fit();
   }
-  b.addEventListener("click", function(){ set(!root.classList.contains("show-image")); });
+  /* Show image is remembered across reloads and hourly refreshes on this device (Mark, Nov 11, 2026): localStorage "skiinut-show-image". */
+  b.addEventListener("click", function(){ var on = !root.classList.contains("show-image"); set(on); try{ localStorage.setItem("skiinut-show-image", on ? "1" : "0"); }catch(e){} });
   window.addEventListener("resize", function(){ if(root.classList.contains("show-image")) fit(); });
   window.addEventListener("orientationchange", function(){ setTimeout(fit, 300); });
-  set(false);
+  var keep = false; try{ keep = localStorage.getItem("skiinut-show-image") === "1"; }catch(e){}
+  set(keep); if(keep){ setTimeout(fit, 800); setTimeout(fit, 2500); }
 })();
 </script>
 <script>
@@ -5175,6 +5177,7 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 @media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
   html.show-image .wt-clock #wt-clock-rtmp .n::after{display:none!important;}
   html.show-image .wt-clock{will-change:transform;}
+  .wt-clock{pointer-events:none;}   /* taps go through the big clock to the top-row buttons (Mark, Nov 11, 2026) */
 }
 </style>
 <script>
@@ -5317,6 +5320,8 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
   function list(){
     var l = [{src: SNAP, name: "Needles"}];
     ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
+    /* Every scenic Snowbasin cam (Mark, Nov 11, 2026): the other HDRelay cams from snowbasin.com's webcam page (snow stake left out). */
+    [["62101a0b8db58d080b9eac83", "Middle Bowl Base"], ["6192dd615233cdcad76d7dba", "Earl's Plaza"], ["65652b36eb0e282336694064", "Strawberry Patio"], ["621944828db58d080b9eac8b", "Base Area"]].forEach(function(c){ l.push({src: "https://img.hdrelay.com/camera/" + c[0] + "/snapshot", name: c[1]}); });
     return l;
   }
   function load(){
