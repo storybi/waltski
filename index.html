@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&display=swap">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23E2733A'/%3E%3Ctext x='20' y='28' font-family='Montserrat,Arial,sans-serif' font-weight='800' font-size='20' fill='%23fff' text-anchor='middle'%3EIN%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Crect width='100' height='100' rx='22'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='100' height='100' fill='%231b2638'/%3E%3Ccircle cx='71' cy='34' r='15' fill='%23E2733A'/%3E%3Cpath d='M4 92 L42 34 L56 52 L66 42 L104 92 Z' fill='%231b2638' stroke='%231b2638' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 92 L42 34 L56 52 L66 42 L104 92 Z' fill='%23fff'/%3E%3Cpath d='M13 92 L35 62 L44 70 L52 58 L62 74 L68 64 L96 92 Z' fill='%231b2638'/%3E%3C/g%3E%3C/svg%3E">
 <style>
 /* Public site: no Ask Claude bar */
 #askbar{display:none!important;}
@@ -5393,6 +5393,40 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
   if(ti) ti.textContent = SERMON.title || "";
   try{ if(da && SERMON.date) da.textContent = new Date(SERMON.date + "T12:00:00").toLocaleDateString("en-US",{weekday:"short", month:"short", day:"numeric"}); }catch(e){}
   fr.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(SERMON.id) + '?rel=0&modestbranding=1&playsinline=1" title="' + esc(SERMON.title) + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+})();
+</script>
+<style>
+/* Clock + temperatures at the bottom of the photo in landscape Show image (Mark, Nov 10, 2026): on phones and iPads held sideways
+   with Show image on, the time and both temperatures slide down to the bottom of the header photo so more of the top of the picture
+   shows. The orange arrow under the resort temperature is hidden there (the resort card is hidden). Keep as is. */
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  html.show-image .wt-clock #wt-clock-rtmp .n::after{display:none!important;}
+  html.show-image .wt-clock{will-change:transform;}
+}
+</style>
+<script>
+/* Clock + temperatures at the bottom of the photo in landscape Show image (Mark, Nov 10, 2026). Keep as is. */
+(function(){
+  var clk = document.getElementById("wt-clock"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
+  if(!clk || !he || !window.matchMedia) return;
+  var mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)"), root = document.documentElement, raf = 0;
+  function place(){
+    raf = 0;
+    clk.style.removeProperty("transform");
+    if(!mq.matches || !root.classList.contains("show-image")) return;
+    var c = clk.getBoundingClientRect(), stop = he.getBoundingClientRect().bottom;
+    if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
+    var d = Math.round(stop - 10 - c.bottom);
+    if(d > 0) clk.style.setProperty("transform", "translateY(" + d + "px)", "important");
+  }
+  function q(){ if(!raf) raf = requestAnimationFrame(place); }
+  window.addEventListener("resize", q);
+  window.addEventListener("orientationchange", function(){ setTimeout(q, 350); setTimeout(q, 900); });
+  if(mq.addEventListener) mq.addEventListener("change", q); else if(mq.addListener) mq.addListener(q);
+  if(window.MutationObserver) new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]});
+  if(window.ResizeObserver){ var ro = new ResizeObserver(q); ro.observe(clk); ro.observe(he); if(gt) ro.observe(gt); }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(q);
+  setInterval(q, 60000); q();
 })();
 </script>
 </body>

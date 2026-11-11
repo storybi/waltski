@@ -306,7 +306,7 @@ head = """<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700;800&family=Montserrat:ital,wght@0,800;1,700;1,800&family=Newsreader:ital,wght@1,400&display=swap">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%23E2733A'/%3E%3Ctext x='20' y='28' font-family='Montserrat,Arial,sans-serif' font-weight='800' font-size='20' fill='%23fff' text-anchor='middle'%3EIN%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Crect width='100' height='100' rx='22'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='100' height='100' fill='%231b2638'/%3E%3Ccircle cx='71' cy='34' r='15' fill='%23E2733A'/%3E%3Cpath d='M4 92 L42 34 L56 52 L66 42 L104 92 Z' fill='%231b2638' stroke='%231b2638' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M4 92 L42 34 L56 52 L66 42 L104 92 Z' fill='%23fff'/%3E%3Cpath d='M13 92 L35 62 L44 70 L52 58 L62 74 L68 64 L96 92 Z' fill='%231b2638'/%3E%3C/g%3E%3C/svg%3E">
 """
 
 # Keep the page's own <style>/<link> tags where they are (browsers accept them in the body); close head first.
