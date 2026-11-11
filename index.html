@@ -151,6 +151,9 @@ window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; 
 .tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#552a89!important;}
 :root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#8961b3!important;}
 .wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#8961b3!important;}
+/* Subtle white glow around the purple temps so they stand out on any background (Mark, Nov 11, 2026). Keep as is. */
+.tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{text-shadow:0 0 1px rgba(255,255,255,.7), 0 0 6px rgba(255,255,255,.4)!important;}
+.wt-clock .tc-cool{text-shadow:0 0 2px rgba(255,255,255,.75), 0 0 .12em rgba(255,255,255,.4), 0 1px 3px rgba(0,0,0,.3)!important;}
 </style>
 
 <style>
