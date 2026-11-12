@@ -3905,6 +3905,7 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar .nb-t.cold{background:#f2b48c;}
 #wx-nowbar .nb-b.rain{background:#2f9e4c;} #wx-nowbar .nb-b.snow{background:#2f6fd0;} #wx-nowbar .nb-b.mix{background:#8a54c4;}
 #wx-nowbar .nb-b{opacity:.92;} #wx-nowbar .nb-b.ch{opacity:.45;}
+#wx-nowbar .nb-b.ov{left:25%; right:25%; box-shadow:0 0 0 1px rgba(255,255,255,.55);}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
 #wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
   color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7); font-variant-numeric:tabular-nums;}
@@ -3981,17 +3982,17 @@ html:not(.view-news) #ecov{display:none!important;}
   document.addEventListener("olk-render", function(e){
     var d = e.detail, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
     if(!r){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
-    var tv = h.map(function(x){ return x[3]; }).filter(function(v){ return v != null; });
-    var tmin = tv.length ? Math.min.apply(null, tv) : 32, tmax = tv.length ? Math.max.apply(null, tv) : 32;
-    var lo = Math.min(30, Math.floor((tmin - 2) / 5) * 5), hi = Math.max(35, Math.ceil((tmax + 2) / 5) * 5), TA = 58;
-    var ty = function(v){ return (v - lo) / (hi - lo) * TA; }, z = ty(32), SEG = [0, 14, 28, 42];
+    /* Fixed scale on this bar only (Mark, Nov 12, 2026): 32°F sits 20% up from the bottom and 99°F at the top; below 32 uses the same
+       step down to the bottom (about 15°F). Rain / snow / mix overlaps the temperature column as a narrower stripe from the 32° line,
+       sized light / moderate / heavy (a faint sliver = 30%+ chance with nothing measurable). */
+    var Z = 20, ty = function(v){ return Math.max(0, Math.min(100, Z + (v - 32) * (100 - Z) / (99 - 32))); }, z = Z, SEG = [0, 25, 50, 80];
     var lvf = window.OLK_LEVEL || function(x){ return x[1] + x[2] > 0 ? 1 : 0; };
-    var lv = lvf(r), seg = lv ? SEG[lv] : (r[0] >= 30 ? 7 : 0), tb = r[3] == null ? z : ty(r[3]), k = d.kinds[d.nh] || "rain";
-    var html = '<span class="nb-tmp">' + (r[3] != null ? r[3] + "°" : "") + '</span><span class="nb-in">';
+    var lv = lvf(r), seg = lv ? SEG[lv] : (r[0] >= 30 ? 8 : 0), tb = r[3] == null ? z : ty(r[3]), k = d.kinds[d.nh] || "rain";
+    var html = '<span class="nb-tmp">' + (r[3] != null ? r[3] + "\u00b0" : "") + '</span><span class="nb-in">';
     if(r[3] != null) html += '<i class="nb-t' + (r[3] < 32 ? ' cold' : '') + '" style="bottom:' + Math.min(z, tb).toFixed(1) + '%;height:' + Math.max(1, Math.abs(tb - z)).toFixed(1) + '%"></i>';
-    if(seg) html += '<i class="nb-b ' + k + (lv ? '' : ' ch') + '" style="bottom:' + Math.max(z, tb).toFixed(1) + '%;height:' + seg + '%"></i>';
+    if(seg) html += '<i class="nb-b ov ' + k + (lv ? '' : ' ch') + '" style="bottom:' + z.toFixed(1) + '%;height:' + Math.min(seg, 100 - z).toFixed(1) + '%"></i>';
     html += '<span class="nb-frz" style="bottom:' + z.toFixed(1) + '%"></span></span>';
-    bar.innerHTML = html;
+bar.innerHTML = html;
     var amt = k === "snow" ? (r[2] || 0) + " in snow" : k === "mix" ? (r[1] || 0) + " in rain + " + (r[2] || 0) + " in snow" : (r[1] || 0) + " in rain";
     var lvl = ["", "light", "moderate", "heavy"][lv] || (seg ? "chance, none measurable" : "dry");
     bar.title = "This hour: " + (r[3] != null ? r[3] + "°F, " : "") + r[0] + "% chance" + (lv ? ", " + amt + " (" + lvl + " " + k + ")" : seg ? " (" + lvl + ")" : ", dry") + ". Tap for the 48-hour outlook.";
