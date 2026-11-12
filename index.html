@@ -3906,6 +3906,7 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar .nb-b.rain{background:#2f9e4c;} #wx-nowbar .nb-b.snow{background:#2f6fd0;} #wx-nowbar .nb-b.mix{background:#8a54c4;}
 #wx-nowbar .nb-b{opacity:.92;} #wx-nowbar .nb-b.ch{opacity:.45;}
 #wx-nowbar .nb-b.ov{left:25%; right:25%; box-shadow:0 0 0 1px rgba(255,255,255,.55);}
+#wx-nowbar .nb-cur{position:absolute; left:-8px; right:-8px; text-align:center; font:700 9.5px/1 "Barlow Condensed","Inter",Arial,sans-serif; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); font-variant-numeric:tabular-nums;}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
 #wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
   color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7); font-variant-numeric:tabular-nums;}
@@ -3979,26 +3980,47 @@ html:not(.view-news) #ecov{display:none!important;}
     } else pc.classList.remove("on");
   }
   function q(){ if(!raf) raf = requestAnimationFrame(place); }
-  document.addEventListener("olk-render", function(e){
-    var d = e.detail, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
-    if(!r){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
-    /* Fixed scale on this bar only (Mark, Nov 12, 2026): 32°F sits 20% up from the bottom and 99°F at the top; below 32 uses the same
-       step down to the bottom (about 15°F). Rain / snow / mix overlaps the temperature column as a narrower stripe from the 32° line,
-       sized light / moderate / heavy (a faint sliver = 30%+ chance with nothing measurable). */
-    var Z = 20, ty = function(v){ return Math.max(0, Math.min(100, Z + (v - 32) * (100 - Z) / (99 - 32))); }, z = Z, SEG = [0, 25, 50, 80];
-    var lvf = window.OLK_LEVEL || function(x){ return x[1] + x[2] > 0 ? 1 : 0; };
-    var lv = lvf(r), seg = lv ? SEG[lv] : (r[0] >= 30 ? 8 : 0), tb = r[3] == null ? z : ty(r[3]), k = d.kinds[d.nh] || "rain";
-    var html = '<span class="nb-tmp">' + (r[3] != null ? r[3] + "\u00b0" : "") + '</span><span class="nb-in">';
-    if(r[3] != null) html += '<i class="nb-t' + (r[3] < 32 ? ' cold' : '') + '" style="bottom:' + Math.min(z, tb).toFixed(1) + '%;height:' + Math.max(1, Math.abs(tb - z)).toFixed(1) + '%"></i>';
-    if(seg) html += '<i class="nb-b ov ' + k + (lv ? '' : ' ch') + '" style="bottom:' + z.toFixed(1) + '%;height:' + Math.min(seg, 100 - z).toFixed(1) + '%"></i>';
+  /* Scale and height (Mark, Nov 12, 2026; this bar only): the column follows the picked resort's current temperature (the resort
+     "Now" reading, the same number as the header's resort temperature; the outlook's hourly forecast only as a fallback). Top of the
+     bar = 75°F when that temperature is under 60, 99°F at 60 and above; 32°F sits 20% up from the bottom, and below 32 uses the same
+     step down to the bottom. Rain / snow / mix is a narrower stripe overlapping the orange column and never taller than it — a third,
+     two thirds or all of it for light / moderate / heavy (a short sliver = a 30%+ chance with nothing measurable). */
+  var lastD = null, panel = document.getElementById("rs-panel");
+  function resortNow(){
+    if(!panel) return null;
+    var st = panel.querySelectorAll(".rs-stat");
+    for(var i = 0; i < st.length; i++){ var l = st[i].querySelector(".l"), v = st[i].querySelector(".v");
+      if(l && v && /^\s*now\s*$/i.test(l.textContent)){ var m = v.textContent.match(/-?\d+(\.\d+)?/); if(m) return Math.round(+m[0]); } }
+    return null;
+  }
+  function draw(){
+    var d = lastD, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
+    var t = resortNow(); if(t == null && r) t = r[3];
+    if(t == null){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
+    var TOP = t < 60 ? 75 : 99, Z = 20;
+    var ty = function(v){ return Math.max(0, Math.min(100, Z + (v - 32) * (100 - Z) / (TOP - 32))); }, z = Z, tb = ty(t);
+    var colB = Math.min(z, tb), colH = Math.max(1, Math.abs(tb - z));
+    var html = '<span class="nb-tmp">' + TOP + '°</span><span class="nb-in">';
+    html += '<i class="nb-t' + (t < 32 ? ' cold' : '') + '" style="bottom:' + colB.toFixed(1) + '%;height:' + colH.toFixed(1) + '%"></i>';
+    var lv = 0, seg = 0, k = "rain";
+    if(r){ var lvf = window.OLK_LEVEL || function(x){ return x[1] + x[2] > 0 ? 1 : 0; };
+      lv = lvf(r); k = (d.kinds && d.kinds[d.nh]) || "rain";
+      seg = lv ? colH * [0, 1/3, 2/3, 1][lv] : (r[0] >= 30 ? Math.min(colH, 4) : 0); }
+    if(seg){ var pb = tb >= z ? z : colB + colH - seg;   /* from the 32° line toward the column's end */
+      html += '<i class="nb-b ov ' + k + (lv ? '' : ' ch') + '" style="bottom:' + pb.toFixed(1) + '%;height:' + seg.toFixed(1) + '%"></i>'; }
+    html += '<span class="nb-cur" style="bottom:calc(' + Math.max(colB + colH, z).toFixed(1) + '% + 3px)">' + t + '°</span>';
     html += '<span class="nb-frz" style="bottom:' + z.toFixed(1) + '%"></span></span>';
-bar.innerHTML = html;
-    var amt = k === "snow" ? (r[2] || 0) + " in snow" : k === "mix" ? (r[1] || 0) + " in rain + " + (r[2] || 0) + " in snow" : (r[1] || 0) + " in rain";
-    var lvl = ["", "light", "moderate", "heavy"][lv] || (seg ? "chance, none measurable" : "dry");
-    bar.title = "This hour: " + (r[3] != null ? r[3] + "°F, " : "") + r[0] + "% chance" + (lv ? ", " + amt + " (" + lvl + " " + k + ")" : seg ? " (" + lvl + ")" : ", dry") + ". Tap for the 48-hour outlook.";
+    bar.innerHTML = html;
+    var tip = "Now at the resort: " + t + "°F (bar tops out at " + TOP + "°)";
+    if(r){ var amt = k === "snow" ? (r[2] || 0) + " in snow" : k === "mix" ? (r[1] || 0) + " in rain + " + (r[2] || 0) + " in snow" : (r[1] || 0) + " in rain";
+      var lvl = ["", "light", "moderate", "heavy"][lv] || (seg ? "chance, none measurable" : "dry");
+      tip += ". This hour: " + r[0] + "% chance" + (lv ? ", " + amt + " (" + lvl + " " + k + ")" : seg ? " (" + lvl + ")" : ", dry"); }
+    bar.title = tip + ". Tap for the 48-hour outlook.";
     bar.setAttribute("aria-label", bar.title);
     bar.classList.add("on"); q();
-  });
+  }
+  document.addEventListener("olk-render", function(e){ lastD = e.detail; draw(); });
+  if(panel && window.MutationObserver) new MutationObserver(function(){ clearTimeout(draw.t); draw.t = setTimeout(draw, 50); }).observe(panel, {childList: true, subtree: true, characterData: true});
   window.addEventListener("resize", q);
   window.addEventListener("orientationchange", function(){ setTimeout(q, 350); setTimeout(q, 900); });
   [mqL, mqP].forEach(function(m){ if(m.addEventListener) m.addEventListener("change", q); else if(m.addListener) m.addListener(q); });
