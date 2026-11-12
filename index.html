@@ -3982,7 +3982,7 @@ html:not(.view-news) #ecov{display:none!important;}
   function q(){ if(!raf) raf = requestAnimationFrame(place); }
   /* Scale and height (Mark, Nov 12, 2026; this bar only): the column follows the picked resort's current temperature (the resort
      "Now" reading, the same number as the header's resort temperature; the outlook's hourly forecast only as a fallback). Top of the
-     bar = 75°F when that temperature is under 60, 99°F at 60 and above; 32°F sits 20% up from the bottom, and below 32 uses the same
+     bar = 60°F when that temperature is under 60, 75°F from 60 to 75, 99°F above 75; 32°F sits 20% up from the bottom, and below 32 uses the same
      step down to the bottom. Rain / snow / mix is a narrower stripe overlapping the orange column and never taller than it — a third,
      two thirds or all of it for light / moderate / heavy (a short sliver = a 30%+ chance with nothing measurable). */
   var lastD = null, panel = document.getElementById("rs-panel");
@@ -3997,7 +3997,7 @@ html:not(.view-news) #ecov{display:none!important;}
     var d = lastD, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
     var t = resortNow(); if(t == null && r) t = r[3];
     if(t == null){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
-    var TOP = t < 60 ? 75 : 99, Z = 20;
+    var TOP = t < 60 ? 60 : t <= 75 ? 75 : 99, Z = 20;
     var ty = function(v){ return Math.max(0, Math.min(100, Z + (v - 32) * (100 - Z) / (TOP - 32))); }, z = Z, tb = ty(t);
     var colB = Math.min(z, tb), colH = Math.max(1, Math.abs(tb - z));
     var html = '<span class="nb-tmp">' + TOP + '°</span><span class="nb-in">';
