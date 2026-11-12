@@ -5417,9 +5417,10 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 #wt-pclock .wt-wind:not(:empty){display:inline-block;}
 .wt-wind{display:none; position:relative; margin-left:.2em; width:var(--ww, 1.3em); height:.72em; vertical-align:baseline;
   color:#fff; letter-spacing:0; line-height:1; text-shadow:0 2px 6px rgba(0,0,0,.45);}
-.wt-wind svg{position:absolute; left:0; top:50%; width:.42em; height:.42em; margin-top:-.21em; fill:#fff; filter:drop-shadow(0 1px 3px rgba(0,0,0,.45)); transition:transform .6s;}
-.wt-wind b{position:absolute; right:0; bottom:-.02em; font-size:var(--wfs, .6em); line-height:.74; font-weight:800; letter-spacing:.02em; font-variant-numeric:tabular-nums; white-space:nowrap;}
-.wt-wind i{position:absolute; right:0; top:-.02em; font:700 .14em/1 "Inter",Arial,sans-serif; font-style:normal; letter-spacing:.04em; opacity:.92;}
+/* arrow and speed share one height (--wh): from the digits' baseline up to just under the mph marker (Mark, Nov 12, 2026) */
+.wt-wind svg{position:absolute; left:0; bottom:0; width:var(--wh, .58em); height:var(--wh, .58em); fill:#fff; filter:drop-shadow(0 1px 3px rgba(0,0,0,.45)); transition:transform .6s;}
+.wt-wind b{position:absolute; right:0; bottom:var(--wbo, 0em); font-size:var(--wfs, .8em); line-height:1; font-weight:800; letter-spacing:.02em; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.wt-wind i{position:absolute; right:0; top:0; font:700 .13em/1 "Inter",Arial,sans-serif; font-style:normal; letter-spacing:.04em; opacity:.92;}
 </style>
 <script>
 /* Resort wind on the clock line (Mark, Nov 12, 2026). Open-Meteo current wind (10 m, mph) for the picked resort — directly on
@@ -5447,14 +5448,27 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
       return JSON.parse(((p && p.data && p.data.stdout) || (p && p.stdout) || (typeof p === "string" ? p : "")).trim()); });
   }
   var DIRS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+  var cvs = null;
   function size(){
-    var p = document.createElement("span"); p.textContent = "00"; p.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit;";
-    t.appendChild(p); var fs = parseFloat(getComputedStyle(t).fontSize) || 40, w = p.getBoundingClientRect().width; t.removeChild(p);
-    if(w > 0) document.documentElement.style.setProperty("--ww", (w / fs).toFixed(3) + "em");
-    /* arrow at the left, speed at the right, sized so the two together fill the box: width of "00", height of the digits */
-    var b = w1.querySelector("b");
-    if(b && w > 0){ document.documentElement.style.setProperty("--wfs", ".6em"); var bw = b.getBoundingClientRect().width, bfs = parseFloat(getComputedStyle(b).fontSize) || 1;
-      if(bw > 0){ var room = w - .48 * fs, em = Math.min(.82, Math.max(.3, (bfs * room / bw) / fs)); document.documentElement.style.setProperty("--wfs", em.toFixed(3) + "em"); } }
+    var root = document.documentElement.style, H = .58;
+    root.setProperty("--wh", H + "em");
+    var pw = document.getElementById("wt-pclock-w"), box = (w1.getClientRects().length ? w1 : (pw && pw.getClientRects().length ? pw : null));
+    if(!box) return;
+    var b = box.querySelector("b"); if(!b) return;
+    /* speed digits' cap height = H: measure the clock font's digit height */
+    var cap = .72;
+    try{ cvs = cvs || document.createElement("canvas"); var cx = cvs.getContext("2d"), cs = getComputedStyle(b);
+      cx.font = cs.fontWeight + " 100px " + cs.fontFamily; var m = cx.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) cap = m.actualBoundingBoxAscent / 100; }catch(e){}
+    root.setProperty("--wfs", (H / cap).toFixed(3) + "em");
+    /* sit the speed's baseline on the box bottom (= the temperatures' baseline) */
+    root.setProperty("--wbo", "0em");
+    var mk2 = document.createElement("span"); mk2.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline;"; b.appendChild(mk2);
+    var off = box.getBoundingClientRect().bottom - mk2.getBoundingClientRect().bottom; b.removeChild(mk2);
+    var bfs = parseFloat(getComputedStyle(b).fontSize) || 1;
+    if(isFinite(off)) root.setProperty("--wbo", (-off / bfs).toFixed(3) + "em");
+    /* box width = arrow + small gap + speed */
+    var bw = b.getBoundingClientRect().width, fs = parseFloat(getComputedStyle(box).fontSize) || 40;
+    if(bw > 0) root.setProperty("--ww", ((H + .06) + bw / fs).toFixed(3) + "em");
   }
   function paint(){
     var d = cache[key()], targets = [w1, document.getElementById("wt-pclock-w")];
