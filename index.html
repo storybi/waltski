@@ -151,10 +151,10 @@ window.tempCls = function(t){ if(t == null || t === "" || isNaN(+t)) return ""; 
 .tc-cool:not(.rs-stat), .rs-stat.tc-cool .v{color:#552a89!important;}
 :root[data-theme="dark"] .tc-cool:not(.rs-stat), :root[data-theme="dark"] .rs-stat.tc-cool .v, html.has-banner #rs-hero .tc-cool:not(.rs-stat), html.has-banner #rs-hero .rs-stat.tc-cool .v{color:#8961b3!important;}
 .wt-clock .tc-hot{color:#ff5c5c!important;} .wt-clock .tc-mild{color:#ffd23f!important;} .wt-clock .tc-cold{color:#5aaeff!important;} .wt-clock .tc-cool{color:#8961b3!important;}
-/* Subtle white glow around every colored temp (blue, purple, yellow, red) so they stand out on any background (Mark, Nov 11, 2026). Keep as is. */
-.tc-hot:not(.rs-stat), .tc-mild:not(.rs-stat), .tc-cool:not(.rs-stat), .tc-cold:not(.rs-stat), .rs-stat.tc-hot .v, .rs-stat.tc-mild .v, .rs-stat.tc-cool .v, .rs-stat.tc-cold .v{text-shadow:0 0 1px rgba(255,255,255,.7), 0 0 6px rgba(255,255,255,.4)!important;}
 /* White outline around the colored clock temps so every color reads on dark night cam pictures (Mark, Nov 12, 2026). Keep as is. */
 .wt-clock .tc-hot, .wt-clock .tc-mild, .wt-clock .tc-cool, .wt-clock .tc-cold{text-shadow:.022em 0 0 #fff, -.022em 0 0 #fff, 0 .022em 0 #fff, 0 -.022em 0 #fff, .016em .016em 0 #fff, -.016em .016em 0 #fff, .016em -.016em 0 #fff, -.016em -.016em 0 #fff, 0 0 .08em rgba(255,255,255,.45), 0 2px 6px rgba(0,0,0,.35)!important;}
+/* No white frame on temps inside the resort card (Mark, Nov 12, 2026): only the clock temps over the photo get it. */
+#rs-hero .wt-clock .tc-hot, #rs-hero .wt-clock .tc-mild, #rs-hero .wt-clock .tc-cool, #rs-hero .wt-clock .tc-cold{text-shadow:inherit!important;}
 </style>
 
 <style>
