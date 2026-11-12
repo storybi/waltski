@@ -3882,15 +3882,22 @@ html:not(.view-news) #ecov{display:none!important;}
 })();
 </script>
 <style>
-/* Current-hour weather bar (Mark, Nov 12, 2026): phones and iPads held sideways with Show image on get one vertical stacked column at the
-   far right of the header photo for the current hour at the picked resort: orange temperature from the 32°F line (lighter below freezing),
-   with rain (green) / snow (blue) / mix (purple) stacked on top, sized light / moderate / heavy — the same colors and scale as the
-   48-hour outlook (a faint sliver = 30%+ chance with no measurable amount). Tap it to jump to the full outlook. Keep as is. */
-#wx-nowbar{display:none;}
-@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  html.show-image #wx-nowbar.on{display:block; position:absolute; z-index:40; width:18px; right:calc(env(safe-area-inset-right, 0px) + 8px);
-    border-radius:9px; background:rgba(5,14,26,.32); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+/* Current-hour weather bar (Mark, Nov 12, 2026): phones and iPads with Show image on — held sideways or upright — get one vertical stacked
+   column at the far right edge of the header photo for the current hour at the picked resort: orange temperature from the 32°F line
+   (lighter below freezing), with rain (green) / snow (blue) / mix (purple) stacked on top, sized light / moderate / heavy — the same
+   colors and scale as the 48-hour outlook (a faint sliver = 30%+ chance with no measurable amount). Tap it to jump to the full outlook.
+   It sits flush with the screen edge (clear of the iPhone notch when the notch is on that side); the landscape clock keeps its size
+   (Mark, Nov 12, 2026: don't shrink it). Upright, the clock and both temperatures show over the bottom of the photo, sized like the landscape line
+   (#wt-pclock, a mirror of #wt-clock). Keep as is. */
+#wx-nowbar,#wt-pclock{display:none;}
+@media (any-pointer:coarse) and (max-height:1100px) and (orientation:landscape), (any-pointer:coarse) and (orientation:portrait){
+  html.show-image #wx-nowbar.on{display:block; position:absolute; z-index:40; width:16px; right:var(--nb-right, 2px);
+    border-radius:8px; background:rgba(5,14,26,.32); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
     text-decoration:none; color:#fff;}
+}
+@media (any-pointer:coarse) and (orientation:portrait){
+  html.show-image #wt-pclock.on{display:block; position:absolute; z-index:39; white-space:nowrap; pointer-events:none; color:#fff; line-height:1;
+    text-shadow:0 2px 10px rgba(0,0,0,.45);}
 }
 #wx-nowbar .nb-in{position:absolute; left:3px; right:3px; top:20px; bottom:8px;}
 #wx-nowbar .nb-t,#wx-nowbar .nb-b{position:absolute; left:0; right:0; display:block; border-radius:2px;}
@@ -3899,32 +3906,81 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar .nb-b.rain{background:#2f9e4c;} #wx-nowbar .nb-b.snow{background:#2f6fd0;} #wx-nowbar .nb-b.mix{background:#8a54c4;}
 #wx-nowbar .nb-b{opacity:.92;} #wx-nowbar .nb-b.ch{opacity:.45;}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
-#wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10.5px/1 "Barlow Condensed","Inter",Arial,sans-serif;
+#wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
   color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7); font-variant-numeric:tabular-nums;}
+#wt-pclock .wt-clock-tmp{display:inline; margin-left:.4em; font:inherit; letter-spacing:inherit;}
+#wt-pclock .wt-clock-tmp:empty{display:none;}
+#wt-pclock .wt-clock-tmp .deg{font-size:.42em; vertical-align:.95em; margin-left:.03em; letter-spacing:0;}
+#wt-pclock #wt-pclock-r .n{position:relative; display:inline-block;}
+#wt-pclock #wt-pclock-r .n::after{content:""; position:absolute; left:50%; top:calc(100% - .1em); transform:translateX(-50%);
+  border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));}
 </style>
 <script>
-/* Current-hour weather bar (Mark, Nov 12, 2026). Draws from the 48-hour outlook's "olk-render" data (current hour = d.nh), uses
-   window.OLK_LEVEL for intensity and the outlook's own rain / snow / mix kinds, and sits over the header photo from just under the
-   top-row buttons to the bottom of the photo. Landscape + Show image only (CSS). Keep as is. */
+/* Current-hour weather bar + upright clock line (Mark, Nov 12, 2026). The bar draws from the 48-hour outlook's "olk-render" data
+   (current hour = d.nh) with window.OLK_LEVEL and the outlook's own rain / snow / mix kinds; it sits over the header photo from just
+   under the top-row buttons to the bottom of the photo.
+   Placed before the outlook script so it hears the first render. Keep as is. */
 (function(){
   var he = document.getElementById("wt-head-end"); if(!he || !window.matchMedia) return;
   var bar = document.createElement("a"); bar.id = "wx-nowbar"; bar.href = "#olk"; bar.setAttribute("aria-label", "Weather this hour");
   document.body.appendChild(bar);
-  var mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)"), root = document.documentElement, raf = 0;
-  function place(){
-    raf = 0;
-    if(!mq.matches || !root.classList.contains("show-image") || !bar.classList.contains("on")) return;
+  var pc = document.createElement("div"); pc.id = "wt-pclock"; pc.setAttribute("aria-hidden", "true");
+  pc.innerHTML = '<span id="wt-pclock-hm"></span><span class="wt-clock-tmp" id="wt-pclock-l"></span><span class="wt-clock-tmp" id="wt-pclock-r"></span>';
+  document.body.appendChild(pc);
+  var mqL = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)");
+  var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)");
+  var root = document.documentElement, raf = 0, lastLeft = null;
+  window.NOWBAR_PORTRAIT = function(){ return mqP.matches && root.classList.contains("show-image"); };
+  function active(){ return (mqL.matches || mqP.matches) && root.classList.contains("show-image"); }
+  /* Which side is the notch on? iOS: orientation 90 = top of the phone to the left (notch left, right edge clear). */
+  function notchRight(){ var a = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : window.orientation;
+    if(mqP.matches) return false; return a === -90 || a === 270; }
+  function photoBox(){
     var sy = window.scrollY || window.pageYOffset || 0, btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio");
-    var top = btn ? btn.getBoundingClientRect().bottom + sy + 10 : 60, bottom = he.getBoundingClientRect().bottom + sy - 30;
+    var gr = mqP.matches ? document.getElementById("wt-greet") : null; if(gr && gr.offsetHeight) btn = gr;   /* upright: start below the greeting, at the photo */
+    var top = btn ? btn.getBoundingClientRect().bottom + sy + 10 : 60, bottom = he.getBoundingClientRect().bottom + sy - (mqP.matches ? 16 : 30);
     var gt = document.getElementById("games-top");
     if(gt && gt.offsetHeight > 0) bottom = Math.min(bottom, gt.getBoundingClientRect().top + sy - 14);
-    if(bottom - top < 80) bottom = top + 80;
-    bar.style.top = Math.round(top) + "px"; bar.style.height = Math.round(bottom - top) + "px";
+    return {top: top, bottom: bottom, sy: sy};
+  }
+  function mirror(){
+    var hm = document.getElementById("wt-clock-hm"), l = document.getElementById("wt-clock-tmp"), r = document.getElementById("wt-clock-rtmp");
+    var t = hm ? hm.textContent : ""; document.getElementById("wt-pclock-hm").textContent = t;
+    [[l, "wt-pclock-l"], [r, "wt-pclock-r"]].forEach(function(p){ var src = p[0], dst = document.getElementById(p[1]); if(!dst) return;
+      var h = src ? src.innerHTML.replace(/<span class="bl"[^>]*><\/span>/g, "") : "";
+      if(dst.innerHTML !== h) dst.innerHTML = h; dst.className = src ? src.className : "wt-clock-tmp"; });
+  }
+  function place(){
+    raf = 0;
+    if(!active()){ window.NOWBAR_LEFT = null; pc.classList.remove("on"); return; }
+    var W = document.documentElement.clientWidth || window.innerWidth, inset = 0;
+    var probe = document.getElementById("wt-nb-probe");
+    if(!probe){ probe = document.createElement("div"); probe.id = "wt-nb-probe"; probe.style.cssText = "position:fixed;top:0;width:0;height:0;visibility:hidden;padding-right:env(safe-area-inset-right,0px)"; document.body.appendChild(probe); }
+    inset = parseFloat(getComputedStyle(probe).paddingRight) || 0;
+    var right = notchRight() ? Math.max(2, inset - 6) : 2;
+    root.style.setProperty("--nb-right", right + "px");
+    var b = photoBox();
+    if(b.bottom - b.top < 80) b.bottom = b.top + 80;
+    bar.style.top = Math.round(b.top) + "px"; bar.style.height = Math.round(b.bottom - b.top) + "px";
+    var left = bar.classList.contains("on") ? W - right - 16 : W - 14;
+    window.NOWBAR_LEFT = left;
+    /* Upright: clock + temperatures over the bottom of the photo, as big as fits beside the bar. */
+    if(mqP.matches){
+      mirror();
+      var src = document.querySelector(".wt-clock-t"); if(src){ var cs = getComputedStyle(src); pc.style.fontFamily = cs.fontFamily; pc.style.fontWeight = cs.fontWeight; pc.style.letterSpacing = cs.letterSpacing; }
+      var L = Math.max(14, parseFloat(getComputedStyle(document.body).paddingLeft) || 0, 14);
+      pc.style.left = L + "px"; pc.style.fontSize = "100px"; pc.classList.add("on");
+      var w = pc.getBoundingClientRect().width, room = left - 10 - L, h = b.bottom - b.top;
+      var fs = Math.max(24, Math.min(100 * room / Math.max(1, w), h * .55));
+      pc.style.fontSize = Math.floor(fs) + "px";
+      var ph = pc.getBoundingClientRect().height;
+      pc.style.top = Math.round(he.getBoundingClientRect().bottom + b.sy - 26 - ph) + "px";
+    } else pc.classList.remove("on");
   }
   function q(){ if(!raf) raf = requestAnimationFrame(place); }
   document.addEventListener("olk-render", function(e){
     var d = e.detail, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
-    if(!r){ bar.classList.remove("on"); bar.innerHTML = ""; return; }
+    if(!r){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
     var tv = h.map(function(x){ return x[3]; }).filter(function(v){ return v != null; });
     var tmin = tv.length ? Math.min.apply(null, tv) : 32, tmax = tv.length ? Math.max.apply(null, tv) : 32;
     var lo = Math.min(30, Math.floor((tmin - 2) / 5) * 5), hi = Math.max(35, Math.ceil((tmax + 2) / 5) * 5), TA = 58;
@@ -3944,9 +4000,11 @@ html:not(.view-news) #ecov{display:none!important;}
   });
   window.addEventListener("resize", q);
   window.addEventListener("orientationchange", function(){ setTimeout(q, 350); setTimeout(q, 900); });
-  if(mq.addEventListener) mq.addEventListener("change", q); else if(mq.addListener) mq.addListener(q);
+  [mqL, mqP].forEach(function(m){ if(m.addEventListener) m.addEventListener("change", q); else if(m.addListener) m.addListener(q); });
   if(window.MutationObserver) new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]});
   if(window.ResizeObserver){ var ro = new ResizeObserver(q); ro.observe(he); }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(q);
+  setInterval(function(){ if(mqP.matches && root.classList.contains("show-image")) mirror(); }, 1000);
   setInterval(q, 60000); q();
 })();
 </script>
@@ -4309,8 +4367,10 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       }, function(){ load(); }, {enableHighAccuracy: false, timeout: 10000, maximumAge: 15 * 60000}); }
     catch(e){ load(); }
   }
-  function check(){ if(!mq.matches || document.hidden) return; if(!asked) locate(); else if(Date.now() - last > 15 * 60000) load(); }
-  var c0 = saved(); if(c0 && mq.matches) load();
+  function on(){ return mq.matches || (window.NOWBAR_PORTRAIT && window.NOWBAR_PORTRAIT()); }   /* upright Show image too (Mark, Nov 12, 2026) */
+  function check(){ if(!on() || document.hidden) return; if(!asked) locate(); else if(Date.now() - last > 15 * 60000) load(); }
+  var c0 = saved(); if(c0 && on()) load();
+  try{ new MutationObserver(function(){ check(); }).observe(document.documentElement, {attributes:true, attributeFilter:["class"]}); }catch(e){}
   check();
   if(mq.addEventListener) mq.addEventListener("change", function(){ check(); setTimeout(fit, 60); }); else if(mq.addListener) mq.addListener(function(){ check(); setTimeout(fit, 60); });
   document.addEventListener("visibilitychange", check);
