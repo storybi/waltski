@@ -3899,13 +3899,15 @@ html:not(.view-news) #ecov{display:none!important;}
   html.show-image #wt-pclock.on{display:block; position:absolute; z-index:39; white-space:nowrap; pointer-events:none; color:#fff; line-height:1;
     text-shadow:0 2px 10px rgba(0,0,0,.45);}
 }
-#wx-nowbar .nb-in{position:absolute; left:3px; right:3px; top:20px; bottom:8px;}
+#wx-nowbar .nb-in{position:absolute; left:3px; right:3px; top:20px; bottom:19px;}
 #wx-nowbar .nb-t,#wx-nowbar .nb-b{position:absolute; left:0; right:0; display:block; border-radius:2px;}
 #wx-nowbar .nb-t{background:#E2733A; opacity:.95;}
 #wx-nowbar .nb-t.cold{background:#f2b48c;}
 #wx-nowbar .nb-b.rain{background:#2f9e4c;} #wx-nowbar .nb-b.snow{background:#2f6fd0;} #wx-nowbar .nb-b.mix{background:#8a54c4;}
 #wx-nowbar .nb-b{opacity:.92;} #wx-nowbar .nb-b.ch{opacity:.45;}
 #wx-nowbar .nb-b.ov{left:25%; right:25%; box-shadow:0 0 0 1px rgba(255,255,255,.55);}
+#wx-nowbar .nb-in,#wx-nowbar .nb-tmp,#wx-nowbar .nb-who{transition:opacity .25s;} #wx-nowbar.nb-fade .nb-in,#wx-nowbar.nb-fade .nb-who{opacity:0;}
+#wx-nowbar .nb-who{position:absolute; left:0; right:0; bottom:5px; height:11px; display:flex; justify-content:center;} #wx-nowbar .nb-who svg{width:11px; height:11px; fill:#fff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));}
 #wx-nowbar .nb-cur{position:absolute; left:-8px; right:-8px; text-align:center; font:700 9.5px/1 "Barlow Condensed","Inter",Arial,sans-serif; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); font-variant-numeric:tabular-nums;}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
 #wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
@@ -3993,32 +3995,72 @@ html:not(.view-news) #ecov{display:none!important;}
       if(l && v && /^\s*now\s*$/i.test(l.textContent)){ var m = v.textContent.match(/-?\d+(\.\d+)?/); if(m) return Math.round(+m[0]); } }
     return null;
   }
+  /* Local / resort alternation (Mark, Nov 12, 2026): every 10 seconds the bar switches between the picked resort and the device's
+     own location ("local", the same temperature as the header's first temperature; rain / snow from Open-Meteo for the device's
+     location, refreshed every 15 minutes). A small house (local) or mountain (resort) mark at the bottom of the bar says which one
+     is showing. With no device location yet, the bar stays on the resort. */
+  var mode = "resort", loc = null, locAt = 0, locBusy = false, inClaude = !!(window.claude && window.claude.use), mcpP = null;
+  function locCoords(){ try{ var c = JSON.parse(localStorage.getItem("skiinut-clock-loc") || "null"); if(c && typeof c.lat === "number") return c; }catch(e){}
+    try{ var L = JSON.parse(localStorage.getItem("skiinut-local") || "null"); if(L && typeof L.lat === "number") return {lat: L.lat, lon: L.lon}; }catch(e){}
+    return null; }
+  function localTemp(){ var el = document.getElementById("wt-clock-tmp"); var m = el && el.textContent.match(/-?\d+/); return m ? +m[0] : (loc ? loc.t : null); }
+  function getJSON(url){
+    if(!inClaude) return fetch(url).then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.json(); });
+    if(!mcpP) mcpP = window.claude.use("mcp");
+    return mcpP.then(function(m){ if(!m) throw new Error("no connector");
+      return m.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: "curl -s --max-time 20 -A 'skiinut.com' '" + url + "'"}, {cache: false});
+    }).then(function(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){} }
+      return JSON.parse(((p && p.data && p.data.stdout) || (p && p.stdout) || (typeof p === "string" ? p : "")).trim()); });
+  }
+  function loadLocal(){
+    var c = locCoords(); if(!c || locBusy || Date.now() - locAt < 15 * 60000) return;
+    locBusy = true;
+    getJSON("https://api.open-meteo.com/v1/forecast?latitude=" + c.lat.toFixed(3) + "&longitude=" + c.lon.toFixed(3) +
+      "&current=temperature_2m,rain,showers,snowfall&hourly=precipitation_probability&forecast_days=1&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto")
+      .then(function(d){ var cu = d && d.current; if(!cu) return;
+        var ch = 0; try{ var hh = (cu.time || "").slice(0, 13), ix = d.hourly.time.findIndex(function(x){ return x.slice(0, 13) === hh; }); if(ix >= 0) ch = d.hourly.precipitation_probability[ix] || 0; }catch(e){}
+        loc = {t: cu.temperature_2m != null ? Math.round(cu.temperature_2m) : null, row: [ch, (cu.rain || 0) + (cu.showers || 0), cu.snowfall || 0, cu.temperature_2m]};
+        locAt = Date.now(); if(mode === "local") draw(); }, function(){})
+      .then(function(){ locBusy = false; });
+  }
+  var ICON = {local: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.2 1 5.6h1.5V11h3V8h1v3h3V5.6H11z"/></svg>',
+              resort: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.3 3 0.5 11h11L8.2 5.6 6.9 7.5z"/><circle cx="9.2" cy="2.6" r="1.4"/></svg>'};
+  function kindOf(r){ if(r[2] > 0 && r[1] > 0) return "mix"; if(r[2] > 0) return "snow"; if(r[1] > 0) return "rain"; return r[3] != null && r[3] <= 33 ? "snow" : "rain"; }
   function draw(){
-    var d = lastD, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null;
+    var d = lastD, h = d && d.o && d.o.h, r = h && d.nh >= 0 ? h[d.nh] : null, k = r ? ((d.kinds && d.kinds[d.nh]) || "rain") : "rain";
     var t = resortNow(); if(t == null && r) t = r[3];
+    var lt = localTemp(), useLocal = mode === "local" && lt != null;
+    if(useLocal){ t = lt; r = loc ? loc.row : null; if(r) k = kindOf(r); }
     if(t == null){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
     var TOP = t < 60 ? 60 : t <= 75 ? 75 : 99, Z = 20;
     var ty = function(v){ return Math.max(0, Math.min(100, Z + (v - 32) * (100 - Z) / (TOP - 32))); }, z = Z, tb = ty(t);
     var colB = Math.min(z, tb), colH = Math.max(1, Math.abs(tb - z));
     var html = '<span class="nb-tmp">' + TOP + '°</span><span class="nb-in">';
     html += '<i class="nb-t' + (t < 32 ? ' cold' : '') + '" style="bottom:' + colB.toFixed(1) + '%;height:' + colH.toFixed(1) + '%"></i>';
-    var lv = 0, seg = 0, k = "rain";
+    var lv = 0, seg = 0;
     if(r){ var lvf = window.OLK_LEVEL || function(x){ return x[1] + x[2] > 0 ? 1 : 0; };
-      lv = lvf(r); k = (d.kinds && d.kinds[d.nh]) || "rain";
-      seg = lv ? colH * [0, 1/3, 2/3, 1][lv] : (r[0] >= 30 ? Math.min(colH, 4) : 0); }
+      lv = lvf(r); seg = lv ? colH * [0, 1/3, 2/3, 1][lv] : (r[0] >= 30 ? Math.min(colH, 4) : 0); }
     if(seg){ var pb = tb >= z ? z : colB + colH - seg;   /* from the 32° line toward the column's end */
       html += '<i class="nb-b ov ' + k + (lv ? '' : ' ch') + '" style="bottom:' + pb.toFixed(1) + '%;height:' + seg.toFixed(1) + '%"></i>'; }
     html += '<span class="nb-cur" style="bottom:calc(' + Math.max(colB + colH, z).toFixed(1) + '% + 3px)">' + t + '°</span>';
     html += '<span class="nb-frz" style="bottom:' + z.toFixed(1) + '%"></span></span>';
+    html += '<span class="nb-who">' + ICON[useLocal ? "local" : "resort"] + '</span>';
     bar.innerHTML = html;
-    var tip = "Now at the resort: " + t + "°F (bar tops out at " + TOP + "°)";
-    if(r){ var amt = k === "snow" ? (r[2] || 0) + " in snow" : k === "mix" ? (r[1] || 0) + " in rain + " + (r[2] || 0) + " in snow" : (r[1] || 0) + " in rain";
+    var tip = (useLocal ? "Now where you are: " : "Now at the resort: ") + t + "°F (bar tops out at " + TOP + "°)";
+    if(r){ var amt = k === "snow" ? (+r[2] || 0).toFixed(2).replace(/0+$/, "").replace(/\.$/, "") + " in snow" : k === "mix" ? (+r[1] || 0).toFixed(2) + " in rain + " + (+r[2] || 0).toFixed(2) + " in snow" : (+r[1] || 0).toFixed(2) + " in rain";
       var lvl = ["", "light", "moderate", "heavy"][lv] || (seg ? "chance, none measurable" : "dry");
       tip += ". This hour: " + r[0] + "% chance" + (lv ? ", " + amt + " (" + lvl + " " + k + ")" : seg ? " (" + lvl + ")" : ", dry"); }
     bar.title = tip + ". Tap for the 48-hour outlook.";
     bar.setAttribute("aria-label", bar.title);
     bar.classList.add("on"); q();
   }
+  setInterval(function(){
+    if(!active()) return;
+    if(mode === "resort" && localTemp() == null){ loadLocal(); return; }
+    mode = mode === "resort" ? "local" : "resort"; if(mode === "local") loadLocal();
+    bar.classList.add("nb-fade"); setTimeout(function(){ draw(); bar.classList.remove("nb-fade"); }, 250);
+  }, 10000);
+  setTimeout(loadLocal, 3000);
   document.addEventListener("olk-render", function(e){ lastD = e.detail; draw(); });
   if(panel && window.MutationObserver) new MutationObserver(function(){ clearTimeout(draw.t); draw.t = setTimeout(draw, 50); }).observe(panel, {childList: true, subtree: true, characterData: true});
   window.addEventListener("resize", q);
