@@ -5403,6 +5403,91 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
   setInterval(q, 60000); q();
 })();
 </script>
+
+<style>
+/* Clock line spacing + resort wind (Mark, Nov 12, 2026): the time and the two temperatures sit closer together (.2em gaps), and after
+   the resort temperature a white wind mark shows the picked resort's current wind — an arrow pointing the way the wind blows, with the
+   speed in mph under it — in a box the width and height of a two-digit temperature. Landscape clock line and the upright Show image
+   line (#wt-pclock). Keep as is. */
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  .wt-clock .wt-clock-t .wt-clock-tmp:not(:empty){margin-left:.2em!important;}
+  .wt-clock .wt-clock-t .wt-wind:not(:empty){display:inline-block;}
+}
+#wt-pclock .wt-clock-tmp{margin-left:.2em!important;}
+#wt-pclock .wt-wind:not(:empty){display:inline-block;}
+.wt-wind{display:none; position:relative; margin-left:.2em; width:var(--ww, 1.3em); height:.72em; vertical-align:baseline;
+  color:#fff; letter-spacing:0; line-height:1; text-shadow:0 2px 6px rgba(0,0,0,.45);}
+.wt-wind svg{position:absolute; left:0; top:50%; width:.42em; height:.42em; margin-top:-.21em; fill:#fff; filter:drop-shadow(0 1px 3px rgba(0,0,0,.45)); transition:transform .6s;}
+.wt-wind b{position:absolute; right:0; bottom:-.02em; font-size:var(--wfs, .6em); line-height:.74; font-weight:800; letter-spacing:.02em; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.wt-wind i{position:absolute; right:0; top:-.02em; font:700 .14em/1 "Inter",Arial,sans-serif; font-style:normal; letter-spacing:.04em; opacity:.92;}
+</style>
+<script>
+/* Resort wind on the clock line (Mark, Nov 12, 2026). Open-Meteo current wind (10 m, mph) for the picked resort — directly on
+   skiinut.com, through Composio inside claude.ai — refreshed every 15 minutes and whenever the resort changes. The box's width is
+   measured from a two-digit temperature ("00") in the clock's own font. Keep as is. */
+(function(){
+  var t = document.querySelector("#wt-clock .wt-clock-t"); if(!t) return;
+  function mk(id){ var s = document.createElement("span"); s.className = "wt-wind"; s.id = id; s.setAttribute("aria-label", "Wind at the resort"); return s; }
+  var w1 = mk("wt-clock-wind"); t.appendChild(w1);
+  var inClaude = !!(window.claude && window.claude.use), mcpP = null, cache = {}, busy = false;
+  var HI = {lat: 21.402, lon: -157.739};
+  function key(){ var p = document.getElementById("radar-view"); return p ? p.value : "sb"; }
+  function coords(k){
+    var r = window.IKON && window.IKON.r && window.IKON.r[k]; if(r && typeof r.lat === "number") return {lat: r.lat, lon: r.lon};
+    if(k === "hi") return HI;
+    if(k === "local"){ try{ var c = JSON.parse(localStorage.getItem("skiinut-local") || "null") || JSON.parse(localStorage.getItem("skiinut-clock-loc") || "null"); if(c && typeof c.lat === "number") return c; }catch(e){} }
+    return null;
+  }
+  function getJSON(url){
+    if(!inClaude) return fetch(url).then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.json(); });
+    if(!mcpP) mcpP = window.claude.use("mcp");
+    return mcpP.then(function(m){ if(!m) throw new Error("no connector");
+      return m.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: "curl -s --max-time 20 -A 'skiinut.com' '" + url + "'"}, {cache: false});
+    }).then(function(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){} }
+      return JSON.parse(((p && p.data && p.data.stdout) || (p && p.stdout) || (typeof p === "string" ? p : "")).trim()); });
+  }
+  var DIRS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+  function size(){
+    var p = document.createElement("span"); p.textContent = "00"; p.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit;";
+    t.appendChild(p); var fs = parseFloat(getComputedStyle(t).fontSize) || 40, w = p.getBoundingClientRect().width; t.removeChild(p);
+    if(w > 0) document.documentElement.style.setProperty("--ww", (w / fs).toFixed(3) + "em");
+    /* arrow at the left, speed at the right, sized so the two together fill the box: width of "00", height of the digits */
+    var b = w1.querySelector("b");
+    if(b && w > 0){ document.documentElement.style.setProperty("--wfs", ".6em"); var bw = b.getBoundingClientRect().width, bfs = parseFloat(getComputedStyle(b).fontSize) || 1;
+      if(bw > 0){ var room = w - .48 * fs, em = Math.min(.82, Math.max(.3, (bfs * room / bw) / fs)); document.documentElement.style.setProperty("--wfs", em.toFixed(3) + "em"); } }
+  }
+  function paint(){
+    var d = cache[key()], targets = [w1, document.getElementById("wt-pclock-w")];
+    var pc = document.getElementById("wt-pclock");
+    if(pc && !targets[1]){ targets[1] = mk("wt-pclock-w"); pc.appendChild(targets[1]); }
+    var html = "", title = "";
+    if(d && d.s != null){
+      var to = ((d.dir || 0) + 180) % 360;   /* weather direction is where it comes FROM; the arrow points where it blows */
+      html = '<svg viewBox="0 0 24 24" style="transform:rotate(' + to + 'deg)" aria-hidden="true"><path d="M12 0l10 12h-6.5v12h-7V12H2z"/></svg><b>' + d.s + '</b><i>mph</i>';
+      title = "Wind at the resort: " + DIRS[Math.round((d.dir || 0) / 22.5) % 16] + " " + d.s + " mph" + (d.g != null ? ", gusts " + d.g : "");
+    }
+    var changed = false;
+    targets.forEach(function(x){ if(!x) return; if(x.innerHTML !== html){ x.innerHTML = html; changed = true; } x.title = title; });
+    size();
+    if(changed) try{ window.dispatchEvent(new Event("resize")); }catch(e){}
+  }
+  function load(force){
+    var k = key(), c = coords(k), have = cache[k];
+    if(!c || busy || (!force && have && Date.now() - have.at < 15 * 60000)){ paint(); return; }
+    busy = true;
+    getJSON("https://api.open-meteo.com/v1/forecast?latitude=" + c.lat.toFixed(3) + "&longitude=" + c.lon.toFixed(3) + "&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=mph&timezone=auto")
+      .then(function(j){ var cu = j && j.current; if(cu && cu.wind_speed_10m != null) cache[k] = {s: Math.round(cu.wind_speed_10m), dir: cu.wind_direction_10m, g: cu.wind_gusts_10m != null ? Math.round(cu.wind_gusts_10m) : null, at: Date.now()}; }, function(){})
+      .then(function(){ busy = false; paint(); });
+  }
+  var pick = document.getElementById("radar-view");
+  if(pick) pick.addEventListener("change", function(){ setTimeout(load, 50); });
+  ["wsj-radar", "wsj-cam"].forEach(function(n){ document.addEventListener(n, function(){ setTimeout(load, 80); }); window.addEventListener(n, function(){ setTimeout(load, 80); }); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(size);
+  window.addEventListener("resize", function(){ clearTimeout(size.t); size.t = setTimeout(size, 120); });
+  setInterval(function(){ load(false); }, 60000);
+  setTimeout(function(){ load(true); }, 1200);
+})();
+</script>
 <script>
 /* Public site: load the Snowbasin cams and the photo banner straight from the cam hosts. */
 (function(){
