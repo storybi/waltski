@@ -5700,6 +5700,87 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 
 
 <style>
+/* Liquid Glass clock (Mark, Nov 14, 2026): on phones and iPads held sideways with Show image on, the time is shown large in the center
+   of the header photo as clear "liquid glass" digits (Inter Tight 700): each digit lightly blurs (0.7px) and brightens the photo behind
+   it, with a bright rim, a shine along the top and a soft shadow. AM/PM is dropped. The local temp, resort temp (with its orange arrow)
+   and wind stay on their own line at the bottom of the photo, centered under the time at 46px. Keep as is. */
+#lg-wrap{display:none;}
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  html.show-image.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
+  html.show-image.lg-on #wt-clock-hm, html.show-image.lg-on #wt-clock-ap{display:none!important;}
+  html.show-image.lg-on #wt-clock .wt-clock-t{display:flex!important; justify-content:center; align-items:flex-end; font-size:46px!important;}
+}
+#lg-glass{position:absolute; inset:0; -webkit-backdrop-filter:blur(.7px) saturate(180%) brightness(1.45) contrast(1.08); backdrop-filter:blur(.7px) saturate(180%) brightness(1.45) contrast(1.08);
+  background:rgba(255,255,255,.06); -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
+#lg-rim{position:absolute; inset:0; width:100%; height:100%; filter:drop-shadow(0 10px 22px rgba(0,0,0,.35));}
+</style>
+<script>
+/* Liquid Glass clock (Mark, Nov 14, 2026). Draws the time with a canvas: a text mask for the frosted backdrop, plus a rim, inner glow and
+   top shine computed from the filled digit shapes. Redraws when the minute changes and when the screen turns or resizes. Keep as is. */
+(function(){
+  if(!window.matchMedia) return;
+  try{ var fl = document.createElement("link"); fl.rel = "stylesheet"; fl.href = "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700&display=swap"; document.head.appendChild(fl); }catch(e){}
+  var mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)"), root = document.documentElement;
+  var hmEl = document.getElementById("wt-clock-hm"), clk = document.getElementById("wt-clock"); if(!hmEl || !clk) return;
+  var wrap = document.createElement("div"); wrap.id = "lg-wrap"; wrap.setAttribute("aria-hidden", "true");
+  var glass = document.createElement("div"); glass.id = "lg-glass"; var rim = document.createElement("canvas"); rim.id = "lg-rim";
+  wrap.appendChild(glass); wrap.appendChild(rim); document.body.appendChild(wrap);
+  var FAM = '"Inter Tight", "Inter", "Barlow Condensed", Arial, sans-serif', WT = 700, ready = false, raf = 0, lastKey = "";
+  function on(){ return mq.matches && root.classList.contains("show-image"); }
+  function draw(){
+    raf = 0;
+    if(!on()){ if(root.classList.contains("lg-on")) root.classList.remove("lg-on"); if(clk.style.paddingRight) clk.style.removeProperty("padding-right"); lastKey = ""; return; }
+    if(!root.classList.contains("lg-on")) root.classList.add("lg-on");   /* only when it changes: re-adding still fires class observers */
+    var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = 54;
+    var area = W - right, c = area / 2;
+    /* center the temps line under the time */
+    var cr = clk.getBoundingClientRect(), pr = Math.max(0, Math.round(cr.left + cr.right - 2 * c)) + "px"; if(clk.style.paddingRight !== pr) clk.style.setProperty("padding-right", pr, "important");
+    var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet");
+    var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
+    var row = clk.querySelector(".wt-clock-t"), rowTop = (row || clk).getBoundingClientRect().top;
+    var avail = Math.max(60, rowTop - top0 - 4), hm = (hmEl.textContent || "").trim(); if(!hm) return;
+    var dpr = Math.min(3, window.devicePixelRatio || 2);
+    var m = document.createElement("canvas").getContext("2d"); m.font = WT + " 100px " + FAM; var tw = m.measureText(hm).width / 100;
+    var fs = Math.floor(Math.min(avail / 0.80, (area - 40) / tw));
+    var cw = Math.ceil(tw * fs + 24), ch = Math.ceil(fs * 0.92), by = Math.round(fs * 0.80);
+    var key = [hm, fs, cw, ch, Math.round(c), Math.round(top0), dpr, ready].join("|");
+    var y = top0 + sy + Math.max(0, (avail - fs * 0.78) / 2) - (by - fs * 0.74);
+    wrap.style.left = Math.round(c - cw / 2) + "px"; wrap.style.top = Math.round(y) + "px"; wrap.style.width = cw + "px"; wrap.style.height = ch + "px";
+    if(key === lastKey) return; lastKey = key;
+    function mk(){ var cv = document.createElement("canvas"); cv.width = cw * dpr; cv.height = ch * dpr; var x = cv.getContext("2d"); x.scale(dpr, dpr);
+      x.font = WT + " " + fs + "px " + FAM; x.textAlign = "center"; x.textBaseline = "alphabetic"; return [cv, x]; }
+    function shape(){ var a = mk(); a[1].fillStyle = "#fff"; a[1].fillText(hm, cw / 2, by); return a[0]; }
+    function shrunk(px){ var cv = shape(), x = cv.getContext("2d"), src = shape(); x.setTransform(1,0,0,1,0,0);
+      for(var i = 0; i < 8; i++){ var a = i / 8 * Math.PI * 2; x.globalCompositeOperation = "destination-in"; x.drawImage(src, Math.cos(a) * px * dpr, Math.sin(a) * px * dpr); } return cv; }
+    function band(px){ var cv = shape(), x = cv.getContext("2d"); x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation = "destination-out"; x.drawImage(shrunk(px), 0, 0); return cv; }
+    var mask = shape(), url = mask.toDataURL(); glass.style.webkitMaskImage = "url(" + url + ")"; glass.style.maskImage = "url(" + url + ")";
+    rim.width = cw * dpr; rim.height = ch * dpr; var rx = rim.getContext("2d"); rx.setTransform(dpr,0,0,dpr,0,0); rx.clearRect(0, 0, cw, ch);
+    rx.font = WT + " " + fs + "px " + FAM; rx.textAlign = "center"; rx.textBaseline = "alphabetic";
+    var g = rx.createLinearGradient(0, by - fs * .72, 0, by);
+    g.addColorStop(0, "rgba(255,255,255,.55)"); g.addColorStop(.18, "rgba(255,255,255,.16)"); g.addColorStop(.55, "rgba(255,255,255,.04)"); g.addColorStop(1, "rgba(255,255,255,.22)");
+    rx.fillStyle = g; rx.fillText(hm, cw / 2, by);
+    var gl = band(fs * .024), gx = gl.getContext("2d"); gx.setTransform(1,0,0,1,0,0); gx.globalCompositeOperation = "source-in"; gx.fillStyle = "rgba(255,255,255,.28)"; gx.fillRect(0, 0, gl.width, gl.height);
+    rx.save(); rx.setTransform(1,0,0,1,0,0); rx.filter = "blur(" + (fs * .014 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(gl, 0, 0); rx.restore();
+    var r2 = band(Math.max(1.2, fs * .0068)), r2x = r2.getContext("2d"); r2x.setTransform(1,0,0,1,0,0); r2x.globalCompositeOperation = "source-in";
+    var sg = r2x.createLinearGradient(0, (by - fs * .72) * dpr, cw * dpr, by * dpr);
+    sg.addColorStop(0, "rgba(255,255,255,.95)"); sg.addColorStop(.45, "rgba(255,255,255,.4)"); sg.addColorStop(.7, "rgba(255,255,255,.75)"); sg.addColorStop(1, "rgba(255,255,255,.35)");
+    r2x.fillStyle = sg; r2x.fillRect(0, 0, r2.width, r2.height);
+    rx.save(); rx.setTransform(1,0,0,1,0,0); rx.drawImage(r2, 0, 0); rx.restore();
+    rx.save(); rx.globalCompositeOperation = "source-atop"; var sp = rx.createLinearGradient(0, by - fs * .75, 0, by - fs * .45);
+    sp.addColorStop(0, "rgba(255,255,255,.65)"); sp.addColorStop(1, "rgba(255,255,255,0)"); rx.fillStyle = sp; rx.fillRect(0, by - fs * .78, cw, fs * .33); rx.restore();
+  }
+  function q(){ if(!raf) raf = requestAnimationFrame(function(){ setTimeout(draw, 30); }); }
+  try{ new MutationObserver(q).observe(hmEl, {childList: true, characterData: true, subtree: true}); }catch(e){}
+  try{ new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
+  try{ new MutationObserver(q).observe(clk, {attributes: true, attributeFilter: ["style"]}); }catch(e){}
+  window.addEventListener("resize", q);
+  window.addEventListener("orientationchange", function(){ setTimeout(q, 400); setTimeout(q, 1000); });
+  if(mq.addEventListener) mq.addEventListener("change", q); else if(mq.addListener) mq.addListener(q);
+  if(document.fonts && document.fonts.load) document.fonts.load(WT + ' 100px "Inter Tight"').then(function(){ ready = true; lastKey = ""; q(); }, function(){});
+  setInterval(q, 15000); q();
+})();
+</script>
+<style>
 /* Rotation cover (Mark, Nov 12, 2026): when a phone or iPad turns, a dozen parts of the page (photo height, pinned band, clock size and
    place, clock moving in/out of the card, the right-side bar, scroll to top) each re-measure on their own timer, which showed as
    blinking and flickering. Now the page is covered in its own background color the moment the screen turns and fades back in once,
