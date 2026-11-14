@@ -5705,7 +5705,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
    digits over the header photo in Saira Extra Condensed 700 (tall, narrow; never narrower than 75% width), spread evenly across the
    photo left of the 54px weather bar. Very translucent (Mark, Nov 14, 2026, 10:42 a.m.): about 90% of the photo shows through — a faint fill, light 1.2px blur, a fine bright edge, a thin adaptive border (dark over light parts of the photo, light over dark parts) and a soft shadow; round colon dots.
    Temps carry a faint tint of their temperature color (window.tempCls: hot / mild / cool / cold) and the wind speed a faint yellow
-   (over 15 mph) or red (over 25) tint; the wind arrow is small, to the right of the speed, with a tiny "mph" under it. AM/PM is
+   (over 15 mph) or red (over 25) tint; the wind arrow is small, to the right of the speed, with a tiny translucent "mph" against the speed's bottom-right edge. AM/PM is
    dropped. The normal #wt-clock line stays in the page (hidden) as the data source. Keep as is. */
 #lg-wrap{display:none;}
 @media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
@@ -5716,12 +5716,12 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 #lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(1.2px) saturate(120%) brightness(1.08); backdrop-filter:blur(1.2px) saturate(120%) brightness(1.08);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 /* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
-   dark over bright sky and light over dark trees */
-#lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(1.8); backdrop-filter:grayscale(1) invert(1) contrast(1.8);
+   darker over bright sky and light over dark trees; range squeezed so its darkest is a mid gray, never black (Mark, 11:45 a.m.) */
+#lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2); backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 #lg-wrap canvas{position:absolute; inset:0; width:100%; height:100%;}
 #lg-wrap .lg-dv{position:absolute; background:#fff; border-radius:1px; opacity:.75; box-shadow:0 0 2px rgba(0,0,0,.45);}
-#lg-wrap .lg-mph{position:absolute; font:700 10px/1 "Inter",Arial,sans-serif; color:rgba(255,255,255,.92); text-shadow:0 1px 3px rgba(0,0,0,.5);}
+#lg-wrap .lg-mph{position:absolute; font:700 10px/1 "Inter",Arial,sans-serif; color:rgba(255,255,255,.5); text-shadow:0 0 1px rgba(80,80,80,.45);}   /* translucent, like the digits */
 #lg-wrap .lg-arw{position:absolute; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
 </style>
 <script>
@@ -5784,15 +5784,16 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     return it;
   }
   function wind(sp, to, H){
+    /* speed, a tiny translucent "mph" tucked against the speed's bottom-right edge, then the small arrow to the right */
     var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05);
-    var aw = H * .36 * Math.min(1, SX / .6), gap = H * .07, sw = tw(s, fs), mf = Math.max(9, Math.min(fs * .12, H * .07));
+    var aw = H * .36 * Math.min(1, SX / .6), gap = H * .07, sw = tw(s, fs), mf = Math.max(9, Math.min(fs * .12, H * .07)), mg = Math.max(2, H * .015);
     mc.font = "700 " + mf + "px Inter,Arial"; var mw = mc.measureText("mph").width;
-    var colw = Math.max(aw, mw), cw = Math.ceil(pad + sw + gap + colw + pad), by = Math.ceil(H + pad), ch = by + pad, ax = pad + sw + gap + colw / 2;
+    var mx = pad + sw + mg, cw = Math.ceil(mx + mw + gap + aw + pad), by = Math.ceil(H + pad), ch = by + pad, ax = mx + mw + gap + aw / 2;
     var el = glass(cw, ch, by, H, function(x){
       txt(x, s, fs, pad + sw / 2, by);
       if(AR){ x.save(); x.translate(ax, by - H * .5); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
     }, WC[k] || null);
-    var m = document.createElement("span"); m.className = "lg-mph"; m.textContent = "mph"; m.style.left = (ax - mw / 2) + "px"; m.style.top = (by - mf * .75) + "px"; m.style.fontSize = mf + "px";
+    var m = document.createElement("span"); m.className = "lg-mph"; m.textContent = "mph"; m.style.left = mx + "px"; m.style.top = (by - mf * .75) + "px"; m.style.fontSize = mf + "px";
     el.appendChild(m); return {el: el, w: cw, px: pad, by: by};
   }
   function num(el, sel){ var n = el && (sel ? el.querySelector(sel) : el); var m = n && n.textContent.match(/-?\d+/); return m ? +m[0] : null; }
