@@ -5709,8 +5709,10 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
    dropped. The normal #wt-clock line stays in the page (hidden) as the data source. Keep as is. */
 #lg-wrap{display:none;}
 /* every Show image view uses this line (Mark, 12:53 p.m.): sideways and upright phones / iPads and desktop */
-html.show-image.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
-html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{visibility:hidden!important;}
+html.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
+html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!important;}   /* also in Show card (Mark, 1:08 p.m.) */
+#lg-slot{display:none;}
+html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright Show card: the line sits above the card instead */
 #lg-wrap .g{position:absolute;}
 /* frosted backing (Mark, Nov 14, 2026, 1:06 p.m.): a softly blurred, slightly darkened pane behind the whole line */
 #lg-wrap .lg-frost{position:absolute; border-radius:16px; -webkit-backdrop-filter:blur(12px) saturate(115%) brightness(.9); backdrop-filter:blur(12px) saturate(115%) brightness(.9);
@@ -5741,7 +5743,7 @@ html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{vi
   var mc = document.createElement("canvas").getContext("2d"), dpr = 2;
   var AR = window.Path2D ? new Path2D("M12 0l8 11h-5.75v13h-4.5V11H4z") : null;
   var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
-  function on(){ return (mq.matches || mqP.matches || mqD.matches) && root.classList.contains("show-image") && !!document.getElementById("wt-banner"); }
+  function on(){ return (mq.matches || mqP.matches || mqD.matches) && !!document.getElementById("wt-banner"); }   /* Show image and Show card (Mark, 1:08 p.m.) */
   function cap(){ mc.font = WT + " 100px " + FAM; var m = mc.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) CAP = m.actualBoundingBoxAscent / 100; }
   function tw(t, fs){ mc.font = WT + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
   function mk(cw, ch){ var c = document.createElement("canvas"); c.width = Math.ceil(cw * dpr); c.height = Math.ceil(ch * dpr); return c; }
@@ -5829,21 +5831,34 @@ html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{vi
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
     var stop = he ? he.getBoundingClientRect().bottom : top0 + 200, gt = document.getElementById("games-top");
     if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
-    var Hs = Math.max(60, stop - 8 - top0), bn = document.getElementById("wt-banner"), ptop = picTop(bn), mid = (ptop + stop) / 2 - top0;
+    var Hs = Math.max(60, stop - 8 - top0), bn = document.getElementById("wt-banner"), ptop = picTop(bn), mid = (ptop + stop) / 2 - top0, left0 = 0;
+    /* Show card (Mark, 1:08 p.m.): the same line sits just above the resort card, as wide as the card. Upright phones get a slot made
+       above the card for it (the time row in the card is hidden). */
+    var card = document.getElementById("rs-hero"), cardMode = !root.classList.contains("show-image") && card && card.offsetHeight > 0;
+    var slot = document.getElementById("lg-slot");
+    if(cardMode && mqP.matches){ if(!slot){ slot = document.createElement("div"); slot.id = "lg-slot"; card.parentNode.insertBefore(slot, card); }
+      var cr0 = card.getBoundingClientRect(), sh = Math.round(Math.min(150, cr0.width * .27)) + "px"; if(slot.style.height !== sh) slot.style.height = sh; if(slot.style.display !== "block") slot.style.display = "block"; }
+    else if(slot && slot.style.display !== "none") slot.style.display = "none";
+    if(cardMode){
+      var cr = card.getBoundingClientRect(), ck = clk.getBoundingClientRect();
+      var t1 = (mqP.matches && slot) ? slot.getBoundingClientRect().top : Math.max(top0 - 2, ck.top);
+      top0 = t1; Hs = Math.max(40, cr.top - 4 - t1); left0 = Math.round(cr.left); area = Math.round(cr.width); ptop = t1; stop = t1 + Hs / .3;
+    }
+    if(root.classList.contains("lg-card") !== !!cardMode) root.classList.toggle("lg-card", !!cardMode);
     dpr = Math.min(3, window.devicePixelRatio || 2);
-    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), dpr, ready].join("|");
-    wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
+    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dpr, ready].join("|");
+    wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
-    var H = Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
+    var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     function fit(){ for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     } }
     fit();
-    if(mqP.matches){ H *= .75; SX = 1; fit(); }   /* upright: 25% shorter than what fits (Mark, 1:00 p.m.) */
+    if(mqP.matches && !cardMode){ H *= .75; SX = 1; fit(); }   /* upright: 25% shorter than what fits (Mark, 1:00 p.m.) */
     var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
@@ -5854,7 +5869,7 @@ html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{vi
     });
     /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
     var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
-    fr.style.left = "6px"; fr.style.width = Math.max(0, area - 12) + "px"; fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
+    fr.style.left = (cardMode ? 0 : 6) + "px"; fr.style.width = Math.max(0, area - (cardMode ? 0 : 12)) + "px"; fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
     els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
     els.forEach(function(e){ wrap.appendChild(e); });
