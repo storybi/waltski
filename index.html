@@ -5823,8 +5823,8 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = (lt != null && rt != null) ? di : -1; return a; }
-    /* about 22% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
-    var H = Math.min(Hs * .85, (stop - ptop) * .224), items, vis; SX = 1;   /* 30% shorter again: about 22% of the photo height (Mark, 11:52 a.m.) */
+    /* about 34% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
+    var H = Math.min(Hs * .85, (stop - ptop) * .336), items, vis; SX = 1;   /* 50% larger (Mark, 12:06 p.m.): about 34% of the photo height (Mark, 11:52 a.m.) */
     for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
