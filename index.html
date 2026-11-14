@@ -3947,7 +3947,7 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar,#wt-pclock{display:none;}
 @media (any-pointer:coarse) and (max-height:1100px) and (orientation:landscape), (any-pointer:coarse) and (orientation:portrait){
   html.show-image #wx-nowbar.on{display:block; position:absolute; z-index:40; width:16px; right:var(--nb-right, 2px);
-    border-radius:8px; background:rgba(5,14,26,.32); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    border-radius:8px; background:#000; box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
     text-decoration:none; color:#fff;}
 }
 @media (any-pointer:coarse) and (orientation:portrait){
@@ -3974,7 +3974,7 @@ html:not(.view-news) #ecov{display:none!important;}
   html.show-image #wx-nowrad.on{display:block; position:absolute; z-index:39; overflow:hidden; pointer-events:none; border-radius:0;
     box-shadow:none; background:#1b2a36 center/cover no-repeat;
     -webkit-mask-image:linear-gradient(to right, transparent 0, #000 4px); mask-image:linear-gradient(to right, transparent 0, #000 4px);}
-  html.show-image #wx-nowbar.on.nb-rad{background:rgba(5,14,26,.10); -webkit-backdrop-filter:none; backdrop-filter:none;}
+  html.show-image #wx-nowbar.on.nb-rad{background:#000; -webkit-backdrop-filter:none; backdrop-filter:none;}  /* black track for contrast (Mark, Nov 14, 2026) */
 }
 #wx-nowrad img{position:absolute; width:256px; height:256px; max-width:none; display:block;}
 #wx-nowrad .nr-c{position:absolute; left:0; top:0; filter:blur(1px);}
@@ -4041,12 +4041,12 @@ html:not(.view-news) #ecov{display:none!important;}
     var left = bar.classList.contains("on") ? W - right - 16 : W - 14;
     window.NOWBAR_LEFT = left;
     /* Sliver (Mark, Nov 14, 2026): runs from the photo's own top edge to its bottom edge, squared off, flush with the screen's right edge,
-       36px wide (50% wider than first built). */
+       54px wide (Mark widened it 50% twice, Nov 14, 2026). */
     if(bar.classList.contains("on")){ var bn2 = document.getElementById("wt-banner"), ib = bn2 ? bn2.getBoundingClientRect() : null;
       var it = ib ? ib.top + b.sy : b.top, ibm = ib ? ib.bottom + b.sy : b.bottom;
       if(ib && mqP.matches){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); }
       rad.style.top = Math.round(it) + "px"; rad.style.height = Math.round(ibm - it) + "px";
-      rad.style.left = (W - 36) + "px"; rad.style.width = "36px"; rad.classList.add("on"); bar.classList.add("nb-rad"); radar(Math.round(ibm - it)); }
+      rad.style.left = (W - 54) + "px"; rad.style.width = "54px"; rad.classList.add("on"); bar.classList.add("nb-rad"); radar(Math.round(ibm - it)); }
     else { rad.classList.remove("on"); bar.classList.remove("nb-rad"); }
     /* Upright: clock + temperatures over the bottom of the photo, as big as fits beside the bar. */
     if(mqP.matches){
@@ -4120,7 +4120,7 @@ html:not(.view-news) #ecov{display:none!important;}
   function radar(H){
     if(inClaude){ var im = document.querySelector("img.radar-img"), src = im && im.src;
       if(src && rad.getAttribute("data-k") !== src){ rad.setAttribute("data-k", src); rad.innerHTML = ""; rad.style.backgroundImage = 'url("' + src + '")'; } return; }
-    var p = placeLL(), z = 8, Wd = 36, n = Math.pow(2, z) * 256, bucket = Math.floor(Date.now() / 300000);
+    var p = placeLL(), z = 8, Wd = 54, n = Math.pow(2, z) * 256, bucket = Math.floor(Date.now() / 300000);
     var px = (p.lon + 180) / 360 * n, sl = Math.sin(p.lat * Math.PI / 180), py = (0.5 - Math.log((1 + sl) / (1 - sl)) / (4 * Math.PI)) * n;
     var key = [p.lat.toFixed(3), p.lon.toFixed(3), p.ridge, H, bucket].join("|"); if(key === radKey) return; radKey = key;
     var x0 = px - Wd / 2, y0 = py - H / 2, lay = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + (p.ridge ? "ridge::" + p.ridge + "-N0Q-0" : "nexrad-n0q-900913");
