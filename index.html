@@ -5862,7 +5862,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     } }
     fit();
-    if(mqP.matches && !cardMode){ H *= .75; SX = 1; fit(); }   /* upright: 25% shorter than what fits (Mark, 1:00 p.m.) */
+    if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
     var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
@@ -5877,7 +5877,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     });
     /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
     var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
-    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; var fbot = Hs + 8; if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); }   /* upright: down to the base of the picture (Mark, 1:23 p.m.) */
+    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; var fbot = Hs + 8; if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: the weather strip below stays on top (Mark, 1:32 p.m.) */   /* upright: down to the base of the picture (Mark, 1:23 p.m.) */
     fr.style.height = Math.round(cardMode ? H * (1 + LGAP + LBL) + fpad * 2 : fbot - (base - H - fpad)) + "px";   /* Show image: down to the very bottom of the photo (Mark, 1:15 p.m.) */
     els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
