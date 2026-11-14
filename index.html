@@ -5875,7 +5875,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     });
     /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
     var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
-    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
+    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(cardMode ? H * (1 + LGAP + LBL) + fpad * 2 : Hs + 8 - (base - H - fpad)) + "px";   /* Show image: down to the very bottom of the photo (Mark, 1:15 p.m.) */
     els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
     els.forEach(function(e){ wrap.appendChild(e); });
