@@ -3233,7 +3233,10 @@ window.PTYPE = (function(){
   var STREAM = "https://classicalking.streamguys1.com/king-fm-aac-128k", PLAYER = "https://player.streamguys.com/classicalking/king-fm/sgplayer/player.php?l=layout-small+single-stream-metadata";
   var b = document.getElementById("wt-radio"); if(!b) return;
   var a = null, on = false, blocked = false;
-  function label(){ b.textContent = blocked ? "Music ↗" : on ? "Mute" : "Music"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
+  function label(){ if(window.skSoundLabel) return window.skSoundLabel(); b.textContent = blocked ? "Music ↗" : on ? "Mute" : "Music"; b.setAttribute("aria-pressed", on ? "true" : "false"); }
+  /* hooks for the Sound menu (Mark, Nov 14, 2026, 2:39 p.m.) */
+  window.skKing = {on: function(){ return on; }, blocked: function(){ return blocked; }, play: function(){ unwait(); if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; } play(false); },
+    stop: function(user){ unwait(); stop(); auto = false; if(user && inWin(new Date())){ skipDay = new Date().toDateString(); try{ localStorage.setItem("wsj-music-skip", skipDay); }catch(e){} } }};
   function stop(){ if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
   var auto = false, waiting = false, skipDay = "";
   function play(isAuto){
@@ -3247,6 +3250,7 @@ window.PTYPE = (function(){
   }
   b.addEventListener("click", function(){
     unwait();
+    if(window.skSoundMenu){ window.skSoundMenu(); return; }   /* Sound menu: Music / Rain sounds / Mute (Mark, Nov 14, 2026) */
     if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; }
     if(on){ stop(); auto = false; if(inWin(new Date())){ skipDay = new Date().toDateString(); try{ localStorage.setItem("wsj-music-skip", skipDay); }catch(e){} } return; }
     play(false);
@@ -3263,7 +3267,7 @@ window.PTYPE = (function(){
   function unwait(){ if(!waiting) return; waiting = false; b.classList.remove("wt-radio-wake"); document.removeEventListener("pointerdown", onTap, true); document.removeEventListener("keydown", onTap, true); }
   function check(){
     var d = new Date();
-    if(inWin(d)){ if(!on && !waiting && !blocked && skipDay !== d.toDateString()) play(true); }
+    if(inWin(d)){ if(!on && !waiting && !blocked && skipDay !== d.toDateString() && !(window.skRainOn && window.skRainOn())) play(true); }   /* not over the rain sounds */
     else { unwait(); if(on && auto){ stop(); auto = false; } }
   }
   label(); check(); setInterval(check, 15000);
@@ -3279,6 +3283,7 @@ window.PTYPE = (function(){
   var loaded = stamp(new Date()), going = false;
   function check(){
     if(going) return;
+    if(window.skRainOn && window.skRainOn()) return;   /* rain sounds playing: wait, so they run without a break (Mark, Nov 14, 2026) */
     if(stamp(new Date()) !== loaded){ going = true; try{ try{ if(location.hash) history.replaceState(null, "", location.pathname + location.search); }catch(x){} try{ sessionStorage.setItem("skiinut-top", "1"); }catch(x){} window.scrollTo(0, 0); location.reload(); }catch(e){ going = false; } }
   }
   setInterval(check, 20000);
@@ -5931,6 +5936,12 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   /* photo top for upright phones: the picture is drawn full width at the bottom of #wt-banner */
   var cv = document.createElement("canvas"); cv.id = "lg-precip"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
   var x = cv.getContext("2d"), kind = "", parts = [], W = 0, H = 0, dpr = 1, raf = 0, last = 0;
+  /* Mist (Mark, Nov 14, 2026, 2:41 p.m.): when the resort wind is over 15 mph, soft white mist drifts across the photo and over the frost
+     bar numbers, blowing the way the wind blows and faster in stronger wind. Plays alongside rain / snow, or on its own. */
+  var mist = 0, mdir = 1, puff = document.createElement("canvas"); puff.width = puff.height = 128;
+  (function(){ var c = puff.getContext("2d"), g = c.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.45, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); c.fillStyle = g; c.fillRect(0, 0, 128, 128); })();
+  function windNow(){ var w = document.getElementById("wt-clock-wind"); if(!w) return null; var n = w.querySelector("b"), m = n && n.textContent.match(/\d+/); if(!m) return null;
+    var sv = w.querySelector("svg"), r = sv && /rotate\(\s*(-?[\d.]+)/.exec(sv.getAttribute("style") || ""), a = r ? +r[1] : 90; return {s: +m[0], dx: Math.sin(a * Math.PI / 180) < 0 ? -1 : 1}; }
   function now(){
     var box = document.getElementById("rs-olk"); if(!box) return "";
     var cols = box.querySelectorAll(".ro-c"), mk = box.querySelector(".ro-now"); if(!cols.length || !mk) return "";
@@ -5941,12 +5952,13 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   function seed(){
     parts = []; var area = W * H, nr = (kind === "rain" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 2600), ns = (kind === "snow" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 3800);
     for(var i = 0; i < nr; i++) parts.push({r: 1, x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 14, v: 520 + Math.random() * 260, a: .12 + Math.random() * .16});
+    if(mist){ var nm = Math.max(10, Math.round(area / 16000)); for(var k = 0; k < nm; k++) parts.push({m: 1, x: Math.random() * (W + 300) - 150, y: Math.random() * H, rad: 50 + Math.random() * 110, sq: .35 + Math.random() * .3, v: .6 + Math.random() * .8, a: .07 + Math.random() * .1, p: Math.random() * 6.28}); }
     for(var j = 0; j < ns; j++) parts.push({r: 0, x: Math.random() * W, y: Math.random() * H, s: .8 + Math.random() * 1.8, v: 22 + Math.random() * 38, a: .45 + Math.random() * .4, p: Math.random() * 6.28, w: .6 + Math.random() * 1.2});
   }
   function place(){
     var on = root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
-    var k = on ? now() : "";
-    if(!k){ if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
+    var k = on ? now() : "", wn = on ? windNow() : null, mi = wn && wn.s > 15 ? wn.s : 0; if(wn) mdir = wn.dx;
+    if(!k && !mi){ mist = 0; if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
     var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
     var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, br = bn ? bn.getBoundingClientRect() : null;
     if(br && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
@@ -5955,17 +5967,20 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     var w = (document.documentElement.clientWidth || window.innerWidth) - ((mq.matches || window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches) ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
     cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    if(w !== W || Math.round(h) !== H || k !== kind){ W = w; H = Math.round(h); kind = k; cv.width = W * dpr; cv.height = H * dpr; seed(); }
+    if(w !== W || Math.round(h) !== H || k !== kind || !mi !== !mist){ W = w; H = Math.round(h); kind = k; mist = mi; cv.width = W * dpr; cv.height = H * dpr; seed(); }
     if(!root.classList.contains("lg-wet")) root.classList.add("lg-wet");
     if(!raf){ last = 0; raf = requestAnimationFrame(tick); }
   }
   function stop(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
   function tick(t){
-    raf = 0; if(document.hidden || !kind) return;
+    raf = 0; if(document.hidden || (!kind && !mist)) return;
     var dt = last ? Math.min(.05, (t - last) / 1000) : .016; last = t;
     x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
     x.lineCap = "round"; x.lineWidth = 1;
     for(var i = 0; i < parts.length; i++){ var q = parts[i];
+      if(q.m){ var sp = (12 + mist * 2.2) * q.v; q.x += sp * mdir * dt; q.p += dt * .35; var yy = q.y + Math.sin(q.p) * 14, rw = q.rad * 2.2, rh = q.rad * 2.2 * q.sq;
+        if(mdir > 0 && q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } if(mdir < 0 && q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
+        x.globalAlpha = q.a * (.75 + .25 * Math.sin(q.p * 1.7)); x.drawImage(puff, q.x - rw / 2, yy - rh / 2, rw, rh); x.globalAlpha = 1; continue; }
       if(q.r){ q.y += q.v * dt; q.x -= q.v * dt * .08; if(q.y > H + q.l){ q.y = -q.l; q.x = Math.random() * (W + 40); }
         x.strokeStyle = "rgba(225,235,248," + q.a + ")"; x.beginPath(); x.moveTo(q.x, q.y); x.lineTo(q.x + q.l * .08, q.y - q.l); x.stroke(); }
       else { q.y += q.v * dt; q.p += dt * q.w; q.x += Math.sin(q.p) * 12 * dt; if(q.y > H + 4){ q.y = -4; q.x = Math.random() * W; }
@@ -5978,7 +5993,100 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   document.addEventListener("olk-render", function(){ setTimeout(q, 60); });
   try{ new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
   var ro = document.getElementById("rs-olk"); if(ro) try{ new MutationObserver(q).observe(ro, {childList: true, subtree: true}); }catch(e){}
+  var wo = document.getElementById("wt-clock-wind"); if(wo) try{ new MutationObserver(q).observe(wo, {childList: true, subtree: true, characterData: true, attributes: true}); }catch(e){}
   setInterval(q, 60000); setTimeout(q, 800);
+})();
+</script>
+<style>
+/* Sound menu (Mark, Nov 14, 2026, 2:39 p.m.): the header Music button opens a small menu — Music (Classical KING FM), Rain sounds
+   (YouTube rt_i7pqZNpo, played in the background for its full 8 hours), Mute. */
+#sk-snd{position:fixed; z-index:200; min-width:184px; padding:6px; border-radius:14px; background:rgba(18,24,36,.92); color:#fff;
+  -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%); box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  font:600 15px/1.2 var(--font-body, -apple-system, sans-serif); display:none;}
+#sk-snd.on{display:block;}
+#sk-snd button{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:0; border-radius:9px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer;}
+#sk-snd button:hover, #sk-snd button:focus-visible{background:rgba(255,255,255,.1); outline:none;}
+#sk-snd button .ck{width:14px; flex:0 0 14px; color:#E2733A; font-weight:800;}
+#sk-snd button small{margin-left:auto; opacity:.55; font-weight:500; font-size:12px;}
+#sk-rain{position:fixed; left:0; bottom:0; width:2px; height:2px; opacity:0; pointer-events:none; overflow:hidden; z-index:-1;}
+#sk-rain iframe{width:200px; height:200px; border:0;}
+</style>
+<script>
+/* Sound menu + rain sounds (Mark, Nov 14, 2026, 2:39 p.m.). Rain plays the YouTube video rt_i7pqZNpo in a hidden player for its full
+   length (8 hours from when it was picked). The choice is remembered (localStorage "skiinut-rain": start time + position), the hourly
+   page reload waits while rain is playing, and if the page does reload the rain picks up where it was (if the browser wants a tap
+   first, the button pulses and the first tap anywhere resumes it). Morning music doesn't start over the rain. Keep as is during routine refreshes. */
+(function(){
+  var b = document.getElementById("wt-radio"); if(!b) return;
+  var VID = "rt_i7pqZNpo", LINK = "https://youtu.be/rt_i7pqZNpo", KEY = "skiinut-rain", LEN = 8 * 3600 * 1000;
+  var st = null; try{ st = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){}
+  if(st && !(Date.now() - st.start < LEN)) st = null;
+  var yt = null, box = null, playing = false, waiting = false, timer = 0;
+  window.skRainOn = function(){ return !!st; };
+  function save(){ try{ if(st) localStorage.setItem(KEY, JSON.stringify(st)); else localStorage.removeItem(KEY); }catch(e){} }
+  function kingOn(){ return b.getAttribute("aria-pressed") === "true" && !st; }
+  function label(){
+    var k = window.skKing, mOn = k && k.on(), blocked = k && k.blocked();
+    b.textContent = st ? "Rain ▾" : mOn ? "Music ▾" : blocked ? "Music ↗" : "Sound ▾";
+    b.setAttribute("aria-pressed", (st || mOn) ? "true" : "false");
+    b.title = "Sound: Music (Classical KING FM), Rain sounds or Mute";
+  }
+  window.skSoundLabel = label;
+  /* menu */
+  var m = document.createElement("div"); m.id = "sk-snd"; m.setAttribute("role", "menu");
+  m.innerHTML = '<button type="button" role="menuitemradio" data-v="music"><span class="ck"></span>Music<small>KING FM</small></button>' +
+                '<button type="button" role="menuitemradio" data-v="rain"><span class="ck"></span>Rain sounds<small>8 hr</small></button>' +
+                '<button type="button" role="menuitemradio" data-v="mute"><span class="ck"></span>Mute</button>';
+  document.body.appendChild(m);
+  function mode(){ var k = window.skKing; return st ? "rain" : (k && k.on()) ? "music" : "mute"; }
+  function place(){ var r = b.getBoundingClientRect(), w = m.offsetWidth || 184; var x = Math.min(window.innerWidth - w - 8, Math.max(8, r.right - w)); m.style.left = x + "px"; m.style.top = Math.round(r.bottom + 6) + "px"; }
+  function open(){ var cur = mode(); [].forEach.call(m.querySelectorAll("button"), function(x){ var on = x.getAttribute("data-v") === cur; x.querySelector(".ck").textContent = on ? "✓" : ""; x.setAttribute("aria-checked", on ? "true" : "false"); });
+    m.classList.add("on"); place(); }
+  function close(){ m.classList.remove("on"); }
+  window.skSoundMenu = function(){ if(m.classList.contains("on")) close(); else open(); };
+  document.addEventListener("pointerdown", function(e){ if(m.classList.contains("on") && !m.contains(e.target) && e.target !== b) close(); }, true);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") close(); });
+  window.addEventListener("resize", function(){ if(m.classList.contains("on")) place(); });
+  window.addEventListener("scroll", function(){ if(m.classList.contains("on")) place(); }, {passive: true});
+  m.addEventListener("click", function(e){ var x = e.target.closest("button"); if(!x) return; var v = x.getAttribute("data-v"); close();
+    var k = window.skKing;
+    if(v === "music"){ stopRain(); if(k && !k.on()) k.play(); }
+    else if(v === "rain"){ if(k && k.on()) k.stop(); st = {start: Date.now(), pos: 0}; save(); startRain(true); }
+    else { stopRain(); if(k && k.on()) k.stop(true); }
+    label(); });
+  /* rain player */
+  function api(cb){ if(window.YT && window.YT.Player) return cb();
+    var prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = function(){ if(prev) try{ prev(); }catch(e){} cb(); };
+    if(!document.getElementById("yt-api")){ var s = document.createElement("script"); s.id = "yt-api"; s.src = "https://www.youtube.com/iframe_api"; s.onerror = fail; document.head.appendChild(s); } }
+  function fail(){ stopRain(); label(); window.open(LINK, "_blank", "noopener"); }
+  function unwait(){ if(!waiting) return; waiting = false; b.classList.remove("wt-radio-wake"); document.removeEventListener("pointerdown", tap, true); }
+  function tap(e){ if(e && e.target && e.target.closest && (e.target.closest("#wt-radio") || e.target.closest("#sk-snd"))) return; unwait(); if(yt && st){ try{ yt.unMute(); yt.playVideo(); }catch(x){} } }
+  function wait(){ if(waiting) return; waiting = true; b.classList.add("wt-radio-wake"); document.addEventListener("pointerdown", tap, true); }
+  function startRain(byTap){
+    if(!st) return;
+    if(!box){ box = document.createElement("div"); box.id = "sk-rain"; document.body.appendChild(box); }
+    var pos = Math.max(0, Math.floor(st.pos || 0));
+    if(yt){ try{ yt.seekTo(pos, true); yt.unMute(); yt.setVolume(100); yt.playVideo(); }catch(e){} return; }
+    var f = document.createElement("iframe"); f.id = "sk-rain-f"; f.setAttribute("allow", "autoplay; encrypted-media"); f.title = "Rain sounds";
+    f.src = "https://www.youtube.com/embed/" + VID + "?enablejsapi=1&autoplay=1&controls=0&playsinline=1&rel=0&start=" + pos + "&origin=" + encodeURIComponent(location.origin || "");
+    box.appendChild(f);
+    api(function(){
+      yt = new YT.Player("sk-rain-f", {events: {
+        onReady: function(e){ try{ e.target.unMute(); e.target.setVolume(100); e.target.playVideo(); }catch(x){}
+          setTimeout(function(){ if(st && !playing) wait(); }, byTap ? 4000 : 2500); },
+        onStateChange: function(e){ playing = e.data === 1; if(playing) unwait(); if(e.data === 0){ stopRain(); label(); } },
+        onError: function(){ fail(); } }});
+    });
+    clearInterval(timer);
+    timer = setInterval(function(){
+      if(!st) return;
+      if(Date.now() - st.start >= LEN){ stopRain(); label(); return; }
+      try{ if(yt && yt.getCurrentTime){ var t = yt.getCurrentTime(); if(t > 0){ st.pos = t; save(); } } }catch(e){}
+    }, 15000);
+  }
+  function stopRain(){ unwait(); clearInterval(timer); if(yt){ try{ yt.stopVideo(); yt.destroy(); }catch(e){} yt = null; } if(box){ box.innerHTML = ""; } playing = false; st = null; save(); }
+  label(); setTimeout(label, 0);
+  if(st) startRain(false);
 })();
 </script>
 
