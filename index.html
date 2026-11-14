@@ -5958,12 +5958,12 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     parts = []; var area = W * H, nr = (kind === "rain" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 2600), ns = (kind === "snow" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 3800);
     for(var i = 0; i < nr; i++) parts.push({r: 1, x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 14, v: 520 + Math.random() * 260, a: .12 + Math.random() * .16});
     if(mist){ var nm = Math.max(5, Math.round(area / 32000));   /* half (Mark, 3:57 p.m.) */ for(var k = 0; k < nm; k++) parts.push({m: 1, x: Math.random() * (W + 300) - 150, y: Math.random() * H, rad: 50 + Math.random() * 110, sq: .35 + Math.random() * .3, v: .6 + Math.random() * .8, a: .07 + Math.random() * .1, p: Math.random() * 6.28}); }
-    if(mist){ var nf = Math.max(8, Math.round(area / 20000));   /* half as many (Mark, 2:59 p.m.) */ for(var f = 0; f < nf; f++) parts.push({f: 1, x: Math.random() * W, y: Math.random() * H, s: .6 + Math.random() * 1.6, l: Math.random() < .45 ? 6 + Math.random() * 16 : 0, v: .7 + Math.random() * .9, a: .3 + Math.random() * .45, p: Math.random() * 6.28, w: 1.5 + Math.random() * 3}); }   /* flying specks and streaks (Mark, 2:55 p.m.) */
+    if(mist >= 15){ var nf = Math.max(8, Math.round(area / 20000));   /* half as many (Mark, 2:59 p.m.) */ for(var f = 0; f < nf; f++) parts.push({f: 1, x: Math.random() * W, y: Math.random() * H, s: .6 + Math.random() * 1.6, l: Math.random() < .45 ? 6 + Math.random() * 16 : 0, v: .7 + Math.random() * .9, a: .3 + Math.random() * .45, p: Math.random() * 6.28, w: 1.5 + Math.random() * 3}); }   /* flying specks and streaks (Mark, 2:55 p.m.) */
     for(var j = 0; j < ns; j++) parts.push({r: 0, x: Math.random() * W, y: Math.random() * H, s: .8 + Math.random() * 1.8, v: 22 + Math.random() * 38, a: .45 + Math.random() * .4, p: Math.random() * 6.28, w: .6 + Math.random() * 1.2});
   }
   function place(){
     var on = root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
-    var k = on ? now() : "", wn = on ? windNow() : null, mi = wn && wn.s >= 15 ? wn.s : 0;   /* 15 mph and up (Mark, 3:12 p.m.) */ if(wn){ mdir = wn.dx; fvx = wn.vx; fvy = wn.vy; }
+    var k = on ? now() : "", wn = on ? windNow() : null, mi = wn && wn.s >= 10 ? wn.s : 0;   /* mist from 10 mph, particles from 15 (Mark, 4:18 p.m.) */ if(wn){ mdir = wn.dx; fvx = wn.vx; fvy = wn.vy; }
     var sn = on && !k && starHours(); if(sn !== stars){ stars = sn; meteors = []; nextStar = 0; }
     if(!k && !mi && !sn){ mist = 0; if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
     var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
@@ -5974,7 +5974,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     var w = (document.documentElement.clientWidth || window.innerWidth) - ((mq.matches || window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches) ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
     cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    if(w !== W || Math.round(h) !== H || k !== kind || !mi !== !mist){ W = w; H = Math.round(h); kind = k; mist = mi; cv.width = W * dpr; cv.height = H * dpr; seed(); }
+    if(w !== W || Math.round(h) !== H || k !== kind || !mi !== !mist || (mi >= 15) !== (mist >= 15)){ W = w; H = Math.round(h); kind = k; mist = mi; cv.width = W * dpr; cv.height = H * dpr; seed(); }
     mist = mi;   /* keep the live wind speed for the particle speed */
     var frE = document.querySelector("#lg-wrap .lg-frost"), frT = frE && frE.offsetParent ? frE.getBoundingClientRect().top - top : 0; skyH = frT > 40 ? Math.min(H, frT) : H * .6;   /* shooting stars stay in the sky above the frost bar */
     if(!root.classList.contains("lg-wet")) root.classList.add("lg-wet");
@@ -6000,8 +6000,9 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
       x.restore();
     }
     for(var i = 0; i < parts.length; i++){ var q = parts[i];
-      if(q.m){ var sp = (12 + mist * 2.2) * q.v; q.x += sp * mdir * dt; q.p += dt * .35; var yy = q.y + Math.sin(q.p) * 14, rw = q.rad * 2.2, rh = q.rad * 2.2 * q.sq;
-        if(mdir > 0 && q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } if(mdir < 0 && q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
+      if(q.m){ var sp = (12 + mist * 2.2) * q.v; q.x += sp * fvx * dt; q.y += sp * fvy * dt; q.p += dt * .35; var yy = q.y + Math.sin(q.p) * 14, rw = q.rad * 2.2, rh = q.rad * 2.2 * q.sq;   /* mist flows the way the wind arrow points (Mark, 4:18 p.m.) */
+        if(q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } else if(q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
+        if(q.y - rh > H){ q.y = -rh; q.x = Math.random() * W; } else if(q.y + rh < 0){ q.y = H + rh; q.x = Math.random() * W; }
         x.globalAlpha = q.a * (.75 + .25 * Math.sin(q.p * 1.7)); x.drawImage(puff, q.x - rw / 2, yy - rh / 2, rw, rh); x.globalAlpha = 1; continue; }
       if(q.f){   /* light grey, flying the way the wind arrow points (Mark, 2:59 p.m.) */
         var fv = (mist <= 20 ? 25 + mist * 3 : 180 + (mist - 20) * 12) * q.v;   /* 15-20 mph: slow drift (70-85 px/s); over 20: fast (180 + 12 per mph) (Mark, 3:07 p.m.) */ q.p += dt * q.w; var wob = Math.sin(q.p) * 16, dxp = fvx * fv - fvy * wob, dyp = fvy * fv + fvx * wob;
