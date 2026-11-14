@@ -5466,13 +5466,17 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 #wt-clock-tmp:not(:empty) + #wt-clock-rtmp:not(:empty)::before,
 #wt-pclock-l:not(:empty) + #wt-pclock-r:not(:empty)::before{content:""; display:inline-block; width:max(1.5px,.035em); height:.7em;
   background:#fff; border-radius:1px; margin-right:.2em; vertical-align:baseline; box-shadow:0 0 2px rgba(0,0,0,.45);}
-/* Clock temps look like the clock's own font (Mark, Nov 14, 2026): the white frame is a thin true stroke around each glyph
-   (paint-order keeps it outside the fill) instead of the heavy 8-way text-shadow, which fattened the digits. Same for the wind speed.
-   Keep as is. */
-.wt-clock .tc-hot, .wt-clock .tc-mild, .wt-clock .tc-cool, .wt-clock .tc-cold,
-#wt-pclock .tc-hot, #wt-pclock .tc-mild, #wt-pclock .tc-cool, #wt-pclock .tc-cold{text-shadow:0 2px 6px rgba(0,0,0,.35)!important; -webkit-text-stroke:.014em #fff; paint-order:stroke fill;}
-#rs-hero .wt-clock .tc-hot, #rs-hero .wt-clock .tc-mild, #rs-hero .wt-clock .tc-cool, #rs-hero .wt-clock .tc-cold{-webkit-text-stroke:0;}
-.wt-wind.ws-w b, .wt-wind.ws-y b, .wt-wind.ws-r b{text-shadow:0 2px 6px rgba(0,0,0,.35); -webkit-text-stroke:.014em #fff; paint-order:stroke fill;}
+/* Clock temps mirror the clock exactly (Mark, Nov 14, 2026): same Barlow Condensed glyphs, size and weight as the time, with only a
+   thin fixed 1.5px white rim drawn outside the digits (never a text-stroke, which thins the digits on iPhone Safari, and not the old
+   heavy .022em rim, which fattened them). The digits get 3px extra letter-spacing so the rims don't close the gap between them —
+   the visible spacing then matches the time's. Same thin rim on the wind speed. Keep as is. */
+html .wt-clock .tc-hot, html .wt-clock .tc-mild, html .wt-clock .tc-cool, html .wt-clock .tc-cold,
+html #wt-pclock .tc-hot, html #wt-pclock .tc-mild, html #wt-pclock .tc-cool, html #wt-pclock .tc-cold{-webkit-text-stroke:0!important; paint-order:normal;
+  text-shadow:1.5px 0 0 #fff, -1.5px 0 0 #fff, 0 1.5px 0 #fff, 0 -1.5px 0 #fff, 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff, 0 2px 6px rgba(0,0,0,.35)!important;}
+html #rs-hero .wt-clock .tc-hot, html #rs-hero .wt-clock .tc-mild, html #rs-hero .wt-clock .tc-cool, html #rs-hero .wt-clock .tc-cold{text-shadow:inherit!important;}
+html .wt-clock .wt-clock-tmp:not(:empty), html #wt-pclock .wt-clock-tmp:not(:empty){letter-spacing:calc(.02em + 3px)!important;}
+.wt-wind.ws-w b, .wt-wind.ws-y b, .wt-wind.ws-r b{-webkit-text-stroke:0; paint-order:normal;
+  text-shadow:1.5px 0 0 #fff, -1.5px 0 0 #fff, 0 1.5px 0 #fff, 0 -1.5px 0 #fff, 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff, 0 2px 6px rgba(0,0,0,.35);}
 /* Wind mark (Mark, Nov 12, 2026, 2:17 a.m.): arrow and speed the same height as the temperatures' digits (speed in the clock's own
    size; arrow --wh = the font's measured digit height), a very small "mph" at the bottom right, and the same .2em gap between every
    element of the line (time · local temp · resort temp · arrow · speed). */
