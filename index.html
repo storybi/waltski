@@ -3947,7 +3947,7 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar,#wt-pclock{display:none;}
 @media (any-pointer:coarse) and (max-height:1100px) and (orientation:landscape), (any-pointer:coarse) and (orientation:portrait){
   html.show-image #wx-nowbar.on{display:block; position:absolute; z-index:40; width:16px; right:var(--nb-right, 2px);
-    border-radius:8px; background:#000; box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    border-radius:0; background:#000; box-shadow:inset 0 0 0 1px rgba(255,255,255,.28); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
     text-decoration:none; color:#fff;}
 }
 @media (any-pointer:coarse) and (orientation:portrait){
@@ -3962,9 +3962,9 @@ html:not(.view-news) #ecov{display:none!important;}
 #wx-nowbar .nb-b{opacity:.92;} #wx-nowbar .nb-b.ch{opacity:.45;}
 #wx-nowbar .nb-in,#wx-nowbar .nb-tmp,#wx-nowbar .nb-who{transition:opacity .25s;} #wx-nowbar.nb-fade .nb-in,#wx-nowbar.nb-fade .nb-who{opacity:0;}
 #wx-nowbar .nb-who{position:absolute; left:0; right:0; bottom:5px; height:11px; display:flex; justify-content:center;} #wx-nowbar .nb-who svg{width:11px; height:11px; fill:#fff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));}
-#wx-nowbar .nb-cur{position:absolute; left:-8px; right:-8px; text-align:center; font:700 9.5px/1 "Barlow Condensed","Inter",Arial,sans-serif; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); font-variant-numeric:tabular-nums;}
+#wx-nowbar .nb-cur{position:absolute; left:-16px; right:1px; text-align:right; font:700 9.5px/1 "Barlow Condensed","Inter",Arial,sans-serif; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); font-variant-numeric:tabular-nums;}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
-#wx-nowbar .nb-tmp{position:absolute; left:-6px; right:-6px; top:4px; text-align:center; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
+#wx-nowbar .nb-tmp{position:absolute; left:-16px; right:1px; top:4px; text-align:right; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
   color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7); font-variant-numeric:tabular-nums;}
 /* Doppler strip behind the bar (Mark, Nov 14, 2026): a narrow slice of radar (satellite + NWS reflectivity) for the place the bar is
    showing (resort or local, switching with it), the bar's height, its right edge under the bar's right edge, reaching left of the bar by
@@ -3976,6 +3976,7 @@ html:not(.view-news) #ecov{display:none!important;}
     -webkit-mask-image:linear-gradient(to right, transparent 0, #000 4px); mask-image:linear-gradient(to right, transparent 0, #000 4px);}
   html.show-image #wx-nowbar.on.nb-rad{background:#000; -webkit-backdrop-filter:none; backdrop-filter:none;}  /* black track for contrast (Mark, Nov 14, 2026) */
 }
+@media (orientation:portrait){ #wx-nowrad{display:none!important;} }
 #wx-nowrad img{position:absolute; width:256px; height:256px; max-width:none; display:block;}
 #wx-nowrad .nr-c{position:absolute; left:0; top:0; filter:blur(1px);}
 #wt-pclock .wt-clock-tmp{display:inline; margin-left:.4em; font:inherit; letter-spacing:inherit;}
@@ -4033,18 +4034,21 @@ html:not(.view-news) #ecov{display:none!important;}
     var probe = document.getElementById("wt-nb-probe");
     if(!probe){ probe = document.createElement("div"); probe.id = "wt-nb-probe"; probe.style.cssText = "position:fixed;top:0;width:0;height:0;visibility:hidden;padding-right:env(safe-area-inset-right,0px)"; document.body.appendChild(probe); }
     inset = parseFloat(getComputedStyle(probe).paddingRight) || 0;
-    var right = notchRight() ? Math.max(2, inset - 6) : 2;
-    root.style.setProperty("--nb-right", right + "px");
+    /* Bar + sliver layout (Mark, Nov 14, 2026): the bar is flush with the very right edge of the screen, squared off, and spans the same
+       height as the Doppler sliver. Sideways: both run from the very top of the screen to the bottom of the photo or of the screen,
+       whichever is lower. Upright: the bar runs from the picture's top edge to its bottom edge and there is no sliver. */
+    var right = 0;
+    root.style.setProperty("--nb-right", "0px");
     var b = photoBox();
-    if(b.bottom - b.top < 80) b.bottom = b.top + 80;
-    bar.style.top = Math.round(b.top) + "px"; bar.style.height = Math.round(b.bottom - b.top) + "px";
-    var left = bar.classList.contains("on") ? W - right - 16 : W - 14;
+    var bn2 = document.getElementById("wt-banner"), ib = bn2 ? bn2.getBoundingClientRect() : null;
+    var it = ib ? ib.top + b.sy : b.top, ibm = ib ? ib.bottom + b.sy : b.bottom;
+    if(mqP.matches){ if(ib){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); } }
+    else { it = 0; ibm = Math.max(ibm, window.innerHeight || document.documentElement.clientHeight || 0); }
+    if(ibm - it < 80) ibm = it + 80;
+    bar.style.top = Math.round(it) + "px"; bar.style.height = Math.round(ibm - it) + "px";
+    var left = bar.classList.contains("on") ? W - 16 : W - 14;
     window.NOWBAR_LEFT = left;
-    /* Sliver (Mark, Nov 14, 2026): runs from the photo's own top edge to its bottom edge, squared off, flush with the screen's right edge,
-       54px wide (Mark widened it 50% twice, Nov 14, 2026). */
-    if(bar.classList.contains("on")){ var bn2 = document.getElementById("wt-banner"), ib = bn2 ? bn2.getBoundingClientRect() : null;
-      var it = ib ? ib.top + b.sy : b.top, ibm = ib ? ib.bottom + b.sy : b.bottom;
-      if(ib && mqP.matches){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); }
+    if(bar.classList.contains("on") && mqL.matches){
       rad.style.top = Math.round(it) + "px"; rad.style.height = Math.round(ibm - it) + "px";
       rad.style.left = (W - 54) + "px"; rad.style.width = "54px"; rad.classList.add("on"); bar.classList.add("nb-rad"); radar(Math.round(ibm - it)); }
     else { rad.classList.remove("on"); bar.classList.remove("nb-rad"); }
