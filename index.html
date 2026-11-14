@@ -2204,7 +2204,7 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
   function size(){
     var w = document.getElementById("wt-head-end") || document.getElementById("wt-dock-end") || document.getElementById("wxbar") || document.getElementById("askbar"); if(!w) return;
     var b = w.getBoundingClientRect().bottom + window.scrollY;
-    el.style.height = Math.max(0, Math.round(b + 16)) + "px"; past();
+    el.style.height = Math.max(0, Math.round(b)) + "px"; past();   /* photo ends where the ticker and site buttons start: no overlap (Mark, Nov 14, 2026, 1:58 p.m.) */
   }
   function past(){ root.classList.toggle("banner-past", window.scrollY > (parseFloat(el.style.height) || 0) - 140); }
   function label(k){
@@ -5712,6 +5712,17 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 html.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
 html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!important;}   /* also in Show card (Mark, 1:08 p.m.) */
 #lg-slot{display:none;}
+/* Show card (Mark, Nov 14, 2026, 1:58 p.m.): no glass line, no frost, and the old time/temp/wind line above the card is hidden too, so the card
+   moves up and the 48-hr outlook columns get taller (22px -> 40px; 16px -> 32px on landscape phones/iPads). Upright phones keep the time in the card. */
+html:not(.show-image):not(.clock-in-card) #wt-clock{display:none!important;}
+html:not(.show-image) #rs-hero .rs-olk .ro-cols{height:40px!important;}
+html:not(.show-image) #rs-hero .rs-olk .ro-now,html:not(.show-image) #rs-hero .rs-olk .ro-day{top:41px!important;}
+html:not(.show-image) #rs-hero .rs-olk .ro-hrs{top:49px!important;} html:not(.show-image) #rs-hero .rs-olk .ro-tmp{top:61px!important;}
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  html:not(.show-image) #rs-hero .rs-olk .ro-cols{height:32px!important;}
+  html:not(.show-image) #rs-hero .rs-olk .ro-now,html:not(.show-image) #rs-hero .rs-olk .ro-day{top:33px!important;}
+  html:not(.show-image) #rs-hero .rs-olk .ro-hrs{top:40px!important;} html:not(.show-image) #rs-hero .rs-olk .ro-tmp{top:49px!important;}
+}
 html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright Show card: the line sits above the card instead */
 #lg-wrap .g{position:absolute;}
 /* frosted backing (Mark, Nov 14, 2026, 1:06 p.m.): a softly blurred, slightly darkened pane behind the whole line */
@@ -5745,7 +5756,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   var mc = document.createElement("canvas").getContext("2d"), dpr = 2;
   var AR = window.Path2D ? new Path2D("M12 0l8 11h-5.75v13h-4.5V11H4z") : null;
   var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
-  function on(){ return (mq.matches || mqP.matches || mqD.matches) && !!document.getElementById("wt-banner"); }   /* Show image and Show card (Mark, 1:08 p.m.) */
+  function on(){ return (mq.matches || mqP.matches || mqD.matches) && root.classList.contains("show-image") && !!document.getElementById("wt-banner"); }   /* Show image only — Show card has no line or frost (Mark, 1:58 p.m.) */
   function cap(){ mc.font = WT + " 100px " + FAM; var m = mc.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) CAP = m.actualBoundingBoxAscent / 100; }
   function tw(t, fs, wt){ mc.font = (wt || WT) + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
   function mk(cw, ch){ var c = document.createElement("canvas"); c.width = Math.ceil(cw * dpr); c.height = Math.ceil(ch * dpr); return c; }
@@ -5826,7 +5837,8 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   }
   function draw(){
     raf = 0;
-    if(!on()){ if(root.classList.contains("lg-on")) root.classList.remove("lg-on"); lastKey = ""; return; }
+    if(!on()){ if(root.classList.contains("lg-on")) root.classList.remove("lg-on"); if(root.classList.contains("lg-card")) root.classList.remove("lg-card");
+      var sl0 = document.getElementById("lg-slot"); if(sl0 && sl0.style.display !== "none") sl0.style.display = "none"; lastKey = ""; return; }
     if(!root.classList.contains("lg-on")) root.classList.add("lg-on");
     var hm = (hmEl.textContent || "").trim(); if(!/\d/.test(hm)) return;
     var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind();
