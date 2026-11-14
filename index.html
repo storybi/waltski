@@ -2628,6 +2628,51 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
 })();
 </script>
 <script>
+/* Radar precipitation type by area (Mark, Nov 14, 2026): NOAA's MRMS surface precipitation type (NCEP GeoServer WMS layer
+   conus_pcpn_typ, 1 km, every 2 minutes, free, CORS open) tells, pixel by pixel, whether the radar echo is rain or snow. Its colors:
+   dark blue (4,80,164) = warm stratiform rain, cyan (110,255,255) = cold stratiform rain, grey (200,200,200) = snow; anything else
+   opaque (convective, hail, tropical) = rain. The big radar, its symbols and the right-side bar's Doppler strip all color each echo by
+   this type: green = rain, blue = snow, pink = mix, which here marks the rain/snow line (rain and snow cells side by side).
+   Where MRMS has no type (outside the lower 48, or no coverage) they fall back to the NWS forecast type as before.
+   window.PTYPE.load(z, x0, y0, x1, y1, w, h, when, cb): x/y in Web Mercator pixel coordinates at zoom z; cb(Uint8Array w*h of
+   0 none / 1 rain / 2 snow / 3 mix) or cb(null). Keep as is. */
+window.PTYPE = (function(){
+  var URL = "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_pcpn_typ/ows", R = 20037508.342789244;
+  function merc(z, px, py){ var s = 2 * R / (256 * Math.pow(2, z)); return [px * s - R, R - py * s]; }
+  function iso(t){ return new Date(Math.floor(t / 120000) * 120000).toISOString().slice(0, 19) + "Z"; }
+  function url(z, x0, y0, x1, y1, w, h, when){ var a = merc(z, x0, y1), b = merc(z, x1, y0);
+    return URL + "?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=conus_pcpn_typ&STYLES=&SRS=EPSG:3857&BBOX=" +
+      [a[0], a[1], b[0], b[1]].map(function(v){ return v.toFixed(1); }).join(",") + "&WIDTH=" + w + "&HEIGHT=" + h +
+      "&FORMAT=image/png&TRANSPARENT=TRUE" + (when ? "&TIME=" + iso(when) : "&_=" + Math.floor(Date.now() / 120000)); }
+  function finish(t, w, h){
+    var i, x, y, n, k, u = new Uint8Array(t), pass, changed;
+    for(pass = 0; pass < 8; pass++){ changed = false; var nx = new Uint8Array(u);   /* spread known types a few cells into gaps */
+      for(y = 0; y < h; y++) for(x = 0; x < w; x++){ i = y * w + x; if(u[i]) continue;
+        k = (x > 0 && u[i - 1]) || (x < w - 1 && u[i + 1]) || (y > 0 && u[i - w]) || (y < h - 1 && u[i + w]) || 0; if(k){ nx[i] = k; changed = true; } }
+      u = nx; if(!changed) break; }
+    var out = new Uint8Array(u);
+    for(y = 0; y < h; y++) for(x = 0; x < w; x++){ i = y * w + x; if(!u[i]) continue;
+      for(n = -1; n <= 1 && out[i] !== 3; n++) for(k = -1; k <= 1; k++){ var xx = x + k, yy = y + n; if(xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        var v = u[yy * w + xx]; if(v && v !== u[i]){ out[i] = 3; break; } } }
+    return out;
+  }
+  function load(z, x0, y0, x1, y1, w, h, when, cb){
+    w = Math.max(1, Math.round(w)); h = Math.max(1, Math.round(h));
+    var im = new Image(); im.crossOrigin = "anonymous";
+    im.onload = function(){ try{
+        var cv = document.createElement("canvas"); cv.width = w; cv.height = h; var ctx = cv.getContext("2d"); ctx.drawImage(im, 0, 0, w, h);
+        var d = ctx.getImageData(0, 0, w, h).data, t = new Uint8Array(w * h), any = false;
+        for(var i = 0, o = 0; i < t.length; i++, o += 4){ if(d[o + 3] < 128) continue; any = true;
+          t[i] = (Math.abs(d[o] - d[o + 1]) < 12 && Math.abs(d[o + 1] - d[o + 2]) < 12 && d[o] > 150) ? 2 : 1; }
+        cb(any ? finish(t, w, h) : null);
+      }catch(e){ cb(null); } };
+    im.onerror = function(){ if(when) load(z, x0, y0, x1, y1, w, h, null, cb); else cb(null); };
+    im.src = url(z, x0, y0, x1, y1, w, h, when);
+  }
+  return {load: load, KIND: ["", "rain", "snow", "mix"]};
+})();
+</script>
+<script>
 /* Live radar — Doppler radar over Mountain Green & Snowbasin under the Snow Watch cards (added Oct 25, 2026).
    On waltski.com: an interactive Leaflet map (Esri satellite base + place labels, NWS NEXRAD composite reflectivity tiles softened with a light blur from the Iowa Environmental
    Mesonet), looping the last 50 minutes in 5-minute frames and reloading every 5 minutes. Inside claude.ai (which can't load
@@ -2659,6 +2704,7 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
   var PAL = {rain: ["#a4ecb0","#6fd889","#45bd65","#2a9a4a","#f2d230","#f28c28","#e0402c","#b52bb0"],
              snow: ["#a9eef6","#7fd0f0","#5aa9e6","#3d84d6","#2c62c2","#2447a3","#3a2f9a","#5a2a9e"],
              mix:  ["#f7d6e5","#efb0cd","#e48ab6","#d4669f","#bf4a8a","#a33876","#862a66","#6a1f58"]};
+  window.RADAR_COLORS = {REF: REF, TH: TH, PAL: PAL};
   function radTiles(){ var r = V().ridge; return "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + (r ? "ridge::" + r + "-N0Q-0" : "nexrad-n0q-900913"); }
   var view = "sb"; try{ var vv = localStorage.getItem("wsj-radar-view"); if(VIEWS[vv]) view = vv; }catch(e){}
   /* Linked to the header cam switch (Oct 25, 2026): the radar starts on, and follows, the header's SB / DV choice. */
@@ -2716,8 +2762,27 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
       "  f=Image.fromarray(np.clip(sm*3,0,255).astype('uint8'),'L').filter(ImageFilter.GaussianBlur(2.6)).resize((W,H),Image.BILINEAR)\n" +
       "  v=np.asarray(f).astype(float)/3;out=np.zeros((H,W,4),np.uint8)\n" +
       "  bi=np.digitize(v,TH)\n" +
-      "  for i,c in enumerate(PAL):\n" +
-      "    out[bi==i+1]=[int(c[1:3],16),int(c[3:5],16),int(c[5:7],16),200]\n" +
+      "  TK=np.zeros((H,W),np.uint8)\n" +
+      "  try:\n" +
+      "    R0=20037508.342789244;sc=2*R0/(256*2**Z)\n" +
+      "    bb='%.1f,%.1f,%.1f,%.1f'%(x0*sc-R0,R0-(y0+H)*sc,(x0+W)*sc-R0,R0-y0*sc)\n" +
+      "    if " + (V().ridge ? "False" : "True") + ":\n" +
+      "      q=np.asarray(get('https://opengeo.ncep.noaa.gov/geoserver/conus/conus_pcpn_typ/ows?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=conus_pcpn_typ&STYLES=&SRS=EPSG:3857&BBOX='+bb+'&WIDTH=%d&HEIGHT=%d&FORMAT=image/png&TRANSPARENT=TRUE'%(W//4,H//4))).astype(int)\n" +
+      "      t=np.where(q[...,3]<128,0,np.where((abs(q[...,0]-q[...,1])<12)&(abs(q[...,1]-q[...,2])<12)&(q[...,0]>150),2,1)).astype(np.uint8)\n" +
+      "      for _ in range(8):\n" +
+      "        z0=t==0\n" +
+      "        if not z0.any(): break\n" +
+      "        nb=np.maximum.reduce([np.roll(t,1,0),np.roll(t,-1,0),np.roll(t,1,1),np.roll(t,-1,1)]);t=np.where(z0,nb,t)\n" +
+      "      mx=np.maximum.reduce([np.roll(np.roll(t,a,0),c,1) for a in (-1,0,1) for c in (-1,0,1)])\n" +
+      "      mn=np.minimum.reduce([np.where(np.roll(np.roll(t,a,0),c,1)==0,9,np.roll(np.roll(t,a,0),c,1)) for a in (-1,0,1) for c in (-1,0,1)])\n" +
+      "      t=np.where((t>0)&(mx==2)&(mn==1),3,t)\n" +
+      "      TK=np.asarray(Image.fromarray(t,'L').resize((W,H),Image.NEAREST))\n" +
+      "  except Exception: pass\n" +
+      "  ALL=" + JSON.stringify(PAL) + ";NAMES=['','rain','snow','mix']\n" +
+      "  for kk in (0,1,2,3):\n" +
+      "    P=PAL if kk==0 else ALL[NAMES[kk]]\n" +
+      "    for i,c in enumerate(P):\n" +
+      "      out[(bi==i+1)&(TK==kk)]=[int(c[1:3],16),int(c[3:5],16),int(c[5:7],16),200]\n" +
       "  rad=Image.fromarray(out,'RGBA');A=rad.split()[3]\n" +
       "except Exception:\n" +
       "  rad=rad.filter(ImageFilter.GaussianBlur(2.2))\n" +
@@ -2737,11 +2802,19 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
       "  base=Image.alpha_composite(base,Image.fromarray(co,'RGBA').filter(ImageFilter.GaussianBlur(3)))\n" +
       "except Exception: pass\n" +
       "img=Image.alpha_composite(Image.alpha_composite(base,rad),lab);d=ImageDraw.Draw(img)\n" +
-      "if kind:\n" +
+      "try: TK\n" +
+      "except NameError:\n" +
+      "  import numpy as np;TK=np.zeros((H,W),np.uint8)\n" +
+      "if kind or TK.any():\n" +
       "  pts=[(x,y) for y in range(14,H-6,30) for x in range(14,W-6,30) if A.getpixel((x,y))>60]\n" +
       "  if len(pts)>60: pts=pts[::math.ceil(len(pts)/60)]\n" +
       "  for i,(x,y) in enumerate(pts):\n" +
       "    k=kind if kind!='mix' else ('rain' if i%2 else 'snow')\n" +
+      "    if not k and not TK[y,x]: continue\n" +
+      "    try:\n" +
+      "      tv=int(TK[y,x])\n" +
+      "      if tv: k=['','rain','snow','rain' if i%2 else 'snow'][tv]\n" +
+      "    except Exception: pass\n" +
       "    if k=='snow':\n" +
       "      for ang in (90,30,150):\n" +
       "        dx=6*math.cos(math.radians(ang));dy=6*math.sin(math.radians(ang))\n" +
@@ -2873,8 +2946,8 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
     }
     function sym(k, i){ return k === "mix" ? (i % 2 ? DROP : FLAKE) : (k === "snow" ? FLAKE : DROP); }
     function place(points, k){
-      fx.innerHTML = points.map(function(p, i){
-        return '<span class="fx-' + (sym(k, i) === FLAKE ? "flake" : "drop") + '" style="left:' + p[0].toFixed(0) + 'px;top:' + p[1].toFixed(0) + 'px;animation-delay:-' + ((i * 0.37) % 3).toFixed(2) + 's">' + sym(k, i) + '</span>';
+      fx.innerHTML = points.map(function(p, i){ var kk = p[2] || k;
+        return '<span class="fx-' + (sym(kk, i) === FLAKE ? "flake" : "drop") + '" style="left:' + p[0].toFixed(0) + 'px;top:' + p[1].toFixed(0) + 'px;animation-delay:-' + ((i * 0.37) % 3).toFixed(2) + 's">' + sym(kk, i) + '</span>';
       }).join("");
     }
     function fallback(k){
@@ -2890,7 +2963,8 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
         var z = map.getZoom(), size = map.getSize(), b = map.getPixelBounds(), bust = Math.floor(Date.now() / 300000);
         var tx0 = Math.floor(b.min.x / 256), ty0 = Math.floor(b.min.y / 256), tx1 = Math.floor(b.max.x / 256), ty1 = Math.floor(b.max.y / 256);
         var cv = document.createElement("canvas"); cv.width = (tx1 - tx0 + 1) * 256; cv.height = (ty1 - ty0 + 1) * 256;
-        var ctx = cv.getContext("2d"), pending = 0, failed = false;
+        var ctx = cv.getContext("2d"), pending = 0, failed = false, T = null, tw = Math.ceil(size.x / 4), th = Math.ceil(size.y / 4);
+        if(!V().ridge && window.PTYPE){ pending++; PTYPE.load(z, b.min.x, b.min.y, b.min.x + tw * 4, b.min.y + th * 4, tw, th, null, function(t){ T = t; done(); }); }
         function done(){
           if(--pending > 0) return;
           fxBusy = false;
@@ -2904,7 +2978,8 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
               var gx = Math.round(b.min.x + jx - tx0 * 256), gy = Math.round(b.min.y + jy - ty0 * 256);
               if(gx < 0 || gy < 0 || gx >= cv.width || gy >= cv.height) continue;
               var o = (gy * cv.width + gx) * 4;
-              if(data[o + 3] > 60 && dbz(data[o], data[o + 1], data[o + 2]) >= 12) pts.push([jx, jy]);
+              if(data[o + 3] > 60 && dbz(data[o], data[o + 1], data[o + 2]) >= 12){ var tk = T ? T[Math.min(th - 1, Math.max(0, jy >> 2)) * tw + Math.min(tw - 1, Math.max(0, jx >> 2))] : 0;
+                pts.push([jx, jy, tk ? PTYPE.KIND[tk] : null]); }
             }
           }
           if(pts.length > 60){ var keep = []; for(var i = 0; i < pts.length; i += Math.ceil(pts.length / 60)) keep.push(pts[i]); pts = keep; }
@@ -2944,11 +3019,12 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
       for(x = 0; x < w; x++){ acc = 0; for(i = -r; i <= r; i++) acc += t[Math.min(h-1, Math.max(0, i))*w + x];
         for(y = 0; y < h; y++){ f[y*w + x] = acc / n; acc += t[Math.min(h-1, y + r + 1)*w + x] - t[Math.max(0, y - r)*w + x]; } }
     }
-    function renderFrame(url, palKey, cb){
+    function renderFrame(url, palKey, cb, when){
       var z = map.getZoom(), b = map.getPixelBounds(), PAD = 160;
       var tx0 = Math.floor((b.min.x - PAD) / 256), ty0 = Math.max(0, Math.floor((b.min.y - PAD) / 256)), tx1 = Math.floor((b.max.x + PAD) / 256), ty1 = Math.floor((b.max.y + PAD) / 256);
       var W = (tx1 - tx0 + 1) * 256, H = (ty1 - ty0 + 1) * 256;
-      var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var ctx = cv.getContext("2d"), pending = 0, any = false;
+      var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var ctx = cv.getContext("2d"), pending = 0, any = false, T = null;
+      if(!V().ridge && window.PTYPE){ pending++; PTYPE.load(z, tx0 * 256, ty0 * 256, (tx1 + 1) * 256, (ty1 + 1) * 256, W / 4, H / 4, when, function(t){ T = t; done(); }); }
       function done(){
         if(--pending > 0) return;
         if(!any){ cb(null); return; }
@@ -2966,7 +3042,8 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
             var v = (f[p]*(1-ax) + f[p+1]*ax)*(1-ay) + (f[p+fw]*(1-ax) + f[p+fw+1]*ax)*ay;
             if(v < TH[0]) continue;
             var bi = 0; while(bi < TH.length - 1 && v >= TH[bi+1]) bi++;
-            var c = pal[bi]; o = (y*ow + x) * 4; d[o] = c[0]; d[o+1] = c[1]; d[o+2] = c[2]; d[o+3] = 255;
+            var pp = pal; if(T){ var tk = T[Math.min(fh - 1, Math.round(fy)) * fw + Math.min(fw - 1, Math.round(fx2))]; if(tk) pp = PALRGB[PTYPE.KIND[tk]]; }
+            var c = pp[bi]; o = (y*ow + x) * 4; d[o] = c[0]; d[o+1] = c[1]; d[o+2] = c[2]; d[o+3] = 255;
           }
         }
         octx.putImageData(im, 0, 0);
@@ -3010,7 +3087,7 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
             }
             if(got === list.length) ready = list.length;
             setTimeout(next, 30);
-          });
+          }, V().ridge ? null : base.getTime() - OFFS[i] * 60000);
         })();
       });
     }
@@ -3900,7 +3977,7 @@ html:not(.view-news) #ecov{display:none!important;}
   html.show-image #wx-nowbar.on.nb-rad{background:rgba(5,14,26,.10); -webkit-backdrop-filter:none; backdrop-filter:none;}
 }
 #wx-nowrad img{position:absolute; width:256px; height:256px; max-width:none; display:block;}
-#wx-nowrad .nr-r{filter:blur(1.2px) saturate(1.2); opacity:.9;}
+#wx-nowrad .nr-c{position:absolute; left:0; top:0; filter:blur(1px);}
 #wt-pclock .wt-clock-tmp{display:inline; margin-left:.4em; font:inherit; letter-spacing:inherit;}
 #wt-pclock .wt-clock-tmp:empty{display:none;}
 #wt-pclock .wt-clock-tmp .deg{font-size:.42em; vertical-align:.95em; margin-left:.03em; letter-spacing:0;}
@@ -4027,7 +4104,7 @@ html:not(.view-news) #ecov{display:none!important;}
               resort: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.3 3 0.5 11h11L8.2 5.6 6.9 7.5z"/><circle cx="9.2" cy="2.6" r="1.4"/></svg>'};
   /* Doppler strip (Mark, Nov 14, 2026): which place is showing, then a small satellite + radar tile mosaic centred on it (zoom 8,
      refreshed every 5 minutes). Inside claude.ai, which can't load map tiles, it shows a slice of the big radar picture instead. */
-  var shown = "resort", radKey = "";
+  var shown = "resort", radKey = "", curKind = "rain";
   function placeLL(){
     if(shown === "local"){ var c = locCoords(); if(c) return {lat: c.lat, lon: c.lon, ridge: null}; }
     var pk = document.getElementById("radar-view"), k = pk && pk.value, r = k && window.IKON && window.IKON.r[k];
@@ -4042,13 +4119,35 @@ html:not(.view-news) #ecov{display:none!important;}
     var px = (p.lon + 180) / 360 * n, sl = Math.sin(p.lat * Math.PI / 180), py = (0.5 - Math.log((1 + sl) / (1 - sl)) / (4 * Math.PI)) * n;
     var key = [p.lat.toFixed(3), p.lon.toFixed(3), p.ridge, H, bucket].join("|"); if(key === radKey) return; radKey = key;
     var x0 = px - Wd / 2, y0 = py - H / 2, lay = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" + (p.ridge ? "ridge::" + p.ridge + "-N0Q-0" : "nexrad-n0q-900913");
-    var html = "", rows = "";
+    /* Satellite tiles as plain images; radar drawn on a canvas and colored like the big radar: reflectivity bands in green (rain),
+       blue (snow) or pink (rain/snow line) by NOAA's MRMS precipitation type for each pixel, else the bar's own type (Mark, Nov 14, 2026). */
+    var html = "", tiles = [];
     for(var ty = Math.floor(y0 / 256); ty <= Math.floor((y0 + H) / 256); ty++) for(var tx = Math.floor(x0 / 256); tx <= Math.floor((x0 + Wd) / 256); tx++){
-      var pos = 'style="left:' + Math.round(tx * 256 - x0) + 'px;top:' + Math.round(ty * 256 - y0) + 'px"', X = ((tx % (n / 256)) + n / 256) % (n / 256);
-      html += '<img alt="" ' + pos + ' src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + z + '/' + ty + '/' + X + '">';
-      rows += '<img class="nr-r" alt="" ' + pos + ' src="' + lay + '/' + z + '/' + X + '/' + ty + '.png?_=' + bucket + '" onerror="this.remove()">';
+      var X = ((tx % (n / 256)) + n / 256) % (n / 256), lx = Math.round(tx * 256 - x0), ly = Math.round(ty * 256 - y0);
+      html += '<img alt="" style="left:' + lx + 'px;top:' + ly + 'px" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/' + z + '/' + ty + '/' + X + '">';
+      tiles.push([lay + '/' + z + '/' + X + '/' + ty + '.png?_=' + bucket, lx, ly]);
     }
-    rad.innerHTML = html + rows;
+    rad.innerHTML = html + '<canvas class="nr-c" width="' + Wd + '" height="' + H + '"></canvas>';
+    var cv = rad.querySelector("canvas"), ctx = cv.getContext("2d"), pending = tiles.length + 1, T = null, myKey = key, RC = window.RADAR_COLORS;
+    function done(){
+      if(--pending > 0 || myKey !== radKey) return;
+      if(!RC){ return; }
+      var id; try{ id = ctx.getImageData(0, 0, Wd, H); }catch(e){ return; }
+      var d = id.data, fb = (curKind === "snow" || curKind === "mix") ? curKind : "rain", cache = {};
+      function dbz(r, g, b){ var k = (r << 16) | (g << 8) | b; if(cache[k] !== undefined) return cache[k]; var best = 0, bd = 1e9;
+        for(var i = 0; i < RC.REF.length; i++){ var e = RC.REF[i], dr = r - e[1], dg = g - e[2], db = b - e[3], dd = dr*dr + dg*dg + db*db; if(dd < bd){ bd = dd; best = e[0]; } }
+        if(bd > 3000 || best < 5) best = 0; return (cache[k] = best); }
+      for(var y = 0; y < H; y++) for(var x = 0; x < Wd; x++){ var o = (y * Wd + x) * 4;
+        var v = d[o + 3] > 40 ? dbz(d[o], d[o + 1], d[o + 2]) : 0;
+        if(v < RC.TH[0]){ d[o + 3] = 0; continue; }
+        var bi = 0; while(bi < RC.TH.length - 1 && v >= RC.TH[bi + 1]) bi++;
+        var tk = T ? T[y * Wd + x] : 0, pal = RC.PAL[tk ? PTYPE.KIND[tk] : fb] || RC.PAL.rain, c = pal[bi];
+        d[o] = parseInt(c.slice(1, 3), 16); d[o + 1] = parseInt(c.slice(3, 5), 16); d[o + 2] = parseInt(c.slice(5, 7), 16); d[o + 3] = 235; }
+      ctx.putImageData(id, 0, 0);
+    }
+    tiles.forEach(function(t){ var im = new Image(); im.crossOrigin = "anonymous";
+      im.onload = function(){ try{ ctx.drawImage(im, t[1], t[2]); }catch(e){} done(); }; im.onerror = done; im.src = t[0]; });
+    if(!p.ridge && window.PTYPE) PTYPE.load(z, x0, y0, x0 + Wd, y0 + H, Wd, H, null, function(t){ T = t; done(); }); else done();
   }
   setInterval(function(){ if(rad.classList.contains("on")) q(); }, 300000);
   document.addEventListener("wsj-radar", function(){ setTimeout(q, 50); });
@@ -4059,6 +4158,7 @@ html:not(.view-news) #ecov{display:none!important;}
     var lt = localTemp(), useLocal = mode === "local" && lt != null;
     if(useLocal){ t = lt; r = loc ? loc.row : null; if(r) k = kindOf(r); }
     var was = shown; shown = useLocal ? "local" : "resort"; if(was !== shown) radKey = "";
+    curKind = r ? k : "rain";
     if(t == null){ bar.classList.remove("on"); bar.innerHTML = ""; q(); return; }
     var TOP = t < 60 ? 60 : t <= 75 ? 75 : 99, Z = 20;
     /* Rain / snow / mix sits on top of the temperature column, full width, like the 48-hour outlook (Mark, Nov 14, 2026): light / moderate /
