@@ -5941,6 +5941,10 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
      bar numbers, blowing the way the wind blows and faster in stronger wind. Plays alongside rain / snow, or on its own. */
   var mist = 0, mdir = 1, fvx = 1, fvy = 0, puff = document.createElement("canvas"); puff.width = puff.height = 128;
   (function(){ var c = puff.getContext("2d"), g = c.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.45, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); c.fillStyle = g; c.fillRect(0, 0, 128, 128); })();
+  /* Shooting stars (Mark, Nov 14, 2026, 4:00 p.m.): from 9 p.m. to 3 a.m. (device clock), an occasional shooting star streaks across the
+     upper part of the photo — one every 8-25 seconds. Not while it's raining or snowing. */
+  var stars = false, meteors = [], nextStar = 0, skyH = 0;
+  function starHours(){ var h = new Date().getHours(); return h >= 21 || h < 3; }
   function windNow(){ var w = document.getElementById("wt-clock-wind"); if(!w) return null; var n = w.querySelector("b"), m = n && n.textContent.match(/\d+/); if(!m) return null;
     var sv = w.querySelector("svg"), r = sv && /rotate\(\s*(-?[\d.]+)/.exec(sv.getAttribute("style") || ""), a = r ? +r[1] : 90; return {s: +m[0], dx: Math.sin(a * Math.PI / 180) < 0 ? -1 : 1, vx: Math.sin(a * Math.PI / 180), vy: -Math.cos(a * Math.PI / 180)}; }
   function now(){
@@ -5960,7 +5964,8 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   function place(){
     var on = root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
     var k = on ? now() : "", wn = on ? windNow() : null, mi = wn && wn.s >= 15 ? wn.s : 0;   /* 15 mph and up (Mark, 3:12 p.m.) */ if(wn){ mdir = wn.dx; fvx = wn.vx; fvy = wn.vy; }
-    if(!k && !mi){ mist = 0; if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
+    var sn = on && !k && starHours(); if(sn !== stars){ stars = sn; meteors = []; nextStar = 0; }
+    if(!k && !mi && !sn){ mist = 0; if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
     var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
     var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, br = bn ? bn.getBoundingClientRect() : null;
     if(br && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
@@ -5970,15 +5975,30 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
     dpr = Math.min(2, window.devicePixelRatio || 1);
     if(w !== W || Math.round(h) !== H || k !== kind || !mi !== !mist){ W = w; H = Math.round(h); kind = k; mist = mi; cv.width = W * dpr; cv.height = H * dpr; seed(); }
+    mist = mi;   /* keep the live wind speed for the particle speed */
+    var frE = document.querySelector("#lg-wrap .lg-frost"), frT = frE && frE.offsetParent ? frE.getBoundingClientRect().top - top : 0; skyH = frT > 40 ? Math.min(H, frT) : H * .6;   /* shooting stars stay in the sky above the frost bar */
     if(!root.classList.contains("lg-wet")) root.classList.add("lg-wet");
     if(!raf){ last = 0; raf = requestAnimationFrame(tick); }
   }
   function stop(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
   function tick(t){
-    raf = 0; if(document.hidden || (!kind && !mist)) return;
+    raf = 0; if(document.hidden || (!kind && !mist && !stars)) return;
     var dt = last ? Math.min(.05, (t - last) / 1000) : .016; last = t;
     x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
     x.lineCap = "round"; x.lineWidth = 1;
+    if(stars){
+      if(!nextStar) nextStar = t + 3000 + Math.random() * 5000;
+      if(t >= nextStar){ var dir = Math.random() < .5 ? -1 : 1, an = (18 + Math.random() * 22) * Math.PI / 180;
+        meteors.push({x: W * (dir > 0 ? .05 + Math.random() * .55 : .4 + Math.random() * .55), y: skyH * (.04 + Math.random() * .4), vx: Math.cos(an) * dir, vy: Math.sin(an), sp: 380 + Math.random() * 260, len: 70 + Math.random() * 80, life: 0, dur: .6 + Math.random() * .45});
+        nextStar = t + 8000 + Math.random() * 17000; }
+      x.save(); x.beginPath(); x.rect(0, 0, W, skyH); x.clip();
+      for(var mi2 = meteors.length - 1; mi2 >= 0; mi2--){ var o = meteors[mi2]; o.life += dt; if(o.life >= o.dur){ meteors.splice(mi2, 1); continue; }
+        o.x += o.vx * o.sp * dt; o.y += o.vy * o.sp * dt; var fa = Math.sin(Math.PI * o.life / o.dur), tl = o.len * (.4 + .6 * Math.min(1, o.life / (o.dur * .4)));
+        var g = x.createLinearGradient(o.x, o.y, o.x - o.vx * tl, o.y - o.vy * tl); g.addColorStop(0, "rgba(255,255,255," + (.95 * fa) + ")"); g.addColorStop(.25, "rgba(220,232,255," + (.5 * fa) + ")"); g.addColorStop(1, "rgba(200,215,255,0)");
+        x.strokeStyle = g; x.lineWidth = 1.6; x.beginPath(); x.moveTo(o.x, o.y); x.lineTo(o.x - o.vx * tl, o.y - o.vy * tl); x.stroke();
+        x.fillStyle = "rgba(255,255,255," + fa + ")"; x.shadowColor = "rgba(210,225,255," + fa + ")"; x.shadowBlur = 8; x.beginPath(); x.arc(o.x, o.y, 1.6, 0, 6.2832); x.fill(); x.shadowBlur = 0; x.lineWidth = 1; }
+      x.restore();
+    }
     for(var i = 0; i < parts.length; i++){ var q = parts[i];
       if(q.m){ var sp = (12 + mist * 2.2) * q.v; q.x += sp * mdir * dt; q.p += dt * .35; var yy = q.y + Math.sin(q.p) * 14, rw = q.rad * 2.2, rh = q.rad * 2.2 * q.sq;
         if(mdir > 0 && q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } if(mdir < 0 && q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
