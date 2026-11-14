@@ -5466,6 +5466,13 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 #wt-clock-tmp:not(:empty) + #wt-clock-rtmp:not(:empty)::before,
 #wt-pclock-l:not(:empty) + #wt-pclock-r:not(:empty)::before{content:""; display:inline-block; width:max(1.5px,.035em); height:.7em;
   background:#fff; border-radius:1px; margin-right:.2em; vertical-align:baseline; box-shadow:0 0 2px rgba(0,0,0,.45);}
+/* Clock temps look like the clock's own font (Mark, Nov 14, 2026): the white frame is a thin true stroke around each glyph
+   (paint-order keeps it outside the fill) instead of the heavy 8-way text-shadow, which fattened the digits. Same for the wind speed.
+   Keep as is. */
+.wt-clock .tc-hot, .wt-clock .tc-mild, .wt-clock .tc-cool, .wt-clock .tc-cold,
+#wt-pclock .tc-hot, #wt-pclock .tc-mild, #wt-pclock .tc-cool, #wt-pclock .tc-cold{text-shadow:0 2px 6px rgba(0,0,0,.35)!important; -webkit-text-stroke:.014em #fff; paint-order:stroke fill;}
+#rs-hero .wt-clock .tc-hot, #rs-hero .wt-clock .tc-mild, #rs-hero .wt-clock .tc-cool, #rs-hero .wt-clock .tc-cold{-webkit-text-stroke:0;}
+.wt-wind.ws-w b, .wt-wind.ws-y b, .wt-wind.ws-r b{text-shadow:0 2px 6px rgba(0,0,0,.35); -webkit-text-stroke:.014em #fff; paint-order:stroke fill;}
 /* Wind mark (Mark, Nov 12, 2026, 2:17 a.m.): arrow and speed the same height as the temperatures' digits (speed in the clock's own
    size; arrow --wh = the font's measured digit height), a very small "mph" at the bottom right, and the same .2em gap between every
    element of the line (time · local temp · resort temp · arrow · speed). */
@@ -5535,7 +5542,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     var html = "", title = "";
     if(d && d.s != null){
       var to = ((d.dir || 0) + 180) % 360;   /* weather direction is where it comes FROM; the arrow points where it blows */
-      html = '<svg viewBox="0 0 24 24" style="transform:rotate(' + to + 'deg)" aria-hidden="true"><path d="M12 0l10 12h-6.5v12h-7V12H2z"/></svg><b>' + d.s + '</b><i>mph</i>';
+      html = '<svg viewBox="0 0 24 24" style="transform:rotate(' + to + 'deg)" aria-hidden="true"><path d="M12 0l8 11h-5.75v13h-4.5V11H4z"/></svg><b>' + d.s + '</b><i>mph</i>';
       title = "Wind at the resort: " + DIRS[Math.round((d.dir || 0) / 22.5) % 16] + " " + d.s + " mph" + (d.g != null ? ", gusts " + d.g : "");
     }
     var changed = false;
