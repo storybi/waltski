@@ -5953,6 +5953,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     parts = []; var area = W * H, nr = (kind === "rain" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 2600), ns = (kind === "snow" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 3800);
     for(var i = 0; i < nr; i++) parts.push({r: 1, x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 14, v: 520 + Math.random() * 260, a: .12 + Math.random() * .16});
     if(mist){ var nm = Math.max(10, Math.round(area / 16000)); for(var k = 0; k < nm; k++) parts.push({m: 1, x: Math.random() * (W + 300) - 150, y: Math.random() * H, rad: 50 + Math.random() * 110, sq: .35 + Math.random() * .3, v: .6 + Math.random() * .8, a: .07 + Math.random() * .1, p: Math.random() * 6.28}); }
+    if(mist){ var nf = Math.max(30, Math.round(area / 5000)); for(var f = 0; f < nf; f++) parts.push({f: 1, x: Math.random() * W, y: Math.random() * H, s: .6 + Math.random() * 1.6, l: Math.random() < .45 ? 6 + Math.random() * 16 : 0, v: .7 + Math.random() * .9, a: .3 + Math.random() * .45, p: Math.random() * 6.28, w: 1.5 + Math.random() * 3}); }   /* flying specks and streaks (Mark, 2:55 p.m.) */
     for(var j = 0; j < ns; j++) parts.push({r: 0, x: Math.random() * W, y: Math.random() * H, s: .8 + Math.random() * 1.8, v: 22 + Math.random() * 38, a: .45 + Math.random() * .4, p: Math.random() * 6.28, w: .6 + Math.random() * 1.2});
   }
   function place(){
@@ -5981,6 +5982,12 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
       if(q.m){ var sp = (12 + mist * 2.2) * q.v; q.x += sp * mdir * dt; q.p += dt * .35; var yy = q.y + Math.sin(q.p) * 14, rw = q.rad * 2.2, rh = q.rad * 2.2 * q.sq;
         if(mdir > 0 && q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } if(mdir < 0 && q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
         x.globalAlpha = q.a * (.75 + .25 * Math.sin(q.p * 1.7)); x.drawImage(puff, q.x - rw / 2, yy - rh / 2, rw, rh); x.globalAlpha = 1; continue; }
+      if(q.f){ var fv = (60 + mist * 9) * q.v; q.x += fv * mdir * dt; q.p += dt * q.w; var vy = Math.sin(q.p) * 18 + 6; q.y += vy * dt;
+        if(mdir > 0 && q.x - q.l > W){ q.x = -q.l - Math.random() * 40; q.y = Math.random() * H; } if(mdir < 0 && q.x + q.l < 0){ q.x = W + q.l + Math.random() * 40; q.y = Math.random() * H; }
+        if(q.y > H + 4) q.y = -4; if(q.y < -4) q.y = H + 4;
+        if(q.l){ x.strokeStyle = "rgba(240,246,255," + (q.a * .8) + ")"; x.lineWidth = q.s * .8; x.beginPath(); x.moveTo(q.x, q.y); x.lineTo(q.x - q.l * mdir, q.y - vy * q.l / fv); x.stroke(); x.lineWidth = 1; }
+        else { x.fillStyle = "rgba(245,248,255," + q.a + ")"; x.beginPath(); x.arc(q.x, q.y, q.s, 0, 6.2832); x.fill(); }
+        continue; }
       if(q.r){ q.y += q.v * dt; q.x -= q.v * dt * .08; if(q.y > H + q.l){ q.y = -q.l; q.x = Math.random() * (W + 40); }
         x.strokeStyle = "rgba(225,235,248," + q.a + ")"; x.beginPath(); x.moveTo(q.x, q.y); x.lineTo(q.x + q.l * .08, q.y - q.l); x.stroke(); }
       else { q.y += q.v * dt; q.p += dt * q.w; q.x += Math.sin(q.p) * 12 * dt; if(q.y > H + 4){ q.y = -4; q.x = Math.random() * W; }
