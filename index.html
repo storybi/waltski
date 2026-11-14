@@ -4048,7 +4048,7 @@ html:not(.view-news) #ecov{display:none!important;}
     bar.style.top = Math.round(it) + "px"; bar.style.height = Math.round(ibm - it) + "px";
     var left = bar.classList.contains("on") ? W - 16 : W - 14;
     window.NOWBAR_LEFT = left;
-    if(bar.classList.contains("on") && mqL.matches){
+    if(false && bar.classList.contains("on") && mqL.matches){   /* Doppler sliver removed: the rain/snow animation replaces it (Mark, Nov 14, 2026, 1:06 p.m.) */
       rad.style.top = Math.round(it) + "px"; rad.style.height = Math.round(ibm - it) + "px";
       rad.style.left = (W - 27) + "px"; rad.style.width = "27px";   /* sliver thinned 50% (Mark, Nov 14, 2026, 12:25 p.m.) */ rad.classList.add("on"); bar.classList.add("nb-rad"); radar(Math.round(ibm - it)); }
     else { rad.classList.remove("on"); bar.classList.remove("nb-rad"); }
@@ -5712,6 +5712,9 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 html.show-image.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
 html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{visibility:hidden!important;}
 #lg-wrap .g{position:absolute;}
+/* frosted backing (Mark, Nov 14, 2026, 1:06 p.m.): a softly blurred, slightly darkened pane behind the whole line */
+#lg-wrap .lg-frost{position:absolute; border-radius:16px; -webkit-backdrop-filter:blur(12px) saturate(115%) brightness(.9); backdrop-filter:blur(12px) saturate(115%) brightness(.9);
+  background:linear-gradient(to bottom, rgba(20,30,46,.16), rgba(20,30,46,.26)); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.1), 0 6px 18px rgba(0,0,0,.18);}
 #lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1); backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 /* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
@@ -5821,7 +5824,7 @@ html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{vi
     if(!root.classList.contains("lg-on")) root.classList.add("lg-on");
     var hm = (hmEl.textContent || "").trim(); if(!/\d/.test(hm)) return;
     var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind();
-    var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = mq.matches ? 27 : mqP.matches ? 20 : 0, area = W - right;   /* sideways: 27px Doppler sliver; upright: the bar; desktop: none */
+    var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = (mq.matches || mqP.matches) ? 20 : 0, area = W - right;   /* phones / iPads: clear of the weather bar (the Doppler sliver is gone, Mark 1:06 p.m.); desktop: none */
     var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet");
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
     var stop = he ? he.getBoundingClientRect().bottom : top0 + 200, gt = document.getElementById("games-top");
@@ -5849,6 +5852,10 @@ html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{vi
         d.style.width = w + "px"; d.style.height = (H * .9) + "px"; d.style.left = Math.round(x + gap / 2 - w / 2) + "px"; d.style.top = Math.round(base - H * .9) + "px"; els.push(d); }
       x += gap;
     });
+    /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
+    var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
+    fr.style.left = "6px"; fr.style.width = Math.max(0, area - 12) + "px"; fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
+    els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
     els.forEach(function(e){ wrap.appendChild(e); });
   }
@@ -5901,7 +5908,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     if(br && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
     var bot = he ? he.getBoundingClientRect().bottom : top + 300;
     if(gt && gt.offsetHeight > 0) bot = Math.min(bot, gt.getBoundingClientRect().top);
-    var w = (document.documentElement.clientWidth || window.innerWidth) - (mq.matches ? 27 : window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
+    var w = (document.documentElement.clientWidth || window.innerWidth) - ((mq.matches || window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches) ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
     cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
     dpr = Math.min(2, window.devicePixelRatio || 1);
     if(w !== W || Math.round(h) !== H || k !== kind){ W = w; H = Math.round(h); kind = k; cv.width = W * dpr; cv.height = H * dpr; seed(); }
