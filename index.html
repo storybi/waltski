@@ -5762,12 +5762,12 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     /* liquid bevel (Mark, 12:00 p.m.): a soft blurred inner shadow along the lower edges, a bright blurred inner highlight along the
        upper edges and a crisp specular rim that fades from white at the top to faint at the bottom, so the edge reads as curved
        glass even over white sky or snow */
-    var lo = paintIn(band(H * .045), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(40,55,75,0)"); g.addColorStop(.45, "rgba(40,55,75,.1)"); g.addColorStop(1, "rgba(30,42,60,.38)"); return g; });
-    rx.save(); rx.filter = "blur(" + (H * .018 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(lo, 0, 0); rx.restore();
-    var hi = paintIn(band(H * .035), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.7)"); g.addColorStop(.4, "rgba(255,255,255,.12)"); g.addColorStop(1, "rgba(255,255,255,0)"); return g; });
-    rx.save(); rx.filter = "blur(" + (H * .012 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(hi, 0, 0); rx.restore();
-    rx.drawImage(paintIn(band(Math.max(1, H * .007)), function(x){ var g = x.createLinearGradient(0, top, cw * dpr * .3, bot); g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.5, T ? a(T, .8) : "rgba(235,242,252,.45)"); g.addColorStop(1, "rgba(120,140,165,.55)"); return g; }), 0, 0);
-    var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(1.6, H * .014)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
+    var lo = paintIn(band(H * .0225), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(40,55,75,0)"); g.addColorStop(.45, "rgba(40,55,75,.1)"); g.addColorStop(1, "rgba(30,42,60,.38)"); return g; });
+    rx.save(); rx.filter = "blur(" + (H * .009 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(lo, 0, 0); rx.restore();
+    var hi = paintIn(band(H * .0175), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.7)"); g.addColorStop(.4, "rgba(255,255,255,.12)"); g.addColorStop(1, "rgba(255,255,255,0)"); return g; });
+    rx.save(); rx.filter = "blur(" + (H * .006 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(hi, 0, 0); rx.restore();
+    rx.drawImage(paintIn(band(Math.max(.6, H * .0035)), function(x){ var g = x.createLinearGradient(0, top, cw * dpr * .3, bot); g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.5, T ? a(T, .8) : "rgba(235,242,252,.45)"); g.addColorStop(1, "rgba(120,140,165,.55)"); return g; }), 0, 0);
+    var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(.8, H * .007)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
     el.appendChild(gl); el.appendChild(rim); el.appendChild(bd); return el;
   }
   function gtext(s, H, tint, below){
@@ -5789,16 +5789,16 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     return it;
   }
   function wind(sp, to, H){
-    /* speed, a tiny translucent "mph" tucked against the speed's bottom-right edge, then the small arrow to the right */
+    /* speed, then the arrow right against it (Mark, 12:39 p.m.), with the tiny translucent "mph" under the arrow at the baseline */
     var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05);
-    var aw = H * .36 * Math.min(1, SX / .6), gap = H * .03, sw = tw(s, fs), mf = Math.max(9, Math.min(fs * .12, H * .07)), mg = Math.max(2, H * .015);
+    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), mf = Math.max(9, Math.min(fs * .12, H * .07));
     mc.font = "700 " + mf + "px Inter,Arial"; var mw = mc.measureText("mph").width;
-    var mx = pad + sw + mg, cw = Math.ceil(mx + mw + gap + aw + pad), by = Math.ceil(H + pad), ch = by + pad, ax = mx + mw + gap + aw / 2;
+    var colw = Math.max(aw, mw), cx0 = pad + sw + gap, cw = Math.ceil(cx0 + colw + pad), by = Math.ceil(H + pad), ch = by + pad, ax = cx0 + colw / 2;
     var el = glass(cw, ch, by, H, function(x){
       txt(x, s, fs, pad + sw / 2, by);
-      if(AR){ x.save(); x.translate(ax, by - H * .5); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
+      if(AR){ x.save(); x.translate(ax, by - H * .58); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
     }, WC[k] || null);
-    var m = document.createElement("span"); m.className = "lg-mph"; m.textContent = "mph"; m.style.left = mx + "px"; m.style.top = (by - mf * .75) + "px"; m.style.fontSize = mf + "px";
+    var m = document.createElement("span"); m.className = "lg-mph"; m.textContent = "mph"; m.style.left = (ax - mw / 2) + "px"; m.style.top = (by - mf * .75) + "px"; m.style.fontSize = mf + "px";
     el.appendChild(m); return {el: el, w: cw, px: pad, by: by};
   }
   function num(el, sel){ var n = el && (sel ? el.querySelector(sel) : el); var m = n && n.textContent.match(/-?\d+/); return m ? +m[0] : null; }
@@ -5823,8 +5823,8 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = (lt != null && rt != null) ? di : -1; return a; }
-    /* about 34% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
-    var H = Math.min(Hs * .85, (stop - ptop) * .336), items, vis; SX = 1;   /* 50% larger (Mark, 12:06 p.m.): about 34% of the photo height (Mark, 11:52 a.m.) */
+    /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
+    var H = Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
@@ -5849,6 +5849,73 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   if(mq.addEventListener) mq.addEventListener("change", q); else if(mq.addListener) mq.addListener(q);
   if(document.fonts && document.fonts.load) document.fonts.load(WT + ' 100px "Saira Extra Condensed"').then(function(){ ready = true; cap(); lastKey = ""; q(); }, function(){});
   setInterval(q, 15000); cap(); q();
+})();
+</script>
+<style>
+/* Rain / snow over the header photo (Mark, Nov 14, 2026): when the picked resort's current hour has measurable rain, snow or a mix
+   (the mini 48-hour outlook's current-hour column), light falling lines (rain) and/or small drifting flakes (snow) play subtly over
+   the photo, under the clock digits. Same place as the glass clock line: phones and iPads held sideways with Show image on. Keep as is. */
+#lg-precip{display:none;}
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
+  html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; position:absolute; z-index:30; pointer-events:none;}
+}
+</style>
+<script>
+/* Rain / snow over the header photo (Mark, Nov 14, 2026). Reads the current hour from the mini outlook in the resort card (#rs-olk:
+   the column under the orange "now" arrow, measurable precip only — i.ro-b without .ch, class rain / snow / mix). Pauses when the tab is
+   hidden or the clock line is off; no animation when the device asks for reduced motion. Keep as is. */
+(function(){
+  if(!window.matchMedia) return;
+  var root = document.documentElement, mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)");
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var cv = document.createElement("canvas"); cv.id = "lg-precip"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
+  var x = cv.getContext("2d"), kind = "", parts = [], W = 0, H = 0, dpr = 1, raf = 0, last = 0;
+  function now(){
+    var box = document.getElementById("rs-olk"); if(!box) return "";
+    var cols = box.querySelectorAll(".ro-c"), mk = box.querySelector(".ro-now"); if(!cols.length || !mk) return "";
+    var left = parseFloat(mk.style.left) || 0, i = Math.round(left / (100 / cols.length) - .5), c = cols[Math.max(0, Math.min(cols.length - 1, i))];
+    var b = c && c.querySelector("i.ro-b:not(.ch)"); if(!b) return "";
+    return b.classList.contains("mix") ? "mix" : b.classList.contains("snow") ? "snow" : b.classList.contains("rain") ? "rain" : "";
+  }
+  function seed(){
+    parts = []; var area = W * H, nr = (kind === "rain" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 2600), ns = (kind === "snow" ? 1 : kind === "mix" ? .5 : 0) * Math.round(area / 3800);
+    for(var i = 0; i < nr; i++) parts.push({r: 1, x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 14, v: 520 + Math.random() * 260, a: .12 + Math.random() * .16});
+    for(var j = 0; j < ns; j++) parts.push({r: 0, x: Math.random() * W, y: Math.random() * H, s: .8 + Math.random() * 1.8, v: 22 + Math.random() * 38, a: .45 + Math.random() * .4, p: Math.random() * 6.28, w: .6 + Math.random() * 1.2});
+  }
+  function place(){
+    var on = mq.matches && root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
+    var k = on ? now() : "";
+    if(!k){ if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
+    var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
+    var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, bot = he ? he.getBoundingClientRect().bottom : top + 300;
+    if(gt && gt.offsetHeight > 0) bot = Math.min(bot, gt.getBoundingClientRect().top);
+    var w = (document.documentElement.clientWidth || window.innerWidth) - 27, h = Math.max(40, bot - top), sy = window.scrollY || 0;
+    cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    if(w !== W || Math.round(h) !== H || k !== kind){ W = w; H = Math.round(h); kind = k; cv.width = W * dpr; cv.height = H * dpr; seed(); }
+    if(!root.classList.contains("lg-wet")) root.classList.add("lg-wet");
+    if(!raf){ last = 0; raf = requestAnimationFrame(tick); }
+  }
+  function stop(){ if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+  function tick(t){
+    raf = 0; if(document.hidden || !kind) return;
+    var dt = last ? Math.min(.05, (t - last) / 1000) : .016; last = t;
+    x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+    x.lineCap = "round"; x.lineWidth = 1;
+    for(var i = 0; i < parts.length; i++){ var q = parts[i];
+      if(q.r){ q.y += q.v * dt; q.x -= q.v * dt * .08; if(q.y > H + q.l){ q.y = -q.l; q.x = Math.random() * (W + 40); }
+        x.strokeStyle = "rgba(225,235,248," + q.a + ")"; x.beginPath(); x.moveTo(q.x, q.y); x.lineTo(q.x + q.l * .08, q.y - q.l); x.stroke(); }
+      else { q.y += q.v * dt; q.p += dt * q.w; q.x += Math.sin(q.p) * 12 * dt; if(q.y > H + 4){ q.y = -4; q.x = Math.random() * W; }
+        x.fillStyle = "rgba(255,255,255," + q.a + ")"; x.beginPath(); x.arc(q.x, q.y, q.s, 0, 6.2832); x.fill(); } }
+    raf = requestAnimationFrame(tick);
+  }
+  var pt = 0; function q(){ clearTimeout(pt); pt = setTimeout(place, 120); }
+  window.addEventListener("resize", q); window.addEventListener("orientationchange", function(){ setTimeout(q, 500); });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) q(); });
+  document.addEventListener("olk-render", function(){ setTimeout(q, 60); });
+  try{ new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
+  var ro = document.getElementById("rs-olk"); if(ro) try{ new MutationObserver(q).observe(ro, {childList: true, subtree: true}); }catch(e){}
+  setInterval(q, 60000); setTimeout(q, 800);
 })();
 </script>
 
