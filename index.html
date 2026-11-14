@@ -5862,10 +5862,10 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 <style>
 /* Rain / snow over the header photo (Mark, Nov 14, 2026): when the picked resort's current hour has measurable rain, snow or a mix
    (the mini 48-hour outlook's current-hour column), light falling lines (rain) and/or small drifting flakes (snow) play subtly over
-   the photo, under the clock digits. Same place as the glass clock line: phones and iPads held sideways with Show image on. Keep as is. */
+   the photo and over the clock digits. Same place as the glass clock line: phones and iPads held sideways with Show image on. Keep as is. */
 #lg-precip{display:none;}
 @media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; position:absolute; z-index:30; pointer-events:none;}
+  html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; position:absolute; z-index:32; pointer-events:none;}   /* over the glass digits too (Mark, 12:49 p.m.) */
 }
 </style>
 <script>
