@@ -4014,7 +4014,7 @@ html:not(.view-news) #ecov{display:none!important;}
     if(mqP.matches) return false; return a === -90 || a === 270; }
   function photoBox(){
     var sy = window.scrollY || window.pageYOffset || 0, btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio");
-    var gr = mqP.matches ? document.getElementById("wt-greet") : null; if(gr && gr.offsetHeight) btn = gr;   /* upright: start below the greeting */
+    var gr = mqP.matches ? document.getElementById("wt-greet") : null; if(gr && gr.offsetHeight && !gr.closest(".wt-greet-bot")) btn = gr;   /* upright: start below the greeting */
     var top = btn ? btn.getBoundingClientRect().bottom + sy + 10 : 60, bottom = he.getBoundingClientRect().bottom + sy - (mqP.matches ? 16 : 30);
     var gt = document.getElementById("games-top");
     if(gt && gt.offsetHeight > 0) bottom = Math.min(bottom, gt.getBoundingClientRect().top + sy - 14);
@@ -5852,7 +5852,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var hm = (hmEl.textContent || "").trim(); if(!/\d/.test(hm)) return;
     var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind();
     var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = (mq.matches || mqP.matches) ? 20 : 0, area = W - right;   /* phones / iPads: clear of the weather bar (the Doppler sliver is gone, Mark 1:06 p.m.); desktop: none */
-    var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet");
+    var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet"); if(gr && gr.closest(".wt-greet-bot")) gr = null;   /* greeting moved to the page bottom (Mark, 4:40 p.m.) */
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
     var stop = he ? he.getBoundingClientRect().bottom : top0 + 200, gt = document.getElementById("games-top");
     if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
@@ -6132,6 +6132,20 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
    on the cam pictures behind the header, so they look cleaner and less soft. Not on the Doppler/video layer. */
 #wt-banner .bl, #wt-banner img.wt-live{filter:url(#sk-sharp) contrast(1.07) saturate(1.1) brightness(1.02);}
 </style>
+<style>
+/* Header tweaks (Mark, Nov 14, 2026, 4:40 p.m.): the "Good afternoon, it's ..." greeting moves to the bottom of the page (just above the
+   footer), and the logo + SKIINUT title are 25% larger (the logo is sized in em, so it grows with the title). */
+html .wt-mast h1.wt-name{font-size:clamp(36px,9.5vw,70px)!important;}
+@media (orientation:landscape) and (max-height:500px), (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){ html .wt-mast h1.wt-name{font-size:27.5px!important;} }
+p.wt-greet.wt-greet-bot{display:block; margin:18px auto 6px!important; padding:10px 12px!important; max-width:1200px; background:none!important; color:var(--fg-muted)!important; text-shadow:none!important; text-align:center!important; font:500 14px/1.4 var(--font-body)!important;}
+</style>
+<script>
+(function(){
+  function move(){ var g = document.querySelector("#top p.wt-greet, p.wt-greet:not(.wt-greet-bot)"), f = document.querySelector("footer"); if(!g || !f || g.classList.contains("wt-greet-bot")) return;
+    g.classList.add("wt-greet-bot"); f.parentNode.insertBefore(g, f); try{ window.dispatchEvent(new Event("resize")); }catch(e){} }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", move); else move();
+})();
+</script>
 <style>
 /* Rotation cover (Mark, Nov 12, 2026): when a phone or iPad turns, a dozen parts of the page (photo height, pinned band, clock size and
    place, clock moving in/out of the card, the right-side bar, scroll to top) each re-measure on their own timer, which showed as
