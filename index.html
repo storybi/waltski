@@ -5776,7 +5776,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var top = (by - H) * dpr, bot = by * dpr;
     rx.drawImage(paintIn(sh(), function(x){ var g = x.createLinearGradient(0, top, 0, bot);
       if(T){ g.addColorStop(0, "rgba(225,232,242,.71)"); g.addColorStop(.4, a(T, .68)); g.addColorStop(1, a(T, .65)); }
-      else{ g.addColorStop(0, "rgba(212,220,233,.72)"); g.addColorStop(.5, "rgba(192,203,220,.68)"); g.addColorStop(1, "rgba(180,192,211,.66)"); }   /* a touch cooler/grayer so white glass reads on white sky (Mark, 1:00 p.m.) */ return g; }), 0, 0);
+      else{ g.addColorStop(0, "rgba(250,252,255,.9)"); g.addColorStop(.5, "rgba(240,244,250,.87)"); g.addColorStop(1, "rgba(230,236,245,.85)"); }   /* brighter white (Mark, 2:27 p.m.) */   /* a touch cooler/grayer so white glass reads on white sky (Mark, 1:00 p.m.) */ return g; }), 0, 0);
     /* liquid bevel (Mark, 12:00 p.m.): a soft blurred inner shadow along the lower edges, a bright blurred inner highlight along the
        upper edges and a crisp specular rim that fades from white at the top to faint at the bottom, so the edge reads as curved
        glass even over white sky or snow */
@@ -5786,7 +5786,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     rx.save(); rx.filter = "blur(" + (H * .006 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(hi, 0, 0); rx.restore();
     rx.drawImage(paintIn(band(Math.max(.6, H * .0035)), function(x){ var g = x.createLinearGradient(0, top, cw * dpr * .3, bot); g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.5, T ? a(T, .8) : "rgba(235,242,252,.45)"); g.addColorStop(1, "rgba(110,130,155,.74)"); return g; }), 0, 0);
     /* labels under the digits: a light wash over their thin strokes (after the edge shading) so they read clearly on the dark frost (Mark, 1:23 p.m.) */
-    rx.save(); rx.globalCompositeOperation = "source-atop"; rx.fillStyle = "rgba(244,247,252,.5)"; rx.fillRect(0, (by + H * .04) * dpr, cw * dpr, ch * dpr); rx.restore();
+    rx.save(); rx.globalCompositeOperation = "source-atop"; rx.fillStyle = "rgba(255,255,255,.88)";   /* brighter white labels (Mark, 2:27 p.m.) */ rx.fillRect(0, (by + H * .04) * dpr, cw * dpr, ch * dpr); rx.restore();
     var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(.8, H * .007)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
     el.appendChild(gl); el.appendChild(rim); el.appendChild(bd); return el;
   }
@@ -5835,6 +5835,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var w = document.getElementById("wt-clock-wind"); if(!w) return null; var sp = num(w, "b"); if(sp == null) return null;
     var sv = w.querySelector("svg"), mm = sv && /rotate\(\s*(-?[\d.]+)/.exec(sv.getAttribute("style") || ""); return {s: sp, to: mm ? +mm[1] : 0};
   }
+  function dayHalf(){ var h = new Date().getHours(); return h >= 8 && h < 20; }
   function draw(){
     raf = 0;
     if(!on()){ if(root.classList.contains("lg-on")) root.classList.remove("lg-on"); if(root.classList.contains("lg-card")) root.classList.remove("lg-card");
@@ -5862,7 +5863,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     }
     if(root.classList.contains("lg-card") !== !!cardMode) root.classList.toggle("lg-card", !!cardMode);
     dpr = Math.min(3, window.devicePixelRatio || 2);
-    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dpr, ready].join("|");
+    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
@@ -5874,8 +5875,14 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     } }
     fit();
-    if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
-    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
+    if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; fit(); }
+    /* sideways phones / iPads (Mark, 2:27 p.m.; overrides earlier size rules): half size 8 a.m.-8 p.m., full "bedside clock" size the rest of the night */
+    else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
+    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];
+    /* upright: the stats sit centered in the frost bar (Mark, 2:27 p.m.) — frost top stays put, the digits and labels move down */
+    var fpad = Math.round(H * .14), ftop = base - H - fpad, fbot = Hs + 8;
+    if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: down to the base of the picture (1:23 p.m.), the weather strip below stays on top (1:32 p.m.) */
+    if(!cardMode && mqP.matches){ var cH = H * (1 + LGAP + LBL), sh0 = Math.round((fbot - ftop - cH) / 2 - (base - H - ftop)); if(sh0 > 0) base += sh0; }   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
       x += it.w - 2 * it.px;
@@ -5888,9 +5895,9 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       x += gap;
     });
     /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
-    var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
-    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; var fbot = Hs + 8; if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: the weather strip below stays on top (Mark, 1:32 p.m.) */   /* upright: down to the base of the picture (Mark, 1:23 p.m.) */
-    fr.style.height = Math.round(cardMode ? H * (1 + LGAP + LBL) + fpad * 2 : fbot - (base - H - fpad)) + "px";   /* Show image: down to the very bottom of the photo (Mark, 1:15 p.m.) */
+    var fr = document.createElement("div"); fr.className = "lg-frost";
+    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(ftop) + "px";
+    fr.style.height = Math.round(cardMode ? H * (1 + LGAP + LBL) + fpad * 2 : fbot - ftop) + "px";   /* Show image: down to the very bottom of the photo (Mark, 1:15 p.m.) */
     els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
     els.forEach(function(e){ wrap.appendChild(e); });
