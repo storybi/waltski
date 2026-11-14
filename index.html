@@ -5700,18 +5700,17 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 
 
 <style>
-/* Frosted glass clock line (Mark, Nov 14, 2026; replaces the earlier Liquid Glass clock): on phones and iPads held sideways with
-   Show image on, the whole clock line — time, local temp, resort temp (tiny orange arrow under it), wind — is drawn as frosted glass
+/* Frosted glass clock line (Mark, Nov 14, 2026; replaces the earlier Liquid Glass clock): with Show image on — phones and iPads
+   sideways or upright, and desktop (12:53 p.m.) — the whole clock line — time, local temp, resort temp (tiny orange arrow under it), wind — is drawn as frosted glass
    digits over the header photo in Saira Extra Condensed 700 (tall, narrow; never narrower than 75% width), spread evenly across the
    photo left of the 27px weather bar + Doppler sliver. Translucent (Mark, Nov 14, 2026; fill made less see-through at 12:09 and 12:25 p.m.): about 30% of the photo shows through — a milky fill, 2.5px blur, a fine bright edge, a thin adaptive border (dark over light parts of the photo, light over dark parts) and a soft shadow; round colon dots.
    Temps carry a faint tint of their temperature color (window.tempCls: hot / mild / cool / cold) and the wind speed a faint yellow
    (over 15 mph) or red (over 25) tint; the wind arrow is small, to the right of the speed, with a tiny translucent "mph" against the speed's bottom-right edge. AM/PM is
    dropped. The normal #wt-clock line stays in the page (hidden) as the data source. Keep as is. */
 #lg-wrap{display:none;}
-@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  html.show-image.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
-  html.show-image.lg-on .wt-clock .wt-clock-t{visibility:hidden!important;}
-}
+/* every Show image view uses this line (Mark, 12:53 p.m.): sideways and upright phones / iPads and desktop */
+html.show-image.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
+html.show-image.lg-on .wt-clock .wt-clock-t, html.show-image.lg-on #wt-pclock{visibility:hidden!important;}
 #lg-wrap .g{position:absolute;}
 #lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1); backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
@@ -5738,7 +5737,8 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   var TINT = {"tc-hot": "#ff5c5c", "tc-mild": "#ffd23f", "tc-cool": "#8961b3", "tc-cold": "#5aaeff"}, WC = {y: "#f5c518", r: "#e0243a"};
   var mc = document.createElement("canvas").getContext("2d"), dpr = 2;
   var AR = window.Path2D ? new Path2D("M12 0l8 11h-5.75v13h-4.5V11H4z") : null;
-  function on(){ return mq.matches && root.classList.contains("show-image"); }
+  var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
+  function on(){ return (mq.matches || mqP.matches || mqD.matches) && root.classList.contains("show-image") && !!document.getElementById("wt-banner"); }
   function cap(){ mc.font = WT + " 100px " + FAM; var m = mc.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) CAP = m.actualBoundingBoxAscent / 100; }
   function tw(t, fs){ mc.font = WT + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
   function mk(cw, ch){ var c = document.createElement("canvas"); c.width = Math.ceil(cw * dpr); c.height = Math.ceil(ch * dpr); return c; }
@@ -5790,25 +5790,26 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   /* temps keep their degree sign and carry a small "LOCAL" / "RESORT" label under the digits in the same tinted glass (Mark, 12:47 p.m.);
      the orange arrow sits under the resort label */
   var LBL = .2, LGAP = .08;
-  function temp(t, H, arrow){
-    var c = window.tempCls ? window.tempCls(t) : "", aw = Math.max(10, H * .075), it = gtext(String(t), H, TINT[c] || null, arrow ? aw * 1.1 : 0, arrow ? "RESORT" : "LOCAL", true);
-    if(arrow){ var d = document.createElement("i"); d.className = "lg-arw"; d.style.left = (it.w / 2 - aw / 2) + "px"; d.style.top = (it.by + H * (LGAP + LBL) + H * .06) + "px";
-      d.style.borderLeftWidth = d.style.borderRightWidth = (aw / 2) + "px"; d.style.borderTopWidth = (aw * .67) + "px"; it.el.appendChild(d); }
-    return it;
+  function temp(t, H, resort){
+    var c = window.tempCls ? window.tempCls(t) : "";
+    return gtext(String(t), H, TINT[c] || null, 0, resort ? "RESORT" : "LOCAL", true);   /* no orange arrow under the resort temp (Mark, 12:53 p.m.) */
   }
   function wind(sp, to, H){
-    /* speed, then the arrow right against it (Mark, 12:39 p.m.), with the tiny translucent "mph" under the arrow at the baseline */
-    var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05);
-    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), mf = Math.max(9, Math.min(fs * .12, H * .07));
-    mc.font = "700 " + mf + "px Inter,Arial"; var mw = mc.measureText("mph").width;
-    var colw = Math.max(aw, mw), cx0 = pad + sw + gap, cw = Math.ceil(cx0 + colw + pad), by = Math.ceil(H + pad), ch = by + pad, ax = cx0 + colw / 2;
+    /* speed, then the arrow right against it, and a "WIND SPEED (MPH)" label under them in the same glass (Mark, 12:53 p.m.) */
+    var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05), label = "WIND SPEED (MPH)";
+    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs) + lfs * .08 * label.length;
+    var nw = sw + gap + aw, cw = Math.ceil(Math.max(nw, lw) + pad * 2), x0 = (cw - nw) / 2, by = Math.ceil(H + pad), ch = Math.ceil(by + pad + H * LGAP + LH);
     var el = glass(cw, ch, by, H, function(x){
-      txt(x, s, fs, pad + sw / 2, by);
-      if(AR){ x.save(); x.translate(ax, by - H * .58); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
+      txt(x, s, fs, x0 + sw / 2, by);
+      if(AR){ x.save(); x.translate(x0 + sw + gap + aw / 2, by - H * .58); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
+      x.save(); try{ x.letterSpacing = (lfs * .08 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH); x.restore();
     }, WC[k] || null);
-    var m = document.createElement("span"); m.className = "lg-mph"; m.textContent = "mph"; m.style.left = (ax - mw / 2) + "px"; m.style.top = (by - mf * .75) + "px"; m.style.fontSize = mf + "px";
-    el.appendChild(m); return {el: el, w: cw, px: pad, by: by};
+    return {el: el, w: cw, px: pad, by: by};
   }
+  /* top of the photo: upright phones draw the picture full width at the bottom of #wt-banner, so its top is banner bottom - width x ratio */
+  function picTop(bn){ if(!bn) return 0; var r = bn.getBoundingClientRect(), t = Math.max(0, r.top);
+    if(mqP.matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; t = Math.max(t, r.bottom - r.width * rt); }
+    return t; }
   function num(el, sel){ var n = el && (sel ? el.querySelector(sel) : el); var m = n && n.textContent.match(/-?\d+/); return m ? +m[0] : null; }
   function readWind(){
     var w = document.getElementById("wt-clock-wind"); if(!w) return null; var sp = num(w, "b"); if(sp == null) return null;
@@ -5820,17 +5821,17 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     if(!root.classList.contains("lg-on")) root.classList.add("lg-on");
     var hm = (hmEl.textContent || "").trim(); if(!/\d/.test(hm)) return;
     var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind();
-    var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = 27, area = W - right;   /* Doppler sliver is 27px wide (Mark, 12:25 p.m.) */
+    var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = mq.matches ? 27 : mqP.matches ? 20 : 0, area = W - right;   /* sideways: 27px Doppler sliver; upright: the bar; desktop: none */
     var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet");
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
     var stop = he ? he.getBoundingClientRect().bottom : top0 + 200, gt = document.getElementById("games-top");
     if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
-    var Hs = Math.max(60, stop - 8 - top0), bn = document.getElementById("wt-banner"), ptop = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, mid = (ptop + stop) / 2 - top0;
+    var Hs = Math.max(60, stop - 8 - top0), bn = document.getElementById("wt-banner"), ptop = picTop(bn), mid = (ptop + stop) / 2 - top0;
     dpr = Math.min(3, window.devicePixelRatio || 2);
     var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), dpr, ready].join("|");
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
+    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
     var H = Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     for(var k = 0; k < 6; k++){
@@ -5838,7 +5839,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     }
-    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - Math.max(10, H * .075) * 1.1 - H * .08)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the temp labels and the orange arrow under the resort label (Mark, 12:47 p.m.) */
+    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
       x += it.w - 2 * it.px;
@@ -5864,9 +5865,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
    (the mini 48-hour outlook's current-hour column), light falling lines (rain) and/or small drifting flakes (snow) play subtly over
    the photo and over the clock digits. Same place as the glass clock line: phones and iPads held sideways with Show image on. Keep as is. */
 #lg-precip{display:none;}
-@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){
-  html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; position:absolute; z-index:32; pointer-events:none;}   /* over the glass digits too (Mark, 12:49 p.m.) */
-}
+html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; position:absolute; z-index:32; pointer-events:none;}   /* over the glass digits too (Mark, 12:49 p.m.); every Show image view (12:53 p.m.) */
 </style>
 <script>
 /* Rain / snow over the header photo (Mark, Nov 14, 2026). Reads the current hour from the mini outlook in the resort card (#rs-olk:
@@ -5876,6 +5875,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   if(!window.matchMedia) return;
   var root = document.documentElement, mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)");
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* photo top for upright phones: the picture is drawn full width at the bottom of #wt-banner */
   var cv = document.createElement("canvas"); cv.id = "lg-precip"; cv.setAttribute("aria-hidden", "true"); document.body.appendChild(cv);
   var x = cv.getContext("2d"), kind = "", parts = [], W = 0, H = 0, dpr = 1, raf = 0, last = 0;
   function now(){
@@ -5891,13 +5891,15 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     for(var j = 0; j < ns; j++) parts.push({r: 0, x: Math.random() * W, y: Math.random() * H, s: .8 + Math.random() * 1.8, v: 22 + Math.random() * 38, a: .45 + Math.random() * .4, p: Math.random() * 6.28, w: .6 + Math.random() * 1.2});
   }
   function place(){
-    var on = mq.matches && root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
+    var on = root.classList.contains("show-image") && root.classList.contains("lg-on") && !root.classList.contains("banner-lock");
     var k = on ? now() : "";
     if(!k){ if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
     var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
-    var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, bot = he ? he.getBoundingClientRect().bottom : top + 300;
+    var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, br = bn ? bn.getBoundingClientRect() : null;
+    if(br && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
+    var bot = he ? he.getBoundingClientRect().bottom : top + 300;
     if(gt && gt.offsetHeight > 0) bot = Math.min(bot, gt.getBoundingClientRect().top);
-    var w = (document.documentElement.clientWidth || window.innerWidth) - 27, h = Math.max(40, bot - top), sy = window.scrollY || 0;
+    var w = (document.documentElement.clientWidth || window.innerWidth) - (mq.matches ? 27 : window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
     cv.style.left = "0px"; cv.style.top = Math.round(top + sy) + "px"; cv.style.width = w + "px"; cv.style.height = Math.round(h) + "px";
     dpr = Math.min(2, window.devicePixelRatio || 1);
     if(w !== W || Math.round(h) !== H || k !== kind){ W = w; H = Math.round(h); kind = k; cv.width = W * dpr; cv.height = H * dpr; seed(); }
