@@ -5462,6 +5462,10 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
 }
 #wt-pclock .wt-clock-tmp{margin-left:.2em!important;}
 #wt-pclock .wt-wind:not(:empty){display:inline;}
+/* Thin white divider between the local and resort temperatures (Mark, Nov 14, 2026). Keep as is. */
+#wt-clock-tmp:not(:empty) + #wt-clock-rtmp:not(:empty)::before,
+#wt-pclock-l:not(:empty) + #wt-pclock-r:not(:empty)::before{content:""; display:inline-block; width:max(1.5px,.035em); height:.7em;
+  background:#fff; border-radius:1px; margin-right:.2em; vertical-align:baseline; box-shadow:0 0 2px rgba(0,0,0,.45);}
 /* Wind mark (Mark, Nov 12, 2026, 2:17 a.m.): arrow and speed the same height as the temperatures' digits (speed in the clock's own
    size; arrow --wh = the font's measured digit height), a very small "mph" at the bottom right, and the same .2em gap between every
    element of the line (time · local temp · resort temp · arrow · speed). */
