@@ -5983,7 +5983,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
         if(mdir > 0 && q.x - rw > W){ q.x = -rw; q.y = Math.random() * H; } if(mdir < 0 && q.x + rw < 0){ q.x = W + rw; q.y = Math.random() * H; }
         x.globalAlpha = q.a * (.75 + .25 * Math.sin(q.p * 1.7)); x.drawImage(puff, q.x - rw / 2, yy - rh / 2, rw, rh); x.globalAlpha = 1; continue; }
       if(q.f){   /* light grey, flying the way the wind arrow points (Mark, 2:59 p.m.) */
-        var fv = (60 + mist * 9) * q.v; q.p += dt * q.w; var wob = Math.sin(q.p) * 16, dxp = fvx * fv - fvy * wob, dyp = fvy * fv + fvx * wob;
+        var fv = (mist <= 20 ? 25 + mist * 3 : 180 + (mist - 20) * 12) * q.v;   /* 15-20 mph: slow drift (70-85 px/s); over 20: fast (180 + 12 per mph) (Mark, 3:07 p.m.) */ q.p += dt * q.w; var wob = Math.sin(q.p) * 16, dxp = fvx * fv - fvy * wob, dyp = fvy * fv + fvx * wob;
         q.x += dxp * dt; q.y += dyp * dt; var mg = q.l + 6;
         if(q.x > W + mg){ q.x = -mg; q.y = Math.random() * H; } else if(q.x < -mg){ q.x = W + mg; q.y = Math.random() * H; }
         if(q.y > H + mg){ q.y = -mg; q.x = Math.random() * W; } else if(q.y < -mg){ q.y = H + mg; q.x = Math.random() * W; }
