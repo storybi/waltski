@@ -5702,8 +5702,8 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 <style>
 /* Frosted glass clock line (Mark, Nov 14, 2026; replaces the earlier Liquid Glass clock): on phones and iPads held sideways with
    Show image on, the whole clock line — time, local temp, resort temp (tiny orange arrow under it), wind — is drawn as frosted glass
-   digits over the header photo in Saira Extra Condensed 700 (tall, narrow; never narrower than 60% width), spread evenly across the
-   photo left of the 54px weather bar. Milky fill lighter at the top, fine bright edge, soft inner shading and shadow, round colon dots.
+   digits over the header photo in Saira Extra Condensed 700 (tall, narrow; never narrower than 75% width), spread evenly across the
+   photo left of the 54px weather bar. Very translucent (Mark, Nov 14, 2026, 10:42 a.m.): about 90% of the photo shows through — a faint fill, light 1.2px blur, a fine bright edge, a thin adaptive border (dark over light parts of the photo, light over dark parts) and a soft shadow; round colon dots.
    Temps carry a faint tint of their temperature color (window.tempCls: hot / mild / cool / cold) and the wind speed a faint yellow
    (over 15 mph) or red (over 25) tint; the wind arrow is small, to the right of the speed, with a tiny "mph" under it. AM/PM is
    dropped. The normal #wt-clock line stays in the page (hidden) as the data source. Keep as is. */
@@ -5713,7 +5713,11 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   html.show-image.lg-on .wt-clock .wt-clock-t{visibility:hidden!important;}
 }
 #lg-wrap .g{position:absolute;}
-#lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(6px) saturate(140%) brightness(1.18); backdrop-filter:blur(6px) saturate(140%) brightness(1.18);
+#lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(1.2px) saturate(120%) brightness(1.08); backdrop-filter:blur(1.2px) saturate(120%) brightness(1.08);
+  -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
+/* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
+   dark over bright sky and light over dark trees */
+#lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(1.8); backdrop-filter:grayscale(1) invert(1) contrast(1.8);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 #lg-wrap canvas{position:absolute; inset:0; width:100%; height:100%;}
 #lg-wrap .lg-dv{position:absolute; background:#fff; border-radius:1px; opacity:.75; box-shadow:0 0 2px rgba(0,0,0,.45);}
@@ -5743,22 +5747,23 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   function glass(cw, ch, by, H, paint, tint){
     var T = tint ? rgb(tint) : null, a = function(c, o){ return "rgba(" + (c || "255,255,255") + "," + o + ")"; };
     function sh(){ var c = mk(cw, ch), x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); paint(x); return c; }
-    function shrunk(px){ var cv = sh(), x = cv.getContext("2d"), src = sh(); for(var i = 0; i < 8; i++){ var an = i / 8 * Math.PI * 2; x.globalCompositeOperation = "destination-in"; x.drawImage(src, Math.cos(an) * px * dpr, Math.sin(an) * px * dpr); } return cv; }
-    function band(px){ var cv = sh(), x = cv.getContext("2d"); x.globalCompositeOperation = "destination-out"; x.drawImage(shrunk(px), 0, 0); return cv; }
-    function paintIn(cv, style){ var x = cv.getContext("2d"); x.globalCompositeOperation = "source-in"; x.fillStyle = style(x); x.fillRect(0, 0, cv.width, cv.height); return cv; }
+    function shrunk(px){ var cv = sh(), x = cv.getContext("2d"), src = sh(); x.setTransform(1, 0, 0, 1, 0, 0); for(var i = 0; i < 8; i++){ var an = i / 8 * Math.PI * 2; x.globalCompositeOperation = "destination-in"; x.drawImage(src, Math.cos(an) * px * dpr, Math.sin(an) * px * dpr); } return cv; }
+    function band(px){ var cv = sh(), x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = "destination-out"; x.drawImage(shrunk(px), 0, 0); return cv; }
+    function paintIn(cv, style){ var x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = "source-in"; x.fillStyle = style(x); x.fillRect(0, 0, cv.width, cv.height); return cv; }
     var el = document.createElement("div"); el.className = "g"; el.style.width = cw + "px"; el.style.height = ch + "px";
     var gl = document.createElement("div"); gl.className = "gl"; var url = "url(" + sh().toDataURL() + ")"; gl.style.webkitMaskImage = url; gl.style.maskImage = url;
-    gl.style.background = T ? a(T, .2) : "rgba(255,255,255,.04)";
+    gl.style.background = T ? a(T, .08) : "rgba(255,255,255,.02)";
     var rim = mk(cw, ch), rx = rim.getContext("2d");
-    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .035) + "px " + a(T, .35) + ") " : "") + "drop-shadow(0 2px 6px rgba(0,0,0,.28))";
+    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .03) + "px " + a(T, .3) + ") " : "") + "drop-shadow(0 1px 3px rgba(0,0,0,.22))";
     var top = (by - H) * dpr, bot = by * dpr;
     rx.drawImage(paintIn(sh(), function(x){ var g = x.createLinearGradient(0, top, 0, bot);
-      if(T){ g.addColorStop(0, "rgba(205,215,232,.7)"); g.addColorStop(.4, a(T, .5)); g.addColorStop(1, a(T, .42)); }
-      else{ g.addColorStop(0, "rgba(200,212,230,.78)"); g.addColorStop(.5, "rgba(172,186,206,.66)"); g.addColorStop(1, "rgba(150,163,184,.6)"); } return g; }), 0, 0);
-    var sd = paintIn(band(H * .02), function(){ return "rgba(20,28,40,.12)"; });
+      if(T){ g.addColorStop(0, "rgba(225,232,242,.14)"); g.addColorStop(.4, a(T, .12)); g.addColorStop(1, a(T, .1)); }
+      else{ g.addColorStop(0, "rgba(225,232,242,.13)"); g.addColorStop(.5, "rgba(210,220,234,.09)"); g.addColorStop(1, "rgba(200,210,226,.08)"); } return g; }), 0, 0);
+    var sd = paintIn(band(H * .02), function(){ return "rgba(20,28,40,.06)"; });
     rx.save(); rx.filter = "blur(" + (H * .02 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(sd, 0, 0); rx.restore();
-    rx.drawImage(paintIn(band(Math.max(1, H * .006)), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.75)"); g.addColorStop(.5, T ? a(T, .7) : "rgba(235,242,250,.45)"); g.addColorStop(1, "rgba(225,232,242,.35)"); return g; }), 0, 0);
-    el.appendChild(gl); el.appendChild(rim); return el;
+    rx.drawImage(paintIn(band(Math.max(1, H * .006)), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.55)"); g.addColorStop(.5, T ? a(T, .75) : "rgba(240,245,252,.35)"); g.addColorStop(1, "rgba(230,236,245,.3)"); return g; }), 0, 0);
+    var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(1.6, H * .014)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
+    el.appendChild(gl); el.appendChild(rim); el.appendChild(bd); return el;
   }
   function gtext(s, H, tint, below){
     var fs = H / CAP, pad = Math.ceil(H * .05), col = s.indexOf(":") >= 0, p = s.split(":");
@@ -5812,12 +5817,12 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = (lt != null && rt != null) ? di : -1; return a; }
-    /* as large as fits (85% of the photo height, room left for the orange arrow), digits never narrower than 60%, evenly spaced */
+    /* as large as fits (85% of the photo height, room left for the orange arrow), digits never narrower than 75%, evenly spaced */
     var H = Hs * .85, items, vis; SX = 1;
     for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
-      var r = area / need * .99; if(SX * r >= .6) SX *= r; else { var s2 = .6 / SX; SX = .6; H *= Math.min(1, r / s2); }
+      var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     }
     var gap = (area - vis) / (items.length + 1), base = Math.round((Hs + H) / 2 - Hs * .035), x = gap, els = [];
     items.forEach(function(it, i){
