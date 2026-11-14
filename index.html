@@ -5759,7 +5759,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   var hmEl = document.getElementById("wt-clock-hm"), clk = document.getElementById("wt-clock"), he = document.getElementById("wt-head-end"); if(!hmEl || !clk) return;
   var wrap = document.createElement("div"); wrap.id = "lg-wrap"; wrap.setAttribute("aria-hidden", "true"); document.body.appendChild(wrap);
   var FAM = '"Saira Extra Condensed", "Barlow Condensed", "Arial Narrow", sans-serif', WT = 700, CAP = .727, SX = 1, ready = false, raf = 0, lastKey = "";
-  var TINT = {"tc-hot": "#ff5c5c", "tc-mild": "#ffd23f", "tc-cool": "#8961b3", "tc-cold": "#5aaeff"}, WC = {y: "#f5c518", r: "#e0243a"};
+  var TINT = {"tc-hot": "#ff5c5c", "tc-mild": "#ffd23f", "tc-cool": "#a77ee0", "tc-cold": "#5aaeff"}, WC = {y: "#f5c518", r: "#ff3b4f"};   /* brighter purple and red in the glass (Mark, 4:33 p.m.) */
   var mc = document.createElement("canvas").getContext("2d"), dpr = 2;
   var AR = window.Path2D ? new Path2D("M12 0l8 11h-5.75v13h-4.5V11H4z") : null;
   var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
@@ -5777,12 +5777,12 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     function paintIn(cv, style){ var x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = "source-in"; x.fillStyle = style(x); x.fillRect(0, 0, cv.width, cv.height); return cv; }
     var el = document.createElement("div"); el.className = "g"; el.style.width = cw + "px"; el.style.height = ch + "px";
     var gl = document.createElement("div"); gl.className = "gl"; var url = "url(" + sh().toDataURL() + ")"; gl.style.webkitMaskImage = url; gl.style.maskImage = url;
-    gl.style.background = T ? a(T, .3) : "rgba(255,255,255,.12)";
+    gl.style.background = T ? a(T, .5) : "rgba(255,255,255,.12)";
     var rim = mk(cw, ch), rx = rim.getContext("2d");
-    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .03) + "px " + a(T, .3) + ") " : "") + "drop-shadow(0 1px 1px rgba(20,30,45,.38)) drop-shadow(0 3px 8px rgba(0,0,0,.24))";
+    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .045) + "px " + a(T, .65) + ") " : "") + "drop-shadow(0 1px 1px rgba(20,30,45,.38)) drop-shadow(0 3px 8px rgba(0,0,0,.24))";
     var top = (by - H) * dpr, bot = by * dpr;
     rx.drawImage(paintIn(sh(), function(x){ var g = x.createLinearGradient(0, top, 0, bot);
-      if(T){ g.addColorStop(0, "rgba(225,232,242,.71)"); g.addColorStop(.4, a(T, .68)); g.addColorStop(1, a(T, .65)); }
+      if(T){ var Lt = T.split(",").map(function(v){ return Math.round(+v + (255 - v) * .35); }).join(","); g.addColorStop(0, a(Lt, .98)); g.addColorStop(.45, a(T, .97)); g.addColorStop(1, a(T, .95)); }   /* bold, bright, solid color (Mark, 4:33 p.m.) */
       else{ g.addColorStop(0, "rgba(250,252,255,.9)"); g.addColorStop(.5, "rgba(240,244,250,.87)"); g.addColorStop(1, "rgba(230,236,245,.85)"); }   /* brighter white (Mark, 2:27 p.m.) */   /* a touch cooler/grayer so white glass reads on white sky (Mark, 1:00 p.m.) */ return g; }), 0, 0);
     /* liquid bevel (Mark, 12:00 p.m.): a soft blurred inner shadow along the lower edges, a bright blurred inner highlight along the
        upper edges and a crisp specular rim that fades from white at the top to faint at the bottom, so the edge reads as curved
@@ -5800,13 +5800,14 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   function gtext(s, H, tint, below, label, deg){
     var fs = H / CAP, pad = Math.ceil(H * .05), col = s.indexOf(":") >= 0, p = s.split(":"), dr = H * .085, dw = deg ? dr * 2 + H * .04 : 0;
     var LH = H * LBL, lfs = LH / CAP, lw = label ? tw(label, lfs, 800) + lfs * .1 * label.length : 0;
-    var inner = (col ? tw(p[0], fs) + tw(p[1], fs) + H * .16 : tw(s, fs)) + dw, cw = Math.ceil(Math.max(inner, lw) + pad * 2), by = Math.ceil(H + pad);
+    var wd = tint ? 800 : WT;   /* colored numbers in the heavier 800 weight (Mark, 4:33 p.m.) */
+    var inner = (col ? tw(p[0], fs, wd) + tw(p[1], fs, wd) + H * .16 : tw(s, fs, wd)) + dw, cw = Math.ceil(Math.max(inner, lw) + pad * 2), by = Math.ceil(H + pad);
     var ch = Math.ceil(by + pad + (label ? H * LGAP + LH : 0) + (below || 0));
     var el = glass(cw, ch, by, H, function(x){
       if(label){ x.save(); try{ x.letterSpacing = (lfs * .1 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH, 800); x.restore(); }
-      if(deg){ var nw = tw(s, fs), x0 = (cw - nw - dw) / 2; txt(x, s, fs, x0 + nw / 2, by);
+      if(deg){ var nw = tw(s, fs, wd), x0 = (cw - nw - dw) / 2; txt(x, s, fs, x0 + nw / 2, by, wd);
         x.save(); x.strokeStyle = "#fff"; x.lineWidth = H * .045; x.beginPath(); x.arc(x0 + nw + H * .025 + dr, by - H + dr + x.lineWidth / 2, dr - x.lineWidth / 2, 0, Math.PI * 2); x.stroke(); x.restore(); return; }   /* small ring degree sign, like the clock's own temps */
-      if(!col){ txt(x, s, fs, cw / 2, by); return; }
+      if(!col){ txt(x, s, fs, cw / 2, by, wd); return; }
       var w1 = tw(p[0], fs), d = H * .08, cg = H * .04, cx = pad + w1 + cg + d / 2;
       txt(x, p[0], fs, pad + w1 / 2, by);
       x.save(); x.fillStyle = "#fff"; [.69, .27].forEach(function(f){ x.beginPath(); x.arc(cx, by - H * f, d / 2, 0, Math.PI * 2); x.fill(); }); x.restore();
@@ -5824,10 +5825,10 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   function wind(sp, to, H){
     /* speed, then the arrow right against it, and a "WIND SPEED (MPH)" label under them in the same glass (Mark, 12:53 p.m.) */
     var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05), label = "WIND SPEED (MPH)";
-    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs, 800) + lfs * .1 * label.length;
+    var wd = k !== "w" ? 800 : WT, aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs, wd), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs, 800) + lfs * .1 * label.length;
     var nw = sw + gap + aw, cw = Math.ceil(Math.max(nw, lw) + pad * 2), x0 = (cw - nw) / 2, by = Math.ceil(H + pad), ch = Math.ceil(by + pad + H * LGAP + LH);
     var el = glass(cw, ch, by, H, function(x){
-      txt(x, s, fs, x0 + sw / 2, by);
+      txt(x, s, fs, x0 + sw / 2, by, wd);
       if(AR){ x.save(); x.translate(x0 + sw + gap + aw / 2, by - H * .58); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
       x.save(); try{ x.letterSpacing = (lfs * .1 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH, 800); x.restore();
     }, WC[k] || null);
@@ -6125,6 +6126,12 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
 })();
 </script>
 
+<svg width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false"><filter id="sk-sharp" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" preserveAlpha="true" edgeMode="duplicate" kernelMatrix="0 -0.45 0 -0.45 2.8 -0.45 0 -0.45 0"/></filter></svg>
+<style>
+/* Crisper header photos (Mark, Nov 14, 2026, 4:33 p.m.): a light sharpening pass (3x3 unsharp kernel) plus a touch of contrast and color
+   on the cam pictures behind the header, so they look cleaner and less soft. Not on the Doppler/video layer. */
+#wt-banner .bl, #wt-banner img.wt-live{filter:url(#sk-sharp) contrast(1.07) saturate(1.1) brightness(1.02);}
+</style>
 <style>
 /* Rotation cover (Mark, Nov 12, 2026): when a phone or iPad turns, a dozen parts of the page (photo height, pinned band, clock size and
    place, clock moving in/out of the card, the right-side bar, scroll to top) each re-measure on their own timer, which showed as
