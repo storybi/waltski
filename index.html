@@ -5717,7 +5717,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 /* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
    darker over bright sky and light over dark trees; range squeezed so its darkest is a mid gray, never black (Mark, 11:45 a.m.) */
-#lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2); backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2);
+#lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2) blur(.8px); backdrop-filter:grayscale(1) invert(1) contrast(.55) brightness(1.2) blur(.8px); opacity:.5;
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 #lg-wrap canvas{position:absolute; inset:0; width:100%; height:100%;}
 #lg-wrap .lg-dv{position:absolute; background:#fff; border-radius:1px; opacity:.3; box-shadow:0 0 1px rgba(0,0,0,.2);}   /* translucent (Mark, 11:52 a.m.) */
@@ -5754,14 +5754,19 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     var gl = document.createElement("div"); gl.className = "gl"; var url = "url(" + sh().toDataURL() + ")"; gl.style.webkitMaskImage = url; gl.style.maskImage = url;
     gl.style.background = T ? a(T, .08) : "rgba(255,255,255,.02)";
     var rim = mk(cw, ch), rx = rim.getContext("2d");
-    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .03) + "px " + a(T, .3) + ") " : "") + "drop-shadow(0 1px 3px rgba(0,0,0,.22))";
+    rim.style.filter = (T ? "drop-shadow(0 0 " + Math.round(H * .03) + "px " + a(T, .3) + ") " : "") + "drop-shadow(0 1px 1px rgba(20,30,45,.28)) drop-shadow(0 3px 8px rgba(0,0,0,.18))";
     var top = (by - H) * dpr, bot = by * dpr;
     rx.drawImage(paintIn(sh(), function(x){ var g = x.createLinearGradient(0, top, 0, bot);
       if(T){ g.addColorStop(0, "rgba(225,232,242,.14)"); g.addColorStop(.4, a(T, .12)); g.addColorStop(1, a(T, .1)); }
       else{ g.addColorStop(0, "rgba(225,232,242,.13)"); g.addColorStop(.5, "rgba(210,220,234,.09)"); g.addColorStop(1, "rgba(200,210,226,.08)"); } return g; }), 0, 0);
-    var sd = paintIn(band(H * .02), function(){ return "rgba(20,28,40,.06)"; });
-    rx.save(); rx.filter = "blur(" + (H * .02 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(sd, 0, 0); rx.restore();
-    rx.drawImage(paintIn(band(Math.max(1, H * .006)), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.55)"); g.addColorStop(.5, T ? a(T, .75) : "rgba(240,245,252,.35)"); g.addColorStop(1, "rgba(230,236,245,.3)"); return g; }), 0, 0);
+    /* liquid bevel (Mark, 12:00 p.m.): a soft blurred inner shadow along the lower edges, a bright blurred inner highlight along the
+       upper edges and a crisp specular rim that fades from white at the top to faint at the bottom, so the edge reads as curved
+       glass even over white sky or snow */
+    var lo = paintIn(band(H * .045), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(40,55,75,0)"); g.addColorStop(.45, "rgba(40,55,75,.1)"); g.addColorStop(1, "rgba(30,42,60,.38)"); return g; });
+    rx.save(); rx.filter = "blur(" + (H * .018 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(lo, 0, 0); rx.restore();
+    var hi = paintIn(band(H * .035), function(x){ var g = x.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(255,255,255,.7)"); g.addColorStop(.4, "rgba(255,255,255,.12)"); g.addColorStop(1, "rgba(255,255,255,0)"); return g; });
+    rx.save(); rx.filter = "blur(" + (H * .012 * dpr) + "px)"; rx.globalCompositeOperation = "source-atop"; rx.drawImage(hi, 0, 0); rx.restore();
+    rx.drawImage(paintIn(band(Math.max(1, H * .007)), function(x){ var g = x.createLinearGradient(0, top, cw * dpr * .3, bot); g.addColorStop(0, "rgba(255,255,255,.95)"); g.addColorStop(.5, T ? a(T, .8) : "rgba(235,242,252,.45)"); g.addColorStop(1, "rgba(120,140,165,.55)"); return g; }), 0, 0);
     var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(1.6, H * .014)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
     el.appendChild(gl); el.appendChild(rim); el.appendChild(bd); return el;
   }
@@ -5818,14 +5823,14 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = (lt != null && rt != null) ? di : -1; return a; }
-    /* about 32% of the photo height, centered on the photo, digits never narrower than 75%, evenly spaced */
-    var H = Math.min(Hs * .85, (stop - ptop) * .32), items, vis; SX = 1;   /* shorter: about 32% of the photo height (Mark, 11:52 a.m.) */
+    /* about 22% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
+    var H = Math.min(Hs * .85, (stop - ptop) * .224), items, vis; SX = 1;   /* 30% shorter again: about 22% of the photo height (Mark, 11:52 a.m.) */
     for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     }
-    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.min(Hs - H * .12, Math.max(H, mid + H / 2))), x = gap, els = [];   /* digits centered on the photo's middle, kept below the buttons and above the photo bottom */
+    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - Math.max(10, H * .075) * 1.1 - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the orange arrow under the resort temp (Mark, 12:00 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
       x += it.w - 2 * it.px;
