@@ -5770,10 +5770,15 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     var bd = document.createElement("div"); bd.className = "bd"; var burl = "url(" + band(Math.max(.8, H * .007)).toDataURL() + ")"; bd.style.webkitMaskImage = burl; bd.style.maskImage = burl;
     el.appendChild(gl); el.appendChild(rim); el.appendChild(bd); return el;
   }
-  function gtext(s, H, tint, below){
-    var fs = H / CAP, pad = Math.ceil(H * .05), col = s.indexOf(":") >= 0, p = s.split(":");
-    var inner = col ? tw(p[0], fs) + tw(p[1], fs) + H * .16 : tw(s, fs), cw = Math.ceil(inner + pad * 2), by = Math.ceil(H + pad), ch = Math.ceil(by + pad + (below || 0));
+  function gtext(s, H, tint, below, label, deg){
+    var fs = H / CAP, pad = Math.ceil(H * .05), col = s.indexOf(":") >= 0, p = s.split(":"), dr = H * .085, dw = deg ? dr * 2 + H * .04 : 0;
+    var LH = H * LBL, lfs = LH / CAP, lw = label ? tw(label, lfs) + lfs * .08 * label.length : 0;
+    var inner = (col ? tw(p[0], fs) + tw(p[1], fs) + H * .16 : tw(s, fs)) + dw, cw = Math.ceil(Math.max(inner, lw) + pad * 2), by = Math.ceil(H + pad);
+    var ch = Math.ceil(by + pad + (label ? H * LGAP + LH : 0) + (below || 0));
     var el = glass(cw, ch, by, H, function(x){
+      if(label){ x.save(); try{ x.letterSpacing = (lfs * .08 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH); x.restore(); }
+      if(deg){ var nw = tw(s, fs), x0 = (cw - nw - dw) / 2; txt(x, s, fs, x0 + nw / 2, by);
+        x.save(); x.strokeStyle = "#fff"; x.lineWidth = H * .045; x.beginPath(); x.arc(x0 + nw + H * .025 + dr, by - H + dr + x.lineWidth / 2, dr - x.lineWidth / 2, 0, Math.PI * 2); x.stroke(); x.restore(); return; }   /* small ring degree sign, like the clock's own temps */
       if(!col){ txt(x, s, fs, cw / 2, by); return; }
       var w1 = tw(p[0], fs), d = H * .08, cg = H * .04, cx = pad + w1 + cg + d / 2;
       txt(x, p[0], fs, pad + w1 / 2, by);
@@ -5782,9 +5787,12 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     }, tint);
     return {el: el, w: cw, px: pad, by: by};
   }
+  /* temps keep their degree sign and carry a small "LOCAL" / "RESORT" label under the digits in the same tinted glass (Mark, 12:47 p.m.);
+     the orange arrow sits under the resort label */
+  var LBL = .2, LGAP = .08;
   function temp(t, H, arrow){
-    var c = window.tempCls ? window.tempCls(t) : "", aw = Math.max(10, H * .075), it = gtext(String(t), H, TINT[c] || null, arrow ? aw * 1.1 : 0);
-    if(arrow){ var d = document.createElement("i"); d.className = "lg-arw"; d.style.left = (it.w / 2 - aw / 2) + "px"; d.style.top = (it.by + H * .06) + "px";
+    var c = window.tempCls ? window.tempCls(t) : "", aw = Math.max(10, H * .075), it = gtext(String(t), H, TINT[c] || null, arrow ? aw * 1.1 : 0, arrow ? "RESORT" : "LOCAL", true);
+    if(arrow){ var d = document.createElement("i"); d.className = "lg-arw"; d.style.left = (it.w / 2 - aw / 2) + "px"; d.style.top = (it.by + H * (LGAP + LBL) + H * .06) + "px";
       d.style.borderLeftWidth = d.style.borderRightWidth = (aw / 2) + "px"; d.style.borderTopWidth = (aw * .67) + "px"; it.el.appendChild(d); }
     return it;
   }
@@ -5822,7 +5830,7 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
     var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), dpr, ready].join("|");
     wrap.style.left = "0px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = (lt != null && rt != null) ? di : -1; return a; }
+    function build(H){ var a = [gtext(hm, H)]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
     var H = Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     for(var k = 0; k < 6; k++){
@@ -5830,11 +5838,11 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     }
-    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - Math.max(10, H * .075) * 1.1 - H * .1)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the orange arrow under the resort temp (Mark, 12:00 p.m.) */
+    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - Math.max(10, H * .075) * 1.1 - H * .08)), x = gap, els = [];   /* at the bottom of the photo, leaving room for the temp labels and the orange arrow under the resort label (Mark, 12:47 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
       x += it.w - 2 * it.px;
-      if(i === items.di){ var d = document.createElement("div"); d.className = "lg-dv"; var w = Math.max(2, H * .022);
+      if(items.di.indexOf(i) >= 0 && i < items.length - 1){ var d = document.createElement("div"); d.className = "lg-dv"; var w = Math.max(2, H * .022);
         d.style.width = w + "px"; d.style.height = (H * .9) + "px"; d.style.left = Math.round(x + gap / 2 - w / 2) + "px"; d.style.top = Math.round(base - H * .9) + "px"; els.push(d); }
       x += gap;
     });
