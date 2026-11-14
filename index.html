@@ -5715,8 +5715,8 @@ html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!import
 html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright Show card: the line sits above the card instead */
 #lg-wrap .g{position:absolute;}
 /* frosted backing (Mark, Nov 14, 2026, 1:06 p.m.): a softly blurred, slightly darkened pane behind the whole line */
-#lg-wrap .lg-frost{position:absolute; border-radius:16px; -webkit-backdrop-filter:blur(12px) saturate(115%) brightness(.9); backdrop-filter:blur(12px) saturate(115%) brightness(.9);
-  background:linear-gradient(to bottom, rgba(20,30,46,.16), rgba(20,30,46,.26)); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 0 0 1px rgba(255,255,255,.1), 0 6px 18px rgba(0,0,0,.18);}
+#lg-wrap .lg-frost{position:absolute; border-radius:0; -webkit-backdrop-filter:blur(12px) saturate(115%) brightness(.9); backdrop-filter:blur(12px) saturate(115%) brightness(.9);
+  background:linear-gradient(to bottom, rgba(20,30,46,.16), rgba(20,30,46,.26)); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(255,255,255,.08);}
 #lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1); backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 /* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
@@ -5724,6 +5724,8 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
 #lg-wrap .bd{position:absolute; inset:0; -webkit-backdrop-filter:grayscale(1) invert(1) contrast(.74) brightness(1.15) blur(.8px); backdrop-filter:grayscale(1) invert(1) contrast(.74) brightness(1.15) blur(.8px); opacity:.68;
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}   /* 35% more contrast (Mark, 1:00 p.m.) */
 #lg-wrap canvas{position:absolute; inset:0; width:100%; height:100%;}
+#lg-wrap .lg-wi{position:absolute; color:rgba(255,255,255,.7); filter:drop-shadow(0 1px 1px rgba(20,30,45,.45)) drop-shadow(0 0 3px rgba(20,30,45,.25));}
+#lg-wrap .lg-wi svg{display:block; width:100%; height:100%;}
 #lg-wrap .lg-dv{position:absolute; background:#fff; border-radius:1px; opacity:.3; box-shadow:0 0 1px rgba(0,0,0,.2);}   /* translucent (Mark, 11:52 a.m.) */
 #lg-wrap .lg-mph{position:absolute; font:700 10px/1 "Inter",Arial,sans-serif; color:rgba(255,255,255,.5); text-shadow:0 0 1px rgba(80,80,80,.45);}   /* translucent, like the digits */
 #lg-wrap .lg-arw{position:absolute; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
@@ -5734,7 +5736,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
    (re-adding a class still fires class observers, which caused a redraw loop with the clock-placement script on Nov 14, 2026). Keep as is. */
 (function(){
   if(!window.matchMedia) return;
-  try{ var fl = document.createElement("link"); fl.rel = "stylesheet"; fl.href = "https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@700&display=swap"; document.head.appendChild(fl); }catch(e){}
+  try{ var fl = document.createElement("link"); fl.rel = "stylesheet"; fl.href = "https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@700;800&display=swap"; document.head.appendChild(fl); }catch(e){}
   var mq = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)"), root = document.documentElement;
   var hmEl = document.getElementById("wt-clock-hm"), clk = document.getElementById("wt-clock"), he = document.getElementById("wt-head-end"); if(!hmEl || !clk) return;
   var wrap = document.createElement("div"); wrap.id = "lg-wrap"; wrap.setAttribute("aria-hidden", "true"); document.body.appendChild(wrap);
@@ -5745,9 +5747,9 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
   function on(){ return (mq.matches || mqP.matches || mqD.matches) && !!document.getElementById("wt-banner"); }   /* Show image and Show card (Mark, 1:08 p.m.) */
   function cap(){ mc.font = WT + " 100px " + FAM; var m = mc.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) CAP = m.actualBoundingBoxAscent / 100; }
-  function tw(t, fs){ mc.font = WT + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
+  function tw(t, fs, wt){ mc.font = (wt || WT) + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
   function mk(cw, ch){ var c = document.createElement("canvas"); c.width = Math.ceil(cw * dpr); c.height = Math.ceil(ch * dpr); return c; }
-  function txt(x, t, fs, cx, by){ x.save(); x.setTransform(dpr * SX, 0, 0, dpr, 0, 0); x.font = WT + " " + fs + "px " + FAM; x.textAlign = "center"; x.textBaseline = "alphabetic"; x.fillStyle = "#fff"; x.fillText(t, cx / SX, by); x.restore(); }
+  function txt(x, t, fs, cx, by, wt){ x.save(); x.setTransform(dpr * SX, 0, 0, dpr, 0, 0); x.font = (wt || WT) + " " + fs + "px " + FAM; x.textAlign = "center"; x.textBaseline = "alphabetic"; x.fillStyle = "#fff"; x.fillText(t, cx / SX, by); x.restore(); }
   function rgb(h){ h = h.replace("#", ""); return [0, 2, 4].map(function(i){ return parseInt(h.substr(i, 2), 16); }).join(","); }
   function glass(cw, ch, by, H, paint, tint){
     var T = tint ? rgb(tint) : null, a = function(c, o){ return "rgba(" + (c || "255,255,255") + "," + o + ")"; };
@@ -5777,11 +5779,11 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   }
   function gtext(s, H, tint, below, label, deg){
     var fs = H / CAP, pad = Math.ceil(H * .05), col = s.indexOf(":") >= 0, p = s.split(":"), dr = H * .085, dw = deg ? dr * 2 + H * .04 : 0;
-    var LH = H * LBL, lfs = LH / CAP, lw = label ? tw(label, lfs) + lfs * .08 * label.length : 0;
+    var LH = H * LBL, lfs = LH / CAP, lw = label ? tw(label, lfs, 800) + lfs * .1 * label.length : 0;
     var inner = (col ? tw(p[0], fs) + tw(p[1], fs) + H * .16 : tw(s, fs)) + dw, cw = Math.ceil(Math.max(inner, lw) + pad * 2), by = Math.ceil(H + pad);
     var ch = Math.ceil(by + pad + (label ? H * LGAP + LH : 0) + (below || 0));
     var el = glass(cw, ch, by, H, function(x){
-      if(label){ x.save(); try{ x.letterSpacing = (lfs * .08 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH); x.restore(); }
+      if(label){ x.save(); try{ x.letterSpacing = (lfs * .1 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH, 800); x.restore(); }
       if(deg){ var nw = tw(s, fs), x0 = (cw - nw - dw) / 2; txt(x, s, fs, x0 + nw / 2, by);
         x.save(); x.strokeStyle = "#fff"; x.lineWidth = H * .045; x.beginPath(); x.arc(x0 + nw + H * .025 + dr, by - H + dr + x.lineWidth / 2, dr - x.lineWidth / 2, 0, Math.PI * 2); x.stroke(); x.restore(); return; }   /* small ring degree sign, like the clock's own temps */
       if(!col){ txt(x, s, fs, cw / 2, by); return; }
@@ -5794,7 +5796,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   }
   /* temps keep their degree sign and carry a small "LOCAL" / "RESORT" label under the digits in the same tinted glass (Mark, 12:47 p.m.);
      the orange arrow sits under the resort label */
-  var LBL = .2, LGAP = .08;
+  var LBL = .23, LGAP = .08;   /* labels bolder (800) and a bit bigger (Mark, 1:12 p.m.) */
   function temp(t, H, resort){
     var c = window.tempCls ? window.tempCls(t) : "";
     return gtext(String(t), H, TINT[c] || null, 0, resort ? "RESORT" : "LOCAL", true);   /* no orange arrow under the resort temp (Mark, 12:53 p.m.) */
@@ -5802,12 +5804,12 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   function wind(sp, to, H){
     /* speed, then the arrow right against it, and a "WIND SPEED (MPH)" label under them in the same glass (Mark, 12:53 p.m.) */
     var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05), label = "WIND SPEED (MPH)";
-    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs) + lfs * .08 * label.length;
+    var aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs, 800) + lfs * .1 * label.length;
     var nw = sw + gap + aw, cw = Math.ceil(Math.max(nw, lw) + pad * 2), x0 = (cw - nw) / 2, by = Math.ceil(H + pad), ch = Math.ceil(by + pad + H * LGAP + LH);
     var el = glass(cw, ch, by, H, function(x){
       txt(x, s, fs, x0 + sw / 2, by);
       if(AR){ x.save(); x.translate(x0 + sw + gap + aw / 2, by - H * .58); x.rotate(to * Math.PI / 180); x.scale(aw / 24, aw / 24); x.translate(-12, -12); x.fillStyle = "#fff"; x.fill(AR); x.restore(); }
-      x.save(); try{ x.letterSpacing = (lfs * .08 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH); x.restore();
+      x.save(); try{ x.letterSpacing = (lfs * .1 / SX).toFixed(2) + "px"; }catch(e){} txt(x, label, lfs, cw / 2, by + H * LGAP + LH, 800); x.restore();
     }, WC[k] || null);
     return {el: el, w: cw, px: pad, by: by};
   }
@@ -5849,7 +5851,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dpr, ready].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
+    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
     var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     function fit(){ for(var k = 0; k < 6; k++){
@@ -5865,11 +5867,15 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       x += it.w - 2 * it.px;
       if(items.di.indexOf(i) >= 0 && i < items.length - 1){ var d = document.createElement("div"); d.className = "lg-dv"; var w = Math.max(2, H * .022);
         d.style.width = w + "px"; d.style.height = (H * .9) + "px"; d.style.left = Math.round(x + gap / 2 - w / 2) + "px"; d.style.top = Math.round(base - H * .9) + "px"; els.push(d); }
+      if(i === items.wi){   /* smooth wind icon between the resort temp and the wind speed (Mark, 1:13 p.m.) */
+        var ws = Math.round(Math.min(gap * .8, H * .5)), wi = document.createElement("span"); wi.className = "lg-wi";
+        wi.innerHTML = '<svg viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 8.5h15.5a4 4 0 1 0-4-4"/><path d="M2 13h22a4.2 4.2 0 1 1-4.2 4.2"/><path d="M2 17.5h9a3 3 0 1 1-3 3"/></svg>';
+        wi.style.width = ws + "px"; wi.style.height = Math.round(ws * .75) + "px"; wi.style.left = Math.round(x + gap / 2 - ws / 2) + "px"; wi.style.top = Math.round(base - H * .5 - ws * .375) + "px"; els.push(wi); }
       x += gap;
     });
     /* frosted backing behind the line so the numbers read over any photo (Mark, 1:06 p.m.) */
     var fr = document.createElement("div"); fr.className = "lg-frost"; var fpad = Math.round(H * .14);
-    fr.style.left = (cardMode ? 0 : 6) + "px"; fr.style.width = Math.max(0, area - (cardMode ? 0 : 12)) + "px"; fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
+    fr.style.left = (-left0) + "px"; fr.style.width = W + "px";   /* edge to edge across the screen, square (Mark, 1:12 p.m.) */ fr.style.top = Math.round(base - H - fpad) + "px"; fr.style.height = Math.round(H * (1 + LGAP + LBL) + fpad * 2) + "px";
     els.unshift(fr);
     while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
     els.forEach(function(e){ wrap.appendChild(e); });
@@ -5880,7 +5886,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   window.addEventListener("resize", q);
   window.addEventListener("orientationchange", function(){ setTimeout(q, 400); setTimeout(q, 1000); });
   if(mq.addEventListener) mq.addEventListener("change", q); else if(mq.addListener) mq.addListener(q);
-  if(document.fonts && document.fonts.load) document.fonts.load(WT + ' 100px "Saira Extra Condensed"').then(function(){ ready = true; cap(); lastKey = ""; q(); }, function(){});
+  if(document.fonts && document.fonts.load) Promise.all([document.fonts.load(WT + ' 100px "Saira Extra Condensed"'), document.fonts.load('800 100px "Saira Extra Condensed"')]).then(function(){ ready = true; cap(); lastKey = ""; q(); }, function(){});
   setInterval(q, 15000); cap(); q();
 })();
 </script>
