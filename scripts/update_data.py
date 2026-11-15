@@ -802,6 +802,10 @@ def do_cam_quality(s, now_mt):
         if bad:
             log("  cam skip:", u[-60:], info)
     s, ok = set_var(s, "CAM_SKIP", json.dumps(skip, separators=(",", ":")))
+    # only one CAM_SKIP (Nov 15, 2026): a stale second copy later in the script won, so cams flagged at night stayed skipped all day
+    _m = [m for m in re.finditer(r"\n[ \t]*var CAM_SKIP = \{.*?\};[^\n]*", s)]
+    for _x in reversed(_m[1:]):
+        s = s[:_x.start()] + s[_x.end():]
     log("  cam quality: %d checked, %d skipped" % (len(urls), len(skip)))
     return s
 

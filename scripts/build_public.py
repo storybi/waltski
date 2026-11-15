@@ -359,6 +359,12 @@ SUGGEST_JS = """<script>
 """ % SUGGEST_TOPIC
 public_css += SUGGEST_CSS
 
+# Never add a second copy (Mark, Nov 15, 2026): the artifact can already carry the newest public-site scripts (snow stake, CAM_SKIP,
+# banner arrows). A second, older copy ran a second banner rotator without them, so some Snowbasin cams never showed.
+if "/* Public site: load the Snowbasin cams" in body:
+    live_js = ""
+if "/* Suggest a resort \u2014 sends the suggestion" in body:
+    SUGGEST_JS = ""
 page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + SUGGEST_JS + "</body>\n</html>\n"
 
 # 7. Sunday's sermon (Mark, Oct 26, 2026): Washington Heights Church's latest Sunday sermon plays in an embedded YouTube player at the
