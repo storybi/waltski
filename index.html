@@ -1219,6 +1219,17 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <a class="ec-map" id="ec-link" href="https://charts.ecmwf.int/products/medium-rain-rate?layer_name=sf_rate&amp;projection=opencharts_north_america" target="_blank" rel="noopener"><img id="ec-img" alt="ECMWF forecast map of snowfall rate over North America" decoding="async"><img class="ec-states" src="https://www.skiinut.com/ecmwf_states.svg" alt="" aria-hidden="true"></a>
       <div class="ec-foot"><span id="ec-run"></span><span>Snowfall rate · © <a href="https://charts.ecmwf.int/" target="_blank" rel="noopener">ECMWF</a> Open Charts, CC BY 4.0</span></div>
     </div>
+    <!-- Snow forecast plumes (Mark, Nov 15, 2026, 1:26 p.m.): the "Snow Forecast Plumes (7-Day)" graphs from powderbuoy.com's Buoy Dashboard,
+         which shows the University of Utah's downscaled GEFS snowfall plumes. Under the ECMWF snowfall map. Rendered by the "Snow plumes" script. -->
+    <div class="ec-snow sk-plume" id="sk-plume">
+      <div class="ec-head">
+        <h3>Snow forecast plumes <span>7-day · GEFS downscaled</span></h3>
+        <span class="ec-time" id="pl-run">Loading…</span>
+      </div>
+      <div class="pl-tabs" id="pl-tabs" role="tablist"></div>
+      <a class="ec-map" id="pl-link" href="https://weather.utah.edu/" target="_blank" rel="noopener"><img id="pl-img" alt="7-day snowfall forecast plume" decoding="async"></a>
+      <div class="ec-foot"><span>Snowfall plumes from the GEFS ensemble</span><span>© <a href="https://weather.utah.edu/" target="_blank" rel="noopener">University of Utah Atmospheric Sciences</a> · via <a href="https://powderbuoy.com/dashboard/" target="_blank" rel="noopener">Powder Buoy</a></span></div>
+    </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
     <div class="wx-cams">
       <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
@@ -6908,6 +6919,39 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
       step = Math.max(0, Math.min(maxStep, Math.ceil((now - b) / H6))); show(step);
     }).catch(function(){ tryRun(i + 1); });
   })(0);
+})();
+</script>
+<style>
+/* Snow plumes (Mark, Nov 15, 2026, 1:26 p.m.): uses the ECMWF card look (.ec-snow / .ec-head / .ec-map / .ec-foot) plus resort tabs. */
+.pl-tabs{display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 10px;}
+.pl-tabs button{font:600 12px var(--font-body); padding:5px 10px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--fg); cursor:pointer;}
+.pl-tabs button.on{background:#E2733A; border-color:#E2733A; color:#fff;}
+</style>
+<script>
+/* Snow plumes (Mark, Nov 15, 2026, 1:26 p.m.). The 8 "Snow Forecast Plumes (7-Day)" graphs on powderbuoy.com/dashboard come straight from
+   the University of Utah: https://weather.utah.edu/YYYYMMDD/images/models/ensgefsds/ENSGEFSDSPL_<site>YYYYMMDDHHF240.png.
+   This finds the newest run (tries 12Z and 00Z for today and the last two days, UTC) and shows one site at a time, picked with the tabs;
+   the last tab picked is remembered (localStorage "sk-plume"). Keep as is. */
+(function(){
+  var box = document.getElementById("sk-plume"); if(!box) return;
+  var SITES = [["UTPWD","Powder Mountain"],["CLN","Little Cottonwood"],["PKCU1","Big Cottonwood"],["PKC","Park City (Summit)"],["PCB","Park City (Base)"],["DVO","Deer Valley"],["CDYBK","Canyons-Daybreak"],["JHRV","Jackson Hole"]];
+  var tabs = document.getElementById("pl-tabs"), img = document.getElementById("pl-img"), runEl = document.getElementById("pl-run"), link = document.getElementById("pl-link");
+  var cur = "UTPWD", run = null; try{ var sv = localStorage.getItem("sk-plume"); if(sv && SITES.some(function(x){ return x[0] === sv; })) cur = sv; }catch(e){}
+  function url(code, r){ return "https://weather.utah.edu/" + r.slice(0, 8) + "/images/models/ensgefsds/ENSGEFSDSPL_" + code + r + "F240.png"; }
+  function show(){
+    [].forEach.call(tabs.children, function(b){ b.classList.toggle("on", b.dataset.k === cur); b.setAttribute("aria-selected", b.dataset.k === cur); });
+    if(run){ img.src = url(cur, run); link.href = img.src; }
+  }
+  SITES.forEach(function(s){ var b = document.createElement("button"); b.type = "button"; b.dataset.k = s[0]; b.textContent = s[1]; b.setAttribute("role", "tab");
+    b.addEventListener("click", function(){ cur = s[0]; try{ localStorage.setItem("sk-plume", cur); }catch(e){} show(); }); tabs.appendChild(b); });
+  var c = [], now = new Date();
+  for(var d = 0; d < 3; d++){ var t = new Date(now.getTime() - d * 864e5), ymd = t.toISOString().slice(0, 10).replace(/-/g, ""); c.push(ymd + "12", ymd + "00"); }
+  (function next(i){
+    if(i >= c.length){ runEl.textContent = "Plumes unavailable"; return; }
+    var p = new Image(); p.onload = function(){ if(p.naturalWidth < 100) return next(i + 1); run = c[i]; runEl.textContent = "Run " + run.slice(4, 6) + "/" + run.slice(6, 8) + " " + run.slice(8) + "Z"; show(); };
+    p.onerror = function(){ next(i + 1); }; p.src = url("UTPWD", c[i]);
+  })(0);
+  show();
 })();
 </script>
 </body>
