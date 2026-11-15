@@ -6464,5 +6464,67 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
   fr.innerHTML = '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(SERMON.id) + '?rel=0&modestbranding=1&playsinline=1" title="' + esc(SERMON.title) + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
 })();
 </script>
+<style>
+/* Location menu in the top button row (Mark, Nov 14, 2026, 7:32 p.m.): the resort menu moved from the resort card up to the top row
+   (before Show image / Show card, Sound, Light/Dark) and always reads "Choose location"; the card keeps the picked name as a plain title. Keep as is. */
+.wt-edition select.wt-locpick{appearance:none; -webkit-appearance:none; cursor:pointer; padding-right:24px!important; max-width:44vw;
+  background-image:linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%)!important;
+  background-position:calc(100% - 13px) 55%, calc(100% - 9px) 55%!important; background-size:4px 4px, 4px 4px!important; background-repeat:no-repeat!important;
+  background-color:rgba(255,255,255,.14); vertical-align:middle; margin-right:6px;}
+html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surface);}
+.wt-edition select.wt-locpick:focus-visible{outline:2px solid #E2733A; outline-offset:2px;}
+.wt-edition select.wt-locpick option,.wt-edition select.wt-locpick optgroup{color:#0d1b2a; background:#fff; font:500 15px var(--font-body);}
+#rs-hero .rs-top .rs-pickwrap{display:none!important;}
+#rs-hero .rs-top .rs-name{font:700 clamp(22px,5.6vw,38px)/1.05 var(--font-title); font-size:var(--rs-pick-fs, clamp(22px,5.6vw,38px)); letter-spacing:.01em;
+  text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto; max-width:72%;}
+</style>
+<script>
+/* Location menu in the top button row (Mark, Nov 14, 2026, 7:32 p.m.) — a copy of the resort list (same choices as the radar menu,
+   "My local weather" included) sits first in the top button row and always shows "Choose location". Picking a place hands it to the
+   card's resort menu (#rs-pick, now hidden), so everything follows exactly as before, then the top menu goes back to "Choose location".
+   The resort card shows the picked place as a plain title (.rs-name). Keep as is. */
+(function(){
+  var hp = document.getElementById("rs-pick"), pick = document.getElementById("radar-view");
+  if(!hp || !pick) return;
+  var sel = document.createElement("select");
+  sel.id = "wt-locpick"; sel.className = "wt-next wt-locpick"; sel.setAttribute("aria-label", "Choose location"); sel.title = "Choose a resort or your local weather";
+  function fill(){
+    var cur = sel.value;
+    sel.innerHTML = '<option value="" selected>Choose location</option>' + hp.innerHTML;
+    [].forEach.call(sel.querySelectorAll("option"), function(o){ o.selected = false; o.removeAttribute("selected"); });
+    var lo = sel.querySelector('option[value="local"]'); if(lo) lo.text = "My local weather";
+    sel.value = "";
+  }
+  fill();
+  sel.addEventListener("focus", fill); sel.addEventListener("mousedown", function(){ if(sel.options.length < 3) fill(); });
+  sel.addEventListener("change", function(){
+    var k = sel.value; sel.value = ""; sel.blur(); if(!k) return;
+    if(hp.value !== k){ hp.value = k; hp.dispatchEvent(new Event("change", {bubbles: true})); }
+    setTimeout(name, 50); setTimeout(name, 800);
+  });
+  function place(){
+    if(sel.parentNode) return true;
+    var first = document.getElementById("wt-imgtog") || document.getElementById("wt-radio") || document.getElementById("wt-theme");
+    if(!first || !first.parentNode) return false;
+    first.parentNode.insertBefore(sel, first); fitW();
+    return true;
+  }
+  /* as wide as "Choose location" (a select is otherwise as wide as its longest choice) */
+  function fitW(){ if(!sel.parentNode) return; try{
+    var m = document.createElement("span"); m.className = "wt-next wt-locpick"; m.textContent = "Choose location";
+    m.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;display:inline-block;";
+    sel.parentNode.appendChild(m); var w = m.getBoundingClientRect().width; m.parentNode.removeChild(m);
+    if(w > 20) sel.style.width = Math.ceil(w + 16) + "px"; }catch(e){} }
+  window.addEventListener("resize", fitW); if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitW); setTimeout(fitW, 1500);
+  if(!place()){ var n = 0, t = setInterval(function(){ if(place() || ++n > 40) clearInterval(t); }, 250); }
+  /* the card's title */
+  var top = hp.closest(".rs-top"), nm = document.createElement("span"); nm.className = "rs-name"; nm.id = "rs-name";
+  var wrap = hp.closest(".rs-pickwrap"); if(top && wrap) top.insertBefore(nm, wrap.nextSibling);
+  function name(){ var o = hp.options[hp.selectedIndex]; var t = o ? o.text : ""; if(nm.textContent !== t) nm.textContent = t; }
+  name();
+  document.addEventListener("change", function(e){ if(e.target === hp || e.target === pick) setTimeout(name, 30); });
+  setInterval(name, 1500);
+})();
+</script>
 </body>
 </html>
