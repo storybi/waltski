@@ -2258,9 +2258,12 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
     }
     if(frames.length < 2) return;
     if(timer){ clearInterval(timer); timer = null; }
-    idx = (idx + 1) % frames.length; paint(idx);
+    var d = nextPhoto.dir || 1; nextPhoto.dir = 1;
+    idx = (idx + d + frames.length) % frames.length; paint(idx);
     timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
   }
+  /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): step the Snowbasin photo set back (-1) or forward (+1) */
+  window.skSbBannerStep = function(d){ nextPhoto.dir = d < 0 ? -1 : 1; nextPhoto(); };
   (function(){ var nb = document.getElementById("wt-next"); if(nb) nb.addEventListener("click", nextPhoto); })();
   function use(list, when){
     frames = list.map(function(b){ return {k: b.k, src: b.src || ("data:image/jpeg;base64," + b.img)}; });
@@ -3392,13 +3395,14 @@ window.PTYPE = (function(){
     root.classList.add("has-banner"); linkTo(f);
   }
   /* waltski.com: load the next cam's current picture; skip cams that don't answer */
+  var webDir = 1;
   function webNext(tries){
     var m = mode, c = CAMS[m]; if(!c) return;
-    tries = tries || 0; if(tries >= c.frames.length) return;
-    idx = (idx + 1) % c.frames.length; var f = c.frames[idx];
+    tries = tries || 0; if(tries >= c.frames.length){ webDir = 1; return; }
+    var n = c.frames.length; idx = ((idx + webDir) % n + n) % n; var f = c.frames[idx];   /* webDir: -1 while stepping back with the arrow */
     if(CAM_SKIP[f.img]){ webNext(tries + 1); return; }   /* black or text-covered picture: skip it */
     var u = f.img + (f.img.indexOf("?") < 0 ? "?t=" : "&t=") + Date.now(), probe = new Image();
-    probe.onload = function(){ if(probe.naturalWidth > 200) show(u, f, new Date().toISOString(), m); else webNext(tries + 1); };
+    probe.onload = function(){ if(probe.naturalWidth > 200){ webDir = 1; show(u, f, new Date().toISOString(), m); } else webNext(tries + 1); };
     probe.onerror = function(){ webNext(tries + 1); };
     probe.src = u;
   }
@@ -3513,6 +3517,18 @@ window.PTYPE = (function(){
     /* (a stream that fails to play is replaced at once by nextLive itself) */
   }
   window.addEventListener("resize", fit);
+  /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): previous (-1) / next (+1) picture or live stream for whatever shows behind the header */
+  window.skCamStep = function(d){
+    d = d < 0 ? -1 : 1; var c = CAMS[mode];
+    if(!c){ if(window.skSbLiveStep && window.skSbLiveStep(d)) return; if(window.skSbBannerStep) window.skSbBannerStep(d); return; }
+    if(c.video && !inClaude) return;
+    if(timer){ clearInterval(timer); timer = null; }
+    if(c.live){ if(inClaude) return; var n = c.live.length; li = ((li + d - 1) % n + n) % n; nextLive(c);
+      timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE); return; }
+    if(inClaude){ var l = usable(mode); if(!l.length) return; idx = ((idx + d - 1) % l.length + l.length) % l.length; claudeNext(); }
+    else { webDir = d; webNext(0); }
+    timer = setInterval(tick, ROTATE);
+  };
   function video(c){
     var f0 = c.frames[0];
     lay.style.backgroundImage = 'url("' + f0.img + '")'; cap.textContent = f0.cap || c.resort; linkTo(f0);
@@ -6403,13 +6419,14 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
   }
   function load(){
     if(busy) return;
-    var l = list(); idx = (idx + 1) % l.length; var f = l[idx];
-    busy = true;
+    var l = list(), dd = load.dir || 1; idx = ((idx + dd) % l.length + l.length) % l.length; var f = l[idx];   /* dd: -1 while stepping back with the arrow */
+    busy = true; var my = load.seq = (load.seq || 0) + 1;   /* a newer load (arrow tap) wins over an older one still loading */
     var next = 1 - front, img = L[next], probe = new Image();
     probe.onload = function(){
+      if(my !== load.seq) return;
       busy = false;
-      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
-      fails = 0;
+      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); else load.dir = 1; return; }
+      fails = 0; load.dir = 1;
       /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
       var old = L[front];
       img.onload = function(){
@@ -6422,11 +6439,17 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
       root.classList.add("has-banner", "has-video");
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
-    probe.onerror = function(){ busy = false; if(++fails < l.length) load(); };
+    probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(++fails < l.length) load(); else load.dir = 1; };
     probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
   }
   load();
-  setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
+  var rot = setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
+  /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): previous / next Snowbasin cam, then rotate on from there */
+  if(!(window.claude && window.claude.use)) window.skSbLiveStep = function(d){
+    var n = list().length; if(n < 2) return false;
+    busy = false; fails = 0; load.dir = d < 0 ? -1 : 1; load();
+    clearInterval(rot); rot = setInterval(function(){ if(!document.hidden) load(); }, ROTATE); return true;
+  };
 })();
 </script>
 <script>
@@ -6545,6 +6568,46 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
   name();
   document.addEventListener("change", function(e){ if(e.target === hp || e.target === pick) setTimeout(name, 30); });
   setInterval(name, 1500);
+})();
+</script>
+<style>
+/* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): a left caret on the left edge and a right caret on the right edge of the header photo,
+   in the Liquid Glass clock's font (Saira Extra Condensed 700, frosted white), with a thin border that reads on light and dark
+   photos (a dark hairline stroke plus a soft light halo). Each tap steps to the previous / next picture of the current place. Keep as is. */
+.sk-arw{position:fixed; z-index:40; top:0; width:44px; height:84px; margin-top:-42px; padding:0; border:0; background:none; cursor:pointer; display:none;
+  font:700 78px/84px "Saira Extra Condensed","Barlow Condensed","Arial Narrow",sans-serif; text-align:center; -webkit-tap-highlight-color:transparent;
+  color:rgba(255,255,255,.9); background-image:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.92) 45%,rgba(222,232,245,.78) 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1px rgba(10,16,26,.55);
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.7)) drop-shadow(0 1px 2px rgba(0,0,0,.45)) drop-shadow(0 0 8px rgba(0,0,0,.18));
+  opacity:.82; transition:opacity .2s ease, transform .15s ease;}
+.sk-arw.on{display:block;}
+.sk-arw:hover,.sk-arw:focus-visible{opacity:1; outline:none;}
+.sk-arw:active{transform:scale(.92);}
+.sk-arw-l{left:6px;} .sk-arw-r{right:6px;}
+@media (max-width:700px){ .sk-arw{width:30px; height:64px; margin-top:-32px; font-size:60px; line-height:64px;} .sk-arw-l{left:2px;} .sk-arw-r{right:2px;} }
+</style>
+<script>
+/* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.) — "‹" / "›" on the left / right edge of the header photo, at its middle; they follow the
+   photo while scrolling and hide once it's scrolled away. Tap: window.skCamStep(-1 / +1) in the "Header cam switch" script, which
+   steps the current place's pictures (Snowbasin set, Deer Valley / Sun Valley / Ikon cams, or the Oahu live streams) and keeps rotating
+   from there. Keep as is. */
+(function(){
+  var b = document.getElementById("wt-banner"), root = document.documentElement; if(!b) return;
+  function mk(cls, ch, lbl, d){ var x = document.createElement("button"); x.type = "button"; x.className = "sk-arw " + cls; x.textContent = ch;
+    x.setAttribute("aria-label", lbl); x.title = lbl;
+    x.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); if(window.skCamStep) window.skCamStep(d); });
+    document.body.appendChild(x); return x; }
+  var L = mk("sk-arw-l", "‹", "Previous picture", -1), R = mk("sk-arw-r", "›", "Next picture", 1);
+  var raf = 0;
+  function pos(){ raf = 0;
+    var r = b.getBoundingClientRect(), vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+    var on = root.classList.contains("has-banner") && vis > 140 && r.height > 140;
+    var y = Math.round(Math.max(r.top, 0) + vis / 2);
+    [L, R].forEach(function(x){ x.classList.toggle("on", on); if(on) x.style.top = y + "px"; });
+  }
+  function q(){ if(!raf) raf = requestAnimationFrame(pos); }
+  window.addEventListener("scroll", q, {passive: true}); window.addEventListener("resize", q); setInterval(pos, 1000); pos();
 })();
 </script>
 </body>
