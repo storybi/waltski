@@ -6048,7 +6048,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     /* sideways phones / iPads (Mark, 2:27 p.m.; overrides earlier size rules): half size 8 a.m.-8 p.m., full "bedside clock" size the rest of the night */
     else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
     /* numbers closer together (Mark, 8:28 p.m.): the space between items is capped at half a digit height and the group is centered */
-    var gap = Math.min((area - vis) / (items.length + 1), H * .5), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
+    var gap = Math.min((area - vis) / (items.length + 1), H * 1.05),   /* spread out a bit more to fill the frost (Mark, 8:35 p.m.; was H * .5) */ base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
     /* upright: the stats sit centered in the frost bar (Mark, 2:27 p.m.) — frost top stays put, the digits and labels move down */
     var fpad = Math.round(H * .14), ftop = base - H - fpad, fbot = Hs + 8;
     if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: down to the base of the picture (1:23 p.m.), the weather strip below stays on top (1:32 p.m.) */
@@ -6629,6 +6629,9 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
 .sk-arw-l{left:44px;} .sk-arw-r{right:44px;}   /* smaller again and further in (Mark, 8:16 p.m.) */
 @media (max-width:700px){ .sk-arw{width:28px; height:40px; margin-top:-20px;} .sk-arw svg{width:10px; height:24px; margin-top:8px;} .sk-arw-l{left:22px;} .sk-arw-r{right:22px;} }
 html.hdr-radar .sk-arw{display:none!important;}
+/* no arrows on upright phones / iPads or on the Other News page (Mark, 8:35 p.m.) */
+html.view-news .sk-arw{display:none!important;}
+@media (orientation:portrait) and (any-pointer:coarse){ .sk-arw{display:none!important;} }
 </style>
 <script>
 /* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.) — "‹" / "›" on the left / right edge of the header photo, at its middle; they follow the
