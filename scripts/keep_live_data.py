@@ -11,7 +11,7 @@ resort card's football button.
 import re
 import sys
 
-PATS = [r'var SNAP = \{.*?\};', r'var SNAP_AT = ".*?";', r'var SEA_GAME = \{.*?\};', r'var ORE_GAME = \{.*?\};']
+PATS = [r'var SNAP = \{.*?\};', r'var SNAP_AT = ".*?";', r'var SEA_GAME = \{.*?\};', r'var ORE_GAME = \{.*?\};', r'var COMPOSITE = \{.*?\};']   # COMPOSITE: hourly composite snow forecast (Nov 15, 2026)
 
 
 def keep(base, built):

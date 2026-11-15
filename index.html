@@ -1230,6 +1230,24 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <a class="ec-map" id="pl-link" href="https://weather.utah.edu/" target="_blank" rel="noopener"><img id="pl-img" alt="7-day snowfall forecast plume" decoding="async"></a>
       <div class="ec-foot"><span>Snowfall plumes from the GEFS ensemble</span><span>© <a href="https://weather.utah.edu/" target="_blank" rel="noopener">University of Utah Atmospheric Sciences</a> · via <a href="https://powderbuoy.com/dashboard/" target="_blank" rel="noopener">Powder Buoy</a></span></div>
     </div>
+    <!-- Composite snow forecast (Mark, Nov 15, 2026, 2:20 p.m.): a 10-day blend of NWS Salt Lake City, the University of Utah snow
+         ensemble and the global models, for the region of the picked resort (or general Utah). Under the snow plumes. Drawn by the
+         "Composite snow forecast" script from var COMPOSITE, which scripts/composite.py refreshes every hour. -->
+    <div class="ec-snow sk-comp" id="sk-comp">
+      <div class="ec-head">
+        <h3>Composite snow forecast <span id="cf-region">Utah</span></h3>
+        <span class="ec-time" id="cf-asof"></span>
+      </div>
+      <div class="cf-body">
+        <p class="cf-note" id="cf-note" hidden></p>
+        <p class="cf-sum" id="cf-sum"></p>
+        <div class="cf-tots" id="cf-tots"></div>
+        <div class="cf-chart" id="cf-chart" role="img" aria-label="Daily snowfall and temperature forecast"></div>
+        <div class="cf-legend"><span><i class="cf-k-snow"></i>Snow (in), best guess</span><span><i class="cf-k-rng"></i>Range of sources</span><span><i class="cf-k-hi"></i>High °F</span><span><i class="cf-k-lo"></i>Low °F</span></div>
+        <p class="cf-nws" id="cf-nws" hidden></p>
+      </div>
+      <div class="ec-foot"><span id="cf-src"></span><span>Global models scaled to NWS mountain totals</span></div>
+    </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
     <div class="wx-cams">
       <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
@@ -6952,6 +6970,98 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     p.onerror = function(){ next(i + 1); }; p.src = url("UTPWD", c[i]);
   })(0);
   show();
+})();
+</script>
+<style>
+/* Composite snow forecast (Mark, Nov 15, 2026, 2:20 p.m.): ECMWF card look plus summary, totals chips and a snow + temperature chart. */
+.cf-body{padding:0 16px 6px;}
+.cf-note{margin:0 0 8px; padding:6px 10px; border-radius:8px; background:rgba(226,115,58,.12); color:var(--fg); font-size:12.5px;}
+.cf-sum{margin:0 0 10px; font-size:14px; line-height:1.5; color:var(--fg);}
+.cf-tots{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 10px;}
+.cf-tots b{display:inline-flex; align-items:baseline; gap:6px; padding:6px 12px; border-radius:10px; border:1px solid var(--border); font:600 12px var(--font-body); color:var(--fg-muted);}
+.cf-tots b em{font:800 20px/1 "Barlow Condensed",var(--font-body); font-style:normal; color:#2f80ed;}
+.cf-chart{width:100%;} .cf-chart svg{display:block; width:100%; height:auto; overflow:visible; color:var(--fg);}
+.cf-chart text{font-family:var(--font-body); fill:var(--fg-muted);}
+.cf-legend{display:flex; flex-wrap:wrap; gap:4px 14px; margin:4px 0 8px; font-size:11.5px; color:var(--fg-muted);}
+.cf-legend i{display:inline-block; vertical-align:middle; margin-right:5px;}
+.cf-k-snow{width:12px; height:10px; border-radius:2px; background:#2f80ed;}
+.cf-k-rng{width:2px; height:12px; background:#7fb2f5;}
+.cf-k-hi{width:14px; height:3px; background:#E2733A; border-radius:2px;}
+.cf-k-lo{width:14px; height:0; border-top:2px dashed #8aa4c0;}
+.cf-nws{margin:4px 0 8px; font-size:12.5px; line-height:1.45; color:var(--fg-muted);}
+.cf-nws b{color:var(--fg);}
+</style>
+<script>
+/* Composite snow forecast (Mark, Nov 15, 2026, 2:20 p.m.). var COMPOSITE is rebuilt every hour by scripts/composite.py (via
+   update_data.py): per Utah ski region, 10 days of [snow best guess, range low, range high, high °F, low °F], a written summary and
+   totals. The card follows the resort menu (#radar-view, events "wsj-radar" / "wsj-cam"); a resort outside Utah shows the general
+   Utah forecast with a note. Keep as is. */
+var COMPOSITE = {"asof":"Sun 2:30 p.m. MT","regions":{"ogden":{"name":"Ogden Valley","resorts":"Snowbasin · Powder Mountain · Nordic Valley","ft":8000,"d":[[0.0,0.0,0.0,39.0,25.0],[0.0,0.0,0.0,45.0,29.0],[2.9,0.3,3.3,40.0,26.0],[1.1,0.3,5.7,30.0,19.0],[2.3,0.1,7.0,29.0,22.0],[5.5,1.7,8.7,27.0,18.0],[0.2,0.0,0.3,30.0,14.0],[0.4,0.0,2.5,31.0,16.0],[0.5,0.0,1.8,30.0,12.0],[0.1,0.0,0.2,30.0,13.0]],"sum":"Dry through tomorrow. Tue–Fri: 9–15\", best guess 12\", starting wet and heavy (rain possible at lower elevations). Totals: about 12\" Mon–Fri, 13\" through Tue 24. Highs 27° (Fri) to 45° (tomorrow).","tot":[11.8,13.0],"k":1.37},"cottonwoods":{"name":"Cottonwood Canyons","resorts":"Alta · Snowbird · Brighton · Solitude","ft":9500,"d":[[0.0,0.0,0.0,37.0,18.0],[0.0,0.0,0.0,39.0,27.0],[10.2,2.3,14.5,33.0,21.0],[1.8,0.2,5.1,25.0,13.0],[4.7,3.2,16.1,26.0,18.0],[8.4,6.8,9.4,23.0,14.0],[0.5,0.0,0.8,27.0,10.0],[0.1,0.0,1.9,28.0,14.0],[0.2,0.0,1.7,28.0,10.0],[0.3,0.0,3.1,31.0,14.0]],"sum":"Dry through tomorrow. Tue–Sat 21: 20–32\", best guess 26\", cold and light. Totals: about 25\" Mon–Fri, 26\" through Tue 24. Highs 23° (Fri) to 39° (tomorrow).","tot":[25.1,26.2],"k":2.08},"parkcity":{"name":"Park City","resorts":"Park City · Deer Valley","ft":8400,"d":[[0.0,0.0,0.0,41.0,23.0],[0.0,0.0,0.0,43.0,31.0],[5.0,0.8,8.6,37.0,24.0],[1.3,0.0,3.6,29.0,16.0],[3.6,2.1,10.8,30.0,21.0],[5.3,4.6,6.3,26.0,17.0],[0.1,0.0,0.2,31.0,14.0],[0.1,0.0,1.3,32.0,17.0],[0.3,0.0,1.2,32.0,14.0],[0.5,0.0,2.1,35.0,18.0]],"sum":"Dry through tomorrow. Tue–Fri: 12–19\", best guess 15\". Totals: about 15\" Mon–Fri, 16\" through Tue 24. Highs 26° (Fri) to 43° (tomorrow).","tot":[15.2,16.2],"k":1.39},"provo":{"name":"Provo Canyon","resorts":"Sundance","ft":7500,"d":[[0.0,0.0,0.0,43.0,25.0],[0.0,0.0,0.0,46.0,32.0],[4.2,1.0,10.8,41.0,27.0],[1.1,0.7,2.6,32.0,20.0],[2.7,0.1,10.2,32.0,23.0],[5.1,2.7,7.1,29.0,20.0],[0.1,0.0,0.2,34.0,12.0],[0.1,0.0,0.6,34.0,16.0],[0.4,0.0,1.5,33.0,15.0],[0.2,0.0,0.9,37.0,15.0]],"sum":"Dry through tomorrow. Tue–Fri: 10–16\", best guess 13\", starting wet and heavy (rain possible at lower elevations). Totals: about 13\" Mon–Fri, 14\" through Tue 24. Highs 29° (Fri) to 46° (tomorrow).","tot":[13.1,13.9],"k":1.06},"logan":{"name":"Logan & Bear River","resorts":"Beaver Mountain · Cherry Peak","ft":7500,"d":[[0.0,0.0,0.0,42.0,24.0],[0.0,0.0,0.0,47.0,31.0],[2.0,0.5,4.4,41.0,27.0],[0.8,0.3,3.3,31.0,20.0],[3.6,2.5,6.4,32.0,23.0],[5.9,1.8,7.6,30.0,20.0],[0.1,0.0,0.2,31.0,16.0],[0.4,0.1,1.9,33.0,21.0],[0.3,0.0,1.0,31.0,16.0],[1.1,0.0,4.3,36.0,17.0]],"sum":"Dry through tomorrow. Tue–Fri: 10–15\", best guess 12\", starting wet and heavy (rain possible at lower elevations). Totals: about 12\" Mon–Fri, 14\" through Tue 24. Highs 30° (Fri) to 47° (tomorrow).","tot":[12.3,14.2],"k":1.79},"south":{"name":"Southern Utah","resorts":"Brian Head · Eagle Point","ft":9800,"d":[[0.0,0.0,0.0,41.0,20.0],[0.0,0.0,0.3,37.0,28.0],[9.8,8.8,15.4,32.0,19.0],[0.0,0.0,0.1,30.0,11.0],[4.9,2.6,6.8,26.0,20.0],[4.3,1.3,5.2,24.0,13.0],[0.0,0.0,0.0,31.0,13.0],[0.1,0.0,1.1,31.0,16.0],[0.2,0.0,0.5,32.0,14.0],[0.1,0.0,0.3,35.0,16.0]],"sum":"Dry through tomorrow. Tue: 8–12\", best guess 10\". Thu–Fri: 7–10\", best guess 9\", cold and light. Totals: about 19\" Mon–Fri, 19\" through Tue 24. Highs 24° (Fri) to 41° (today).","tot":[19.0,19.4],"k":1.95},"utah":{"name":"Utah (general)","resorts":"average of the six Utah ski regions","ft":null,"d":[[0.0,0.0,0.0,40.0,22.0],[0.0,0.0,0.0,43.0,30.0],[5.7,2.3,9.5,37.0,24.0],[1.0,0.2,3.4,30.0,16.0],[3.6,1.8,9.6,29.0,21.0],[5.8,3.1,7.4,26.0,17.0],[0.2,0.0,0.3,31.0,13.0],[0.2,0.0,1.6,32.0,17.0],[0.3,0.0,1.3,31.0,14.0],[0.4,0.0,1.8,34.0,16.0]],"sum":"Dry through tomorrow. Tue–Fri: 13–20\", best guess 16\". Totals: about 16\" Mon–Fri, 17\" through Tue 24. Highs 26° (Fri) to 43° (tomorrow).","tot":[16.1,17.2]}},"keys":{"sb":"ogden","powmow":"ogden","alta":"cottonwoods","snowbird":"cottonwoods","brighton":"cottonwoods","solitude":"cottonwoods","dv":"parkcity","parkcity":"parkcity"},"dates":["2026-11-15","2026-11-16","2026-11-17","2026-11-18","2026-11-19","2026-11-20","2026-11-21","2026-11-22","2026-11-23","2026-11-24"],"nws":"A cold Pacific system will impact the region Monday night into Wednesday morning. Accumulating snow will impact most Utah mountain locations as well as the Wasatch Back and potentially some Wasatch Front bench areas.","nws_at":"1246 PM MST Sun Nov 15 2026","src":["NWS Salt Lake City","University of Utah snow ensemble","ECMWF","GFS","ICON","GEM","ECMWF & GEFS ensembles"]};
+(function(){
+  var box = document.getElementById("sk-comp"); if(!box) return;
+  var C = window.COMPOSITE || (typeof COMPOSITE !== "undefined" ? COMPOSITE : null);
+  var $ = function(id){ return document.getElementById(id); };
+  if(!C || !C.regions || !C.dates){ $("cf-sum").textContent = "The composite forecast is being prepared; check back within the hour."; return; }
+  var DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], NS = "http://www.w3.org/2000/svg";
+  function pickKey(){ var k = ""; try{ var p = $("radar-view"); k = (p && p.value) || localStorage.getItem("wsj-radar-view") || "sb"; }catch(e){ k = "sb"; } return k; }
+  function pickName(k){ var p = $("radar-view"); if(p){ for(var i = 0; i < p.options.length; i++) if(p.options[i].value === k) return p.options[i].textContent.replace(/,\s*[A-Z]{2}$/, ""); } return "This resort"; }
+  function el(tag, at, txt){ var e = document.createElementNS(NS, tag); for(var a in at) e.setAttribute(a, at[a]); if(txt != null) e.textContent = txt; return e; }
+  function chart(R){
+    /* two panels on one day axis: temperatures on top (high orange, low dashed), snowfall bars below with the range of sources */
+    var box2 = $("cf-chart"), d = R.d, n = d.length;
+    var W = Math.max(340, Math.min(720, Math.round(box2.clientWidth || 600))), fs = W < 480 ? 1 : .95;
+    var L = 30, Rr = 8, TT = 22, TB = 118, ST = 150, B = 38, H = 330, cw = (W - L - Rr) / n;
+    var smax = 2; d.forEach(function(r){ smax = Math.max(smax, r[2] || 0, r[0] || 0); }); smax = Math.ceil(smax / 2) * 2;
+    var ts = []; d.forEach(function(r){ if(r[3] != null) ts.push(r[3]); if(r[4] != null) ts.push(r[4]); });
+    var tmin = Math.min.apply(null, ts.concat([32])) - 3, tmax = Math.max.apply(null, ts.concat([32])) + 3;
+    var ys = function(v){ return ST + (H - B - ST) * (1 - v / smax); }, yt = function(v){ return TT + (TB - TT) * (1 - (v - tmin) / (tmax - tmin)); };
+    var svg = el("svg", {viewBox: "0 0 " + W + " " + H, width: W, height: H});
+    svg.appendChild(el("text", {x: 0, y: 11, "font-size": 11 * fs, "font-weight": 700}, "Temperature °F"));
+    svg.appendChild(el("text", {x: 0, y: ST - 14, "font-size": 11 * fs, "font-weight": 700}, "Snowfall (inches)"));
+    var yf = yt(32); svg.appendChild(el("line", {x1: L, x2: W - Rr, y1: yf, y2: yf, stroke: "#8aa4c0", "stroke-dasharray": "2 4", "stroke-opacity": .7}));
+    svg.appendChild(el("text", {x: L - 4, y: yf + 4, "text-anchor": "end", "font-size": 10 * fs, fill: "#8aa4c0"}, "32°"));
+    for(var g = 0; g <= 2; g++){ var v = smax * g / 2, y = ys(v);
+      svg.appendChild(el("line", {x1: L, x2: W - Rr, y1: y, y2: y, stroke: "currentColor", "stroke-opacity": g ? .1 : .3}));
+      svg.appendChild(el("text", {x: L - 4, y: y + 4, "text-anchor": "end", "font-size": 10.5 * fs}, Math.round(v) + '"')); }
+    var hi = [], lo = [];
+    d.forEach(function(r, i){
+      var cx = L + cw * (i + .5), bw = Math.min(26, cw * .6), s = r[0] || 0;
+      var dd = new Date(C.dates[i] + "T12:00:00");
+      if(i % 2 === 0) svg.appendChild(el("rect", {x: L + cw * i, y: TT - 8, width: cw, height: H - B - TT + 8, fill: "currentColor", "fill-opacity": .035}));
+      svg.appendChild(el("text", {x: cx, y: H - B + 16, "text-anchor": "middle", "font-size": 11.5 * fs, "font-weight": 700, fill: "currentColor"}, i === 0 && cw > 52 ? "Today" : DOW[dd.getDay()]));
+      svg.appendChild(el("text", {x: cx, y: H - B + 30, "text-anchor": "middle", "font-size": 10 * fs}, (dd.getMonth() + 1) + "/" + dd.getDate()));
+      if((r[2] || 0) > s + .05) svg.appendChild(el("line", {x1: cx, x2: cx, y1: ys(r[2]), y2: ys(r[1] || 0), stroke: "#7fb2f5", "stroke-width": 2, "stroke-linecap": "round"}));
+      if(s > 0.04){ var y0 = ys(s); svg.appendChild(el("rect", {x: cx - bw / 2, y: y0, width: bw, height: Math.max(1.5, ys(0) - y0), rx: 3, fill: "#2f80ed"})); }
+      var top = Math.min(ys(s), r[2] ? ys(r[2]) : ys(s));
+      if(s >= .3) svg.appendChild(el("text", {x: cx, y: top - 5, "text-anchor": "middle", "font-size": 12 * fs, "font-weight": 800, fill: "#2f80ed"}, s >= 1 ? Math.round(s) + '"' : '<1"'));
+      if(r[3] != null) hi.push([cx, yt(r[3]), r[3]]); if(r[4] != null) lo.push([cx, yt(r[4]), r[4]]);
+    });
+    function line(p, col, dash){ if(p.length < 2) return; svg.appendChild(el("polyline", {points: p.map(function(q){ return q[0].toFixed(1) + "," + q[1].toFixed(1); }).join(" "), fill: "none", stroke: col, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-dasharray": dash || ""})); }
+    line(lo, "#8aa4c0", "5 4"); line(hi, "#E2733A");
+    hi.forEach(function(q){ svg.appendChild(el("circle", {cx: q[0], cy: q[1], r: 3.5, fill: "#E2733A"})); svg.appendChild(el("text", {x: q[0], y: q[1] - 7, "text-anchor": "middle", "font-size": 10.5 * fs, fill: "#E2733A", "font-weight": 700}, q[2] + "°")); });
+    lo.forEach(function(q){ svg.appendChild(el("circle", {cx: q[0], cy: q[1], r: 3, fill: "#8aa4c0"})); svg.appendChild(el("text", {x: q[0], y: q[1] + 14, "text-anchor": "middle", "font-size": 10 * fs, fill: "#8aa4c0"}, q[2] + "°")); });
+    box2.innerHTML = ""; box2.appendChild(svg);
+  }
+  function render(){
+    var k = pickKey(), rid = (C.keys || {})[k], R = C.regions[rid] || C.regions.utah, general = !C.regions[rid];
+    if(!R) return;
+    $("cf-region").textContent = R.name + (R.ft ? " · " + R.ft.toLocaleString() + " ft" : "");
+    $("cf-asof").textContent = "Updated " + (C.asof || "");
+    var note = $("cf-note");
+    if(general){ note.hidden = false; var nm = pickName(k);
+      note.textContent = "General Utah forecast: " + (/^(hi|kailua)$/.test(k) ? "Kailua" : nm) + " isn't in one of Utah's ski regions, so this is the average of Utah's six regions (" + Object.keys(C.regions).filter(function(x){ return x !== "utah"; }).map(function(x){ return C.regions[x].name; }).join(", ") + ")."; }
+    else { note.hidden = true; }
+    $("cf-sum").textContent = R.sum + (R.resorts && !general ? " Covers " + R.resorts + "." : "");
+    var dd = C.dates || [], wd = function(i){ var x = new Date(dd[i] + "T12:00:00"); return DOW[x.getDay()]; };
+    $("cf-tots").innerHTML = '<b><em>' + Math.round(R.tot[0]) + '"</em> next 5 days (' + wd(1) + "–" + wd(5) + ')</b><b><em>' + Math.round(R.tot[1]) + '"</em> 10 days</b>';
+    chart(R);
+    var nws = $("cf-nws"); if(C.nws){ nws.hidden = false; nws.innerHTML = "<b>NWS Salt Lake City:</b> "; nws.appendChild(document.createTextNode(C.nws + (C.nws_at ? " (" + C.nws_at.replace(/ \w{3} \w{3} \d+ \d{4}$/, "") + ")" : ""))); } else nws.hidden = true;
+    $("cf-src").textContent = "Blend of " + (C.src || []).join(", ");
+  }
+  document.addEventListener("wsj-radar", function(){ setTimeout(render, 30); });
+  document.addEventListener("wsj-cam", function(){ setTimeout(render, 30); });
+  var rw = 0; window.addEventListener("resize", function(){ clearTimeout(rw); rw = setTimeout(render, 200); });
+  render();
 })();
 </script>
 </body>

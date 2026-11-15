@@ -810,13 +810,27 @@ def do_cam_quality(s, now_mt):
     return s
 
 
+def do_composite(s, now_mt):
+    """Composite snow forecast by Utah region (Mark, Nov 15, 2026): scripts/composite.py -> var COMPOSITE."""
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import composite
+    c = composite.build()
+    if not c:
+        log("  composite: no data")
+        return s
+    s, ok = set_var(s, "COMPOSITE", json.dumps(c, separators=(",", ":"), ensure_ascii=False))
+    log("  composite: %d regions%s" % (len(c.get("regions", {})), "" if ok else " (var not found)"))
+    return s
+
+
 def main():
     path = sys.argv[1]
     s = open(path, encoding="utf-8").read()
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ots_cams, do_cam_quality):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ots_cams, do_cam_quality, do_composite):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
