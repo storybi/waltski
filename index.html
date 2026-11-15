@@ -6612,7 +6612,7 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
    translucent): a left caret and a right caret on the header photo, brought in from the edges, sitting just above the frost line, in the
    clock's Saira Extra Condensed. See-through white fill with a thin light rim and a faint dark edge so they read on light and dark photos.
    Each tap steps to the previous / next picture of the current place. Keep as is. */
-.sk-arw{position:fixed; z-index:40; top:0; width:46px; height:116px; margin-top:-58px; padding:0; border:0; background:none; cursor:pointer; display:none;
+.sk-arw{position:fixed; z-index:40; top:0; width:36px; height:90px; margin-top:-45px; padding:0; border:0; background:none; cursor:pointer; display:none;
   -webkit-tap-highlight-color:transparent; transition:transform .15s ease;}
 /* sharper angle (Mark, 8:12 p.m.): drawn as a slim chevron (about 47 degrees at the point) instead of the font's caret */
 .sk-arw svg{display:block; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 0 .6px rgba(10,16,26,.5)) drop-shadow(0 2px 8px rgba(0,0,0,.22));}
@@ -6620,8 +6620,8 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
 .sk-arw.on{display:block;}
 .sk-arw:hover,.sk-arw:focus-visible{outline:none;} .sk-arw:hover svg path,.sk-arw:focus-visible svg path{fill:rgba(255,255,255,.62);}
 .sk-arw:active{transform:scale(.92);}
-.sk-arw-l{left:24px;} .sk-arw-r{right:24px;}
-@media (max-width:700px){ .sk-arw{width:35px; height:88px; margin-top:-44px;} .sk-arw-l{left:12px;} .sk-arw-r{right:12px;} }
+.sk-arw-l{left:44px;} .sk-arw-r{right:44px;}   /* smaller again and further in (Mark, 8:16 p.m.) */
+@media (max-width:700px){ .sk-arw{width:27px; height:68px; margin-top:-34px;} .sk-arw-l{left:22px;} .sk-arw-r{right:22px;} }
 html.hdr-radar .sk-arw{display:none!important;}
 </style>
 <script>
@@ -6644,7 +6644,7 @@ html.hdr-radar .sk-arw{display:none!important;}
     var on = root.classList.contains("has-banner") && vis > 140 && r.height > 140;
     var y = Math.round(Math.max(r.top, 0) + vis / 2);
     /* just above the frost line when the frost bar shows (Mark, 8:05 p.m.) */
-    var fr = document.querySelector("#lg-wrap .lg-frost"), h = (L.offsetHeight || 116);
+    var fr = document.querySelector("#lg-wrap .lg-frost"), h = (L.offsetHeight || 90);
     if(fr && fr.offsetParent){ var fb = fr.getBoundingClientRect(); if(fb.height > 10 && fb.top > r.top + h + 20) y = Math.round(fb.top - 10 - h / 2); }
     if(y < h / 2 + 4) on = false;
     [L, R].forEach(function(x){ x.classList.toggle("on", on); if(on) x.style.top = y + "px"; });
