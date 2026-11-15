@@ -6807,18 +6807,18 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
     var right = gs[1] && gs[1].offsetParent ? gs[1].getBoundingClientRect().left - 10 : W - 20;
     var half = Math.max(30, Math.min(cx - 8, right - cx));
     var txt = String(h12), ff = getComputedStyle(el).fontFamily, F = 200;
-    cv.font = "800 " + F + "px " + ff; var mt = cv.measureText(txt);
+    cv.font = "700 " + F + "px " + ff; var mt = cv.measureText(txt);
     var asc = mt.actualBoundingBoxAscent || F * .72, des = mt.actualBoundingBoxDescent || 0, ink = asc + des;
     var L = mt.actualBoundingBoxLeft || 0, wd = (mt.actualBoundingBoxRight || mt.width) + L;
     var hgt = Math.max(20, bot - top), k = hgt / ink;
     if(wd * k > 2 * half) k = 2 * half / wd;                    /* too wide: shrink, keep the bottom on the frost edge */
-    var cw = wd * k, ch = ink * k, dpr = Math.min(3, window.devicePixelRatio || 1), sw = Math.max(1, F * k * .022);
+    var cw = wd * k, ch = ink * k, dpr = Math.min(3, window.devicePixelRatio || 1), sw = Math.max(.5, F * k * .006);   /* a third thinner (Mark, Nov 15, 2026, 6:56 a.m.): weight 700 + a light stroke, was 800 + .022 */
     /* colors: orange through the night, yellow from 5 a.m., green from 6 a.m. (Mark, Nov 15, 2026, 4:50 / 6:49 a.m.) */
     var col = h === 5 ? "#F5C518" : (h === 6 || h === 7) ? "#2EB85C" : "#E2733A";
     cnv.width = Math.ceil((cw + 2 * sw) * dpr); cnv.height = Math.ceil((ch + 2 * sw) * dpr);
     cnv.style.width = (cw + 2 * sw) + "px"; cnv.style.height = (ch + 2 * sw) + "px";
     var c = cnv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    c.font = "800 " + (F * k) + "px " + ff; c.textBaseline = "alphabetic"; c.fillStyle = col; c.strokeStyle = col; c.lineWidth = sw * 2; c.lineJoin = "round";
+    c.font = "700 " + (F * k) + "px " + ff; c.textBaseline = "alphabetic"; c.fillStyle = col; c.strokeStyle = col; c.lineWidth = sw * 2; c.lineJoin = "round";
     c.strokeText(txt, sw + L * k, sw + asc * k); c.fillText(txt, sw + L * k, sw + asc * k);   /* the stroke makes it thicker */
     el.style.left = Math.round(cx - cw / 2 - sw) + "px"; el.style.top = Math.round(bot - ch - sw) + "px";
   }
