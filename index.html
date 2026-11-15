@@ -1209,6 +1209,16 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · clouds: GOES-West infrared via NASA GIBS · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
+    <!-- ECMWF snowfall map (Mark, Nov 15, 2026, 7:29 a.m.): ECMWF Open Charts "Precipitation rate", snowfall-rate layer, North America, right under
+         the big Live Doppler radar. Rendered by the "ECMWF snowfall map" script; keep as is. -->
+    <div class="ec-snow" id="ec-snow">
+      <div class="ec-head">
+        <h3>ECMWF snowfall forecast <span>North America</span></h3>
+        <div class="ec-step"><button type="button" class="ec-btn" id="ec-prev" aria-label="Earlier">&#8249;</button><span class="ec-time" id="ec-time">Loading…</span><button type="button" class="ec-btn" id="ec-next" aria-label="Later">&#8250;</button></div>
+      </div>
+      <a class="ec-map" id="ec-link" href="https://charts.ecmwf.int/products/medium-rain-rate?layer_name=sf_rate&amp;projection=opencharts_north_america" target="_blank" rel="noopener"><img id="ec-img" alt="ECMWF forecast map of snowfall rate over North America" decoding="async"></a>
+      <div class="ec-foot"><span id="ec-run"></span><span>Snowfall rate · © <a href="https://charts.ecmwf.int/" target="_blank" rel="noopener">ECMWF</a> Open Charts, CC BY 4.0</span></div>
+    </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
     <div class="wx-cams">
       <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
@@ -7017,6 +7027,60 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
   var fs = dock.querySelectorAll(":scope > form.gbar.sug"); if(!fs.length) return;
   for(var i = 0; i < fs.length; i++){ fs[i].classList.add("sug-bot"); dock.appendChild(fs[i]); }
   try{ window.dispatchEvent(new Event("resize")); }catch(e){}
+})();
+</script>
+<style>
+/* ECMWF snowfall map (Mark, Nov 15, 2026, 7:29 a.m.): under the big Live Doppler radar. Same card look as the radar. Keep as is. */
+.ec-snow{margin:4px 0 16px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--snow);}
+.ec-head{display:flex; justify-content:space-between; align-items:center; gap:6px 10px; flex-wrap:wrap; padding:12px 16px;}
+.ec-head h3{font-size:15px; margin:0;} .ec-head h3 span{font:500 12px var(--font-body); color:var(--fg-muted); margin-left:6px;}
+.ec-step{display:inline-flex; align-items:center; gap:8px;}
+.ec-time{font:700 12px var(--font-body); color:var(--snow); font-variant-numeric:tabular-nums; min-width:150px; text-align:center;}
+.ec-btn{width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:transparent; color:var(--fg); font:600 20px/1 var(--font-body); cursor:pointer; padding:0 0 3px;}
+.ec-btn:disabled{opacity:.3; cursor:default;}
+.ec-map{display:block; background:#fff; line-height:0;}
+.ec-map img{display:block; width:100%; height:auto; min-height:120px;}
+.ec-foot{display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:space-between; padding:8px 14px; font-size:11px; color:var(--fg-faint);}
+.ec-foot a{color:var(--accent);}
+</style>
+<script>
+/* ECMWF snowfall map (Mark, Nov 15, 2026, 7:29 a.m.). Asks the free ECMWF Open Charts API (CORS open) for the newest run of
+   "medium-rain-rate", layer sf_rate, projection opencharts_north_america, and shows the PNG it links to. Opens on the next 6-hour time from
+   now; the arrows step 6 hours back and forth through the run (+0 h to +240 h, stopping where the run ends). Tapping the map opens the chart
+   on charts.ecmwf.int. Keep as is. */
+(function(){
+  var box = document.getElementById("ec-snow"); if(!box) return;
+  var img = document.getElementById("ec-img"), lab = document.getElementById("ec-time"), run = document.getElementById("ec-run"), link = document.getElementById("ec-link");
+  var prev = document.getElementById("ec-prev"), next = document.getElementById("ec-next");
+  var API = "https://charts.ecmwf.int/opencharts-api/v1/products/medium-rain-rate/", H6 = 6 * 3600e3;
+  var base = null, step = 0, maxStep = 40, cache = {};
+  function iso(t){ return new Date(t).toISOString().slice(0, 19) + "Z"; }
+  function compact(t){ return iso(t).replace(/[-:T]/g, "").slice(0, 12); }
+  function q(b, v){ return API + "?layer_name=sf_rate&projection=opencharts_north_america&base_time=" + encodeURIComponent(iso(b)) + "&valid_time=" + encodeURIComponent(iso(v)); }
+  function get(b, v){
+    var k = b + "|" + v; if(cache[k]) return cache[k];
+    return cache[k] = fetch(q(b, v)).then(function(r){ if(!r.ok) throw r.status; return r.json(); }).then(function(j){ var h = j && j.data && j.data.link && j.data.link.href; if(!h) throw "nolink"; return h; });
+  }
+  function fmt(t){ try{ return new Date(t).toLocaleString("en-US", {timeZone: "America/Denver", weekday: "short", month: "short", day: "numeric", hour: "numeric"}).replace(/ AM/, " a.m.").replace(/ PM/, " p.m.") + " MT"; }catch(e){ return iso(t); } }
+  function show(s){
+    var v = base + s * H6; lab.textContent = fmt(v) + " · +" + (s * 6) + "h"; prev.disabled = s <= 0; next.disabled = s >= maxStep;
+    get(base, v).then(function(h){ if(s !== step) return; img.src = h;
+      link.href = "https://charts.ecmwf.int/products/medium-rain-rate?base_time=" + compact(base) + "&layer_name=sf_rate&projection=opencharts_north_america&valid_time=" + compact(v);
+      if(s + 1 <= maxStep) get(base, v + H6).catch(function(){ maxStep = Math.min(maxStep, s); next.disabled = step >= maxStep; });   /* look ahead */
+    }).catch(function(){ if(s !== step) return; maxStep = Math.max(0, s - 1); step = maxStep; show(step); });
+  }
+  prev.addEventListener("click", function(){ if(step > 0){ step--; show(step); } });
+  next.addEventListener("click", function(){ if(step < maxStep){ step++; show(step); } });
+  /* newest run: ECMWF charts come out several hours after the run time, so try the latest 00/06/12/18 UTC run and step back until one answers */
+  var now = Date.now(), b0 = Math.floor((now - 5 * 3600e3) / H6) * H6;
+  (function tryRun(i){
+    if(i > 4){ lab.textContent = "ECMWF chart unavailable"; return; }
+    var b = b0 - i * H6;
+    get(b, b).then(function(){
+      base = b; run.textContent = "ECMWF run " + new Date(b).toISOString().slice(5, 13).replace("-", "/").replace("T", " ") + "Z";
+      step = Math.max(0, Math.min(maxStep, Math.ceil((now - b) / H6))); show(step);
+    }).catch(function(){ tryRun(i + 1); });
+  })(0);
 })();
 </script>
 </body>
