@@ -5595,6 +5595,14 @@ html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.sho
   html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,0) 0, rgba(5,14,26,0) 96%, var(--bg) 100%)!important;}
 }
 #wt-imgtog[aria-pressed="true"]{background:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
+/* View menu (Mark, Nov 14, 2026, 9:11 p.m.): the button opens a pop-up with Show stats / Show card / Full image (same look as the Sound menu) */
+#sk-view{position:fixed; z-index:200; min-width:184px; padding:6px; border-radius:14px; background:rgba(18,24,36,.92); color:#fff;
+  -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%); box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  font:600 15px/1.2 var(--font-body, -apple-system, sans-serif); display:none;}
+#sk-view.on{display:block;}
+#sk-view button{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:0; border-radius:9px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer;}
+#sk-view button:hover, #sk-view button:focus-visible{background:rgba(255,255,255,.1); outline:none;}
+#sk-view button .ck{width:14px; flex:0 0 14px; color:#E2733A; font-weight:800;}
 </style>
 <style>
 /* Last-refresh date in the resort card (Mark, Nov 8, 2026): a tiny "11/8" in the card's bottom-right corner, nearly the card's own
@@ -5651,19 +5659,37 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
     busy = false;
   }
   function later(){ clearTimeout(deb); deb = setTimeout(fit, 180); }
-  function set(on){
-    root.classList.toggle("show-image", on);
-    b.textContent = on ? "Show card" : "Show image";
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-    b.title = on ? "Bring back the resort card" : "Hide the resort card and show the full cam picture";
+  /* View menu (Mark, Nov 14, 2026, 9:11 p.m.): three views instead of a two-way toggle —
+     "stats" = the photo with the glass stats line and frost (was "Show image"), "card" = the resort card (was "Show card"),
+     "full"  = the photo alone, no stats line, frost or card (html.show-image.full-image). Remembered in localStorage "skiinut-view"
+     (old "skiinut-show-image" = "1" counts as stats). */
+  var NAMES = {stats: "Show stats", card: "Show card", full: "Full image"}, mode = "card";
+  function set(on, m){
+    mode = m || (on ? "stats" : "card"); on = mode !== "card";
+    root.classList.toggle("show-image", on); root.classList.toggle("full-image", mode === "full");
+    b.textContent = NAMES[mode] + " \u25be";
+    b.setAttribute("aria-pressed", on ? "true" : "false"); b.setAttribute("aria-haspopup", "menu");
+    b.title = "View: Show stats, Show card or Full image";
     fit();
   }
-  /* Show image is remembered across reloads and hourly refreshes on this device (Mark, Nov 11, 2026): localStorage "skiinut-show-image". */
-  b.addEventListener("click", function(){ var on = !root.classList.contains("show-image"); set(on); try{ localStorage.setItem("skiinut-show-image", on ? "1" : "0"); }catch(e){} });
+  var mv = document.createElement("div"); mv.id = "sk-view"; mv.setAttribute("role", "menu");
+  mv.innerHTML = ["stats", "card", "full"].map(function(k){ return '<button type="button" role="menuitemradio" data-v="' + k + '"><span class="ck"></span>' + NAMES[k] + '</button>'; }).join("");
+  document.body.appendChild(mv);
+  function placeM(){ var r = b.getBoundingClientRect(), w = mv.offsetWidth || 184; mv.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, r.left)) + "px"; mv.style.top = Math.round(r.bottom + 6) + "px"; }
+  function openM(){ [].forEach.call(mv.querySelectorAll("button"), function(x){ var c = x.getAttribute("data-v") === mode; x.querySelector(".ck").textContent = c ? "\u2713" : ""; x.setAttribute("aria-checked", c ? "true" : "false"); });
+    mv.classList.add("on"); placeM(); }
+  function closeM(){ mv.classList.remove("on"); }
+  b.addEventListener("click", function(){ if(mv.classList.contains("on")) closeM(); else openM(); });
+  mv.addEventListener("click", function(e){ var x = e.target.closest("button"); if(!x) return; var v = x.getAttribute("data-v"); closeM(); set(v !== "card", v);
+    try{ localStorage.setItem("skiinut-view", v); localStorage.setItem("skiinut-show-image", v !== "card" ? "1" : "0"); }catch(er){} });
+  document.addEventListener("pointerdown", function(e){ if(mv.classList.contains("on") && !mv.contains(e.target) && e.target !== b) closeM(); }, true);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeM(); });
+  window.addEventListener("scroll", function(){ if(mv.classList.contains("on")) placeM(); }, {passive: true});
   window.addEventListener("resize", function(e){ if(busy || !root.classList.contains("show-image")) return; later(); });
   window.addEventListener("orientationchange", function(){ later(); setTimeout(later, 400); });
-  var keep = false; try{ keep = localStorage.getItem("skiinut-show-image") === "1"; }catch(e){}
-  set(keep); if(keep){ setTimeout(fit, 800); setTimeout(fit, 2500); }
+  var keep = false, vm = null; try{ vm = localStorage.getItem("skiinut-view"); keep = localStorage.getItem("skiinut-show-image") === "1"; }catch(e){}
+  if(!NAMES[vm]) vm = keep ? "stats" : "card"; keep = vm !== "card";
+  set(keep, vm); if(keep){ setTimeout(fit, 800); setTimeout(fit, 2500); }
 })();
 </script>
 <script>
@@ -5920,7 +5946,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   var mc = document.createElement("canvas").getContext("2d"), dpr = 2;
   var AR = window.Path2D ? new Path2D("M12 0l8 11h-5.75v13h-4.5V11H4z") : null;
   var mqP = window.matchMedia("(orientation:portrait) and (any-pointer:coarse)"), mqD = window.matchMedia("(hover:hover) and (pointer:fine)");
-  function on(){ return (mq.matches || mqP.matches || mqD.matches) && root.classList.contains("show-image") && !!document.getElementById("wt-banner"); }   /* Show image only — Show card has no line or frost (Mark, 1:58 p.m.) */
+  function on(){ return (mq.matches || mqP.matches || mqD.matches) && root.classList.contains("show-image") && !root.classList.contains("full-image") && !!document.getElementById("wt-banner"); }   /* Full image: no stats line or frost (Mark, 9:11 p.m.) */   /* Show image only — Show card has no line or frost (Mark, 1:58 p.m.) */
   function cap(){ mc.font = WT + " 100px " + FAM; var m = mc.measureText("0123456789"); if(m.actualBoundingBoxAscent > 0) CAP = m.actualBoundingBoxAscent / 100; }
   function tw(t, fs, wt){ mc.font = (wt || WT) + " " + fs + "px " + FAM; return mc.measureText(t).width * SX; }
   function mk(cw, ch){ var c = document.createElement("canvas"); c.width = Math.ceil(cw * dpr); c.height = Math.ceil(ch * dpr); return c; }
