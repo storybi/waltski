@@ -4232,17 +4232,17 @@ html:not(.view-news) #ecov{display:none!important;}
   html.show-image #wt-pclock.on{display:block; position:absolute; z-index:39; width:max-content; white-space:nowrap; pointer-events:none; color:#fff; line-height:1;
     text-shadow:0 2px 10px rgba(0,0,0,.45);}
 }
-#wx-nowbar .nb-in{position:absolute; left:3px; right:3px; top:20px; bottom:19px;}
+#wx-nowbar .nb-in{position:absolute; left:3px; right:3px; top:32px; bottom:6px;}   /* room for the home/resort icon above the temp (Mark, Nov 15, 2026, 3:37 p.m.) */
 #wx-nowbar .nb-t,#wx-nowbar .nb-b{position:absolute; left:0; right:0; display:block; border-radius:2px;}
 #wx-nowbar .nb-t{background:#E2733A; opacity:.95;}
 #wx-nowbar .nb-t.cold{background:#f2b48c;}
 #wx-nowbar .nb-b.rain{background:#4dff7a;} #wx-nowbar .nb-b.snow{background:#4fb4ff;} #wx-nowbar .nb-b.mix{background:#c58cff;}   /* brighter against the black bar (Mark, Nov 14, 2026, 1:17 p.m.) */
 #wx-nowbar .nb-b{opacity:1;} #wx-nowbar .nb-b.ch{opacity:.6;}
 #wx-nowbar .nb-in,#wx-nowbar .nb-tmp,#wx-nowbar .nb-who{transition:opacity .25s;} #wx-nowbar.nb-fade .nb-in,#wx-nowbar.nb-fade .nb-who{opacity:0;}
-#wx-nowbar .nb-who{position:absolute; left:0; right:0; bottom:5px; height:11px; display:flex; justify-content:center;} #wx-nowbar .nb-who svg{width:11px; height:11px; fill:#fff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));}
+#wx-nowbar .nb-who{position:absolute; left:0; right:0; top:4px; height:11px; display:flex; justify-content:center;}   /* home/resort icon at the very top, above the temp (Mark, Nov 15, 2026, 3:37 p.m.) */ #wx-nowbar .nb-who svg{width:11px; height:11px; fill:#fff; filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));}
 #wx-nowbar .nb-cur{position:absolute; left:-16px; right:1px; text-align:right; font:700 9.5px/1 "Barlow Condensed","Inter",Arial,sans-serif; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8); font-variant-numeric:tabular-nums;}
 #wx-nowbar .nb-frz{position:absolute; left:-3px; right:-3px; height:0; border-top:1px solid rgba(255,255,255,.75);}
-#wx-nowbar .nb-tmp{position:absolute; left:-16px; right:1px; top:4px; text-align:right; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
+#wx-nowbar .nb-tmp{position:absolute; left:-16px; right:1px; top:18px; text-align:right; font:700 10px/1 "Barlow Condensed","Inter",Arial,sans-serif;
   color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7); font-variant-numeric:tabular-nums;}
 /* Doppler strip behind the bar (Mark, Nov 14, 2026): a narrow slice of radar (satellite + NWS reflectivity) for the place the bar is
    showing (resort or local, switching with it), the bar's height, its right edge under the bar's right edge, reaching left of the bar by
@@ -5000,6 +5000,55 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
   setInterval(each, 3000); each();
 })();
 </script>
+<script>
+/* Weather strip inside the frost (Mark, Nov 15, 2026, 3:37 p.m.): "extend the frost line to include the other weather ticker just below the
+   current frost line. Make this change to impact all browsers and views both landscape and portrait."
+   In the Show stats view the Mor / Eug / Red / Hon / Lak strip (#wxbar) moves out of the sticky dock into #wxf, a slot at the bottom of
+   the header photo, and the photo and the frosted bar grow by the strip's height so the strip sits inside the frost under the stats.
+   window.SK_WXF_H (the strip's height) is read by the View menu's fit() (header height), the glass stats line (stats stay where they were;
+   the frost reaches the new photo bottom). When the photo band locks on scroll, or in Show card / Full image / Other News, the strip
+   goes back to its place in the dock. Keep as is. */
+(function(){
+  var root = document.documentElement, bar = document.getElementById("wxbar"), he = document.getElementById("wt-head-end");
+  if(!bar || !he) return;
+  var home = bar.parentNode, next = bar.nextSibling, slot = document.createElement("div");
+  slot.id = "wxf"; slot.setAttribute("aria-label", "Current weather"); document.body.appendChild(slot);
+  var H = 0, q = 0;
+  function want(){ var c = root.classList; return c.contains("show-image") && !c.contains("full-image") && !c.contains("view-news") && c.contains("lg-on"); }
+  function setH(h){ h = Math.round(h); if(Math.abs(h - H) < 2) return; H = h; window.SK_WXF_H = h; try{ window.dispatchEvent(new Event("resize")); }catch(e){} }
+  function back(){ if(bar.parentNode !== home){ home.insertBefore(bar, next && next.parentNode === home ? next : null); setTimeout(function(){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} }, 30); } root.classList.remove("wxf-on"); }
+  function run(){
+    q = 0;
+    if(!want()){ back(); setH(0); slot.style.display = "none"; return; }
+    var lock = root.classList.contains("banner-lock");
+    if(lock){ back(); slot.style.display = "none"; return; }   /* keep the photo height steady while scrolled; the strip rides in the sticky dock */
+    if(bar.parentNode !== slot){ slot.appendChild(bar); setTimeout(function(){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} }, 30); }   /* lets the strip re-check whether low/high fit at its new width */
+    root.classList.add("wxf-on"); slot.style.display = "flex";
+    var h = bar.offsetHeight || 34; setH(h + 6);
+    var bn = document.getElementById("wt-banner"), br = (bn || he).getBoundingClientRect(), hb = he.getBoundingClientRect(), sy = window.scrollY || 0;
+    slot.style.left = Math.round(br.left) + "px"; slot.style.width = Math.round(br.width) + "px";
+    slot.style.top = Math.round(hb.bottom + sy - H) + "px"; slot.style.height = H + "px";
+  }
+  function soon(){ if(!q) q = requestAnimationFrame(run); }
+  try{ new MutationObserver(soon).observe(root, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
+  window.addEventListener("resize", soon); window.addEventListener("orientationchange", soon); window.addEventListener("load", soon);
+  try{ new ResizeObserver(soon).observe(he); }catch(e){}
+  setInterval(run, 2000); run();
+})();
+</script>
+<style>
+/* Weather strip inside the frost (Mark, Nov 15, 2026, 3:37 p.m.) — see the script below. */
+#wxf{display:none; position:absolute; z-index:34; pointer-events:auto; align-items:center;}
+#wxf .wxbar{width:100%; margin:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important;
+  padding:0 max(12px, 2vw)!important; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.65); font-family:var(--font-body)!important;}
+#wxf .wxbar .wb b{color:rgba(255,255,255,.9)!important;}
+#wxf .wxbar .wb span{color:#fff!important;}
+#wxf .wxbar .wb span + span, #wxf .wxbar .wb i, #wxf .wxbar .wb small, #wxf .wxbar .wb-lbl{color:rgba(255,255,255,.72)!important;}
+#wxf .wxbar svg{filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));}
+html.wxf-on #wt-dock .wxbar{display:none;}
+/* no fade to the page colour at the photo's bottom edge while the strip sits there (it would wash out the strip) */
+html.wxf-on.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.55) 0, rgba(5,14,26,.28) 14%, rgba(5,14,26,0) 32%, rgba(5,14,26,0) 100%)!important;}
+</style>
 <script>
 /* Snow stake readings (Mark, Nov 15, 2026): Claude reads each resort's snow stake (snow stick) picture on every daily run and writes
    whole inches here, with the time it read it. The resort card's New 24h uses a reading when it is under 24 hours old;
@@ -5883,7 +5932,7 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
       var top = he.getBoundingClientRect().top + window.scrollY;
       var phone = window.matchMedia && window.matchMedia("(orientation:portrait) and (max-width:700px), (orientation:portrait) and (any-pointer:coarse)").matches;
       var target = phone ? top + 34 + window.innerWidth * 9 / 16 : Math.min(window.innerWidth * 9 / 16, window.innerHeight * 0.92);
-      want = Math.max(40, Math.round(target - top - 16));
+      want = Math.max(40, Math.round(target - top - 16 + (window.SK_WXF_H || 0)));   /* + the weather strip inside the frost (Nov 15, 3:37 p.m.) */
     }
     var changed = false;
     if(want == null){ if(lastH != null || he.style.getPropertyValue("height")){ he.style.removeProperty("height"); changed = true; } lastH = null; }
@@ -6272,7 +6321,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = (mq.matches || mqP.matches) ? 20 : 0, area = W - right;   /* phones / iPads: clear of the weather bar (the Doppler sliver is gone, Mark 1:06 p.m.); desktop: none */
     var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet"); if(gr && gr.closest(".wt-greet-bot")) gr = null;   /* greeting moved to the page bottom (Mark, 4:40 p.m.) */
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
-    var stop = he ? he.getBoundingClientRect().bottom : top0 + 200, gt = document.getElementById("games-top");
+    var stop = he ? he.getBoundingClientRect().bottom - (window.SK_WXF_H || 0) : top0 + 200, gt = document.getElementById("games-top");   /* stats stay above the weather strip in the frost (Nov 15, 3:37 p.m.) */
     if(gt && gt.offsetHeight > 0) stop = Math.min(stop, gt.getBoundingClientRect().top);
     var Hs = Math.max(60, stop - 8 - top0), bn = document.getElementById("wt-banner"), ptop = picTop(bn), mid = (ptop + stop) / 2 - top0, left0 = 0;
     /* Show card (Mark, 1:08 p.m.): the same line sits just above the resort card, as wide as the card. Upright phones get a slot made
@@ -6309,9 +6358,9 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     /* numbers closer together (Mark, 8:28 p.m.): the space between items is capped at half a digit height and the group is centered */
     var gap = Math.min((area - vis) / (items.length + 1), mqP.matches ? 1e9 : H * 1.05),   /* upright: spread evenly across the whole frost (Mark, 9:25 p.m.) */   /* spread out a bit more to fill the frost (Mark, 8:35 p.m.; was H * .5) */ base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
     /* upright: the stats sit centered in the frost bar (Mark, 2:27 p.m.) — frost top stays put, the digits and labels move down */
-    var fpad = Math.round(H * .14), ftop = base - H - fpad, fbot = Hs + 8;
+    var fpad = Math.round(H * .14), ftop = base - H - fpad, fbot = Hs + 8 + (window.SK_WXF_H || 0);   /* frost reaches down over the weather strip (Nov 15, 3:37 p.m.) */
     if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: down to the base of the picture (1:23 p.m.), the weather strip below stays on top (1:32 p.m.) */
-    if(!cardMode && mqP.matches){ var cH = H * (1 + LGAP + LBL), sh0 = Math.round((fbot - ftop - cH) / 2 - (base - H - ftop)); if(sh0 > 0) base += sh0; }   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
+    if(!cardMode && mqP.matches){ var cH = H * (1 + LGAP + LBL), sh0 = Math.round((fbot - (window.SK_WXF_H || 0) - ftop - cH) / 2 - (base - H - ftop)); if(sh0 > 0) base += sh0; }   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
       x += it.w - 2 * it.px;
