@@ -656,6 +656,9 @@ def do_holdings(s, now_mt):
 
 
 # ------------------------------------------------------------------------------------- cam quality
+_OCR_LOCK = __import__("threading").BoundedSemaphore(2)
+
+
 def _img_flags(b):
     """(black, text, info) for one cam picture: black = almost entirely dark; text = text over the picture
     (an error slate, a label or weather overlay, a promo card) found by tesseract OCR."""
@@ -663,7 +666,7 @@ def _img_flags(b):
     from PIL import Image
     im = Image.open(io.BytesIO(b)).convert("RGB")
     g = im.convert("L")
-    px = sorted(g.resize((96, 54)).getdata())
+    px = sorted(g.resize((96, 54)).tobytes())
     mean = sum(px) / len(px)
     p90 = px[int(len(px) * .9)]
     if mean < 24 and p90 < 60:
@@ -674,7 +677,9 @@ def _img_flags(b):
     g.resize((w, h)).save(f.name)
     f.close()
     try:
-        out = subprocess.run(["tesseract", f.name, "stdout", "--psm", "11", "tsv"], capture_output=True, text=True, timeout=40).stdout
+        with _OCR_LOCK:   # tesseract one or two at a time, one thread each: 6 at once on the 2-core runner all hit the timeout
+            out = subprocess.run(["tesseract", f.name, "stdout", "--psm", "11", "tsv"], capture_output=True, text=True, timeout=25,
+                                 env=dict(os.environ, OMP_THREAD_LIMIT="1")).stdout
     except Exception:  # noqa: BLE001  (no tesseract: black check only)
         out = ""
     finally:
