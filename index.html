@@ -5980,8 +5980,8 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     return gtext(String(t), H, TINT[c] || null, 0, resort ? "RESORT" : "LOCAL", true);   /* no orange arrow under the resort temp (Mark, 12:53 p.m.) */
   }
   function wind(sp, to, H){
-    /* speed, then the arrow right against it, and a "WIND SPEED (MPH)" label under them in the same glass (Mark, 12:53 p.m.) */
-    var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05), label = "WIND SPEED (MPH)";
+    /* speed, then the arrow right against it, and a "WIND" label under them in the same glass (Mark, 12:53 p.m.; label just "WIND", 8:28 p.m.) */
+    var k = sp > 25 ? "r" : sp > 15 ? "y" : "w", fs = H / CAP, s = String(sp), pad = Math.ceil(H * .05), label = "WIND";
     var wd = k !== "w" ? 800 : WT, aw = H * .36 * Math.min(1, SX / .6), gap = Math.max(2, H * .02), sw = tw(s, fs, wd), LH = H * LBL, lfs = LH / CAP, lw = tw(label, lfs, 800) + lfs * .1 * label.length;
     var nw = sw + gap + aw, cw = Math.ceil(Math.max(nw, lw) + pad * 2), x0 = (cw - nw) / 2, by = Math.ceil(H + pad), ch = Math.ceil(by + pad + H * LGAP + LH);
     var el = glass(cw, ch, by, H, function(x){
@@ -6001,13 +6001,15 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var sv = w.querySelector("svg"), mm = sv && /rotate\(\s*(-?[\d.]+)/.exec(sv.getAttribute("style") || ""); return {s: sp, to: mm ? +mm[1] : 0};
   }
   function dayHalf(){ var h = new Date().getHours(); return h >= 8 && h < 20; }
+  /* 24-hour new snowfall at the picked resort (Mark, Nov 14, 2026, 8:28 p.m.): the "New 24h" box in the resort card (#rs-panel) */
+  function readSnow(){ var v = document.querySelector("#rs-panel .rs-stat .v"); if(!v) return null; var m = (v.textContent || "").match(/\d+(\.\d+)?/); return m ? m[0] : null; }
   function draw(){
     raf = 0;
     if(!on()){ if(root.classList.contains("lg-on")) root.classList.remove("lg-on"); if(root.classList.contains("lg-card")) root.classList.remove("lg-card");
       var sl0 = document.getElementById("lg-slot"); if(sl0 && sl0.style.display !== "none") sl0.style.display = "none"; lastKey = ""; return; }
     if(!root.classList.contains("lg-on")) root.classList.add("lg-on");
     var hm = (hmEl.textContent || "").trim(); if(!/\d/.test(hm)) return;
-    var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind();
+    var lt = num(document.getElementById("wt-clock-tmp")), rt = num(document.getElementById("wt-clock-rtmp"), ".n"), wd = readWind(), sn = readSnow();
     var W = document.documentElement.clientWidth || window.innerWidth, sy = window.scrollY || 0, right = (mq.matches || mqP.matches) ? 20 : 0, area = W - right;   /* phones / iPads: clear of the weather bar (the Doppler sliver is gone, Mark 1:06 p.m.); desktop: none */
     var btn = document.getElementById("wt-imgtog") || document.getElementById("wt-radio"), gr = document.getElementById("wt-greet"); if(gr && gr.closest(".wt-greet-bot")) gr = null;   /* greeting moved to the page bottom (Mark, 4:40 p.m.) */
     var top0 = Math.max(btn ? btn.getBoundingClientRect().bottom : 40, gr && gr.offsetHeight ? gr.getBoundingClientRect().bottom : 0) + 6;
@@ -6028,10 +6030,12 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     }
     if(root.classList.contains("lg-card") !== !!cardMode) root.classList.toggle("lg-card", !!cardMode);
     dpr = Math.min(3, window.devicePixelRatio || 2);
-    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready].join("|");
+    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di); return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
+    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di);
+      if(sn != null){ if(a.length > 1) a.di.push(a.length - 1); a.push(gtext(sn + '"', H, +sn > 0 ? TINT["tc-cold"] : null, 0, "24H SNOW")); }   /* 24h new snow in inches (Mark, 8:28 p.m.) */
+      return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
     var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     function fit(){ for(var k = 0; k < 6; k++){
@@ -6043,7 +6047,8 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; fit(); }
     /* sideways phones / iPads (Mark, 2:27 p.m.; overrides earlier size rules): half size 8 a.m.-8 p.m., full "bedside clock" size the rest of the night */
     else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
-    var gap = (area - vis) / (items.length + 1), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = gap, els = [];
+    /* numbers closer together (Mark, 8:28 p.m.): the space between items is capped at half a digit height and the group is centered */
+    var gap = Math.min((area - vis) / (items.length + 1), H * .5), base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
     /* upright: the stats sit centered in the frost bar (Mark, 2:27 p.m.) — frost top stays put, the digits and labels move down */
     var fpad = Math.round(H * .14), ftop = base - H - fpad, fbot = Hs + 8;
     if(mqP.matches && bn){ fbot = Math.max(fbot, bn.getBoundingClientRect().bottom - top0); var dk = document.getElementById("wt-dock"); if(dk && dk.offsetHeight){ fbot = Math.min(fbot, dk.getBoundingClientRect().top - top0); } }   /* upright: down to the base of the picture (1:23 p.m.), the weather strip below stays on top (1:32 p.m.) */
@@ -6069,6 +6074,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   }
   function q(){ if(!raf) raf = requestAnimationFrame(function(){ setTimeout(draw, 30); }); }
   try{ new MutationObserver(q).observe(clk, {childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["class", "style"]}); }catch(e){}
+  try{ var rsp = document.getElementById("rs-panel"); if(rsp) new MutationObserver(q).observe(rsp, {childList: true, characterData: true, subtree: true}); }catch(e){}   /* 24h snow follows the resort card */
   try{ new MutationObserver(q).observe(root, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
   window.addEventListener("resize", q);
   window.addEventListener("orientationchange", function(){ setTimeout(q, 400); setTimeout(q, 1000); });
