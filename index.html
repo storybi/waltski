@@ -4945,7 +4945,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
      (#rs-hero, Show card). The stick base goes 14px above whichever starts higher. */
   function coverTop(br){
     var t = Infinity, a = [document.querySelector("#lg-wrap .lg-frost"), document.getElementById("rs-hero")];
-    a.forEach(function(e){ if(!e || !e.getClientRects().length) return; var r = e.getBoundingClientRect(); if(r.height > 4 && r.top > br.top + 30 && r.top < br.bottom) t = Math.min(t, r.top); });
+    a.forEach(function(e){ if(!e || !e.getClientRects().length) return; var r = e.getBoundingClientRect(); if(r.height > 4 && r.top > br.top + 30 && r.top < br.bottom + 60) t = Math.min(t, r.top, br.bottom); });   /* desktop: the bar starts right at the photo's bottom edge (Mark, 3:22 p.m.) */
     return t === Infinity ? null : t;
   }
   function place(el, sp, w, h){
