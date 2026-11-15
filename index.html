@@ -3310,9 +3310,15 @@ window.PTYPE = (function(){
       yt("iNdfTLilLlU", "Sterling Express"), yt("0shWeR7Fvpg", "Galena Express"), yt("XZjubaPbamE", "Revelator Express"), yt("sAjdqw-lzgI", "Sultan Express")]},
     /* HI (Mark, Oct 26, 2026): Lanikai Beach video instead of the ski cams — plays muted behind the header on waltski.com;
        inside claude.ai (no outside video) its picture shows and Watch Live opens it on YouTube. */
-    hi: {resort: "Oahu", title: "Watch this Oahu cam live on YouTube", frames: [   /* Oahu live cams (Mark, Nov 14, 2026, 4:51 p.m.): five free, long-running YouTube live streams, rotating like the other resorts */
-      yt("4CK0CsimBHs", "Waikiki Beach (Marriott)"), yt("Fp7l8XASb9Y", "Banzai Pipeline, North Shore"), yt("kCPppYpcY_s", "Waikiki & Diamond Head (Park Shore)"),
-      yt("y5XS3fMISRk", "Magic Island, Ala Moana"), yt("EuR8OkQxOgk", "Concessions surf, Ala Moana")]},
+    /* Oahu (Mark, Nov 14, 2026, 5:03 p.m.): LIVE VIEWS ONLY, no still or stock pictures. The five YouTube live streams play muted behind the
+       header one at a time, switching to the next every 60 s with a crossfade (YouTube's still thumbnails for these streams are fixed
+       promo images, so none are used). Inside claude.ai (no outside video) nothing is shown but the caption. */
+    hi: {resort: "Oahu", title: "Watch this Oahu cam live on YouTube", live: ["4CK0CsimBHs", "Fp7l8XASb9Y", "kCPppYpcY_s", "y5XS3fMISRk", "EuR8OkQxOgk"], frames: [
+      {name: "Waikiki Beach (Marriott)", cap: "Oahu \u00b7 Waikiki Beach \u00b7 live", img: "", watch: "https://www.youtube.com/live/4CK0CsimBHs"},
+      {name: "Banzai Pipeline, North Shore", cap: "Oahu \u00b7 Banzai Pipeline, North Shore \u00b7 live", img: "", watch: "https://www.youtube.com/live/Fp7l8XASb9Y"},
+      {name: "Waikiki & Diamond Head", cap: "Oahu \u00b7 Waikiki & Diamond Head \u00b7 live", img: "", watch: "https://www.youtube.com/live/kCPppYpcY_s"},
+      {name: "Magic Island, Ala Moana", cap: "Oahu \u00b7 Magic Island, Ala Moana \u00b7 live", img: "", watch: "https://www.youtube.com/live/y5XS3fMISRk"},
+      {name: "Concessions surf, Ala Moana", cap: "Oahu \u00b7 Concessions surf, Ala Moana \u00b7 live", img: "", watch: "https://www.youtube.com/live/EuR8OkQxOgk"}]},
     sv: {resort: "Sun Valley", title: "Watch Sun Valley's web cams live", frames: [
       hd("4c82abd4-5ef5-4b16-870f-548c2885d3f0", "River Run", "b16"), hd("390488dd-a758-4dd3-ae95-91c408abbff0", "The Bowls"),
       hd("5f27e4b8-7c51-4451-bcf5-3ab843f56bc6", "Warm Springs"), hd("b4e43d2a-4ba6-4f25-8753-1055f95230cb", "Quarter Dollar"),
@@ -3393,7 +3399,7 @@ window.PTYPE = (function(){
     show("data:image/jpeg;base64," + x.img, CAMS[m].frames[x.i], setAt[m], m);
   }
   function fetchSet(){
-    var m = mode; if(!mcp || busy || !CAMS[m]) return; busy = true;
+    var m = mode; if(!mcp || busy || !CAMS[m] || CAMS[m].live) return; busy = true;
     mcp.callTool("Composio", "COMPOSIO_REMOTE_BASH_TOOL", {command: cmd(m)}, {cache:false}).then(function(r){
       busy = false; var at = null, got = [];
       stdoutOf(r).split("\n").forEach(function(l){ var f = l.split("|"); if(f[0] === "ts") at = f[1]; else if(f.length === 3 && f[2].length > 1000) got.push({i: +f[0], lum: +f[1], img: f[2].trim()}); });
@@ -3403,12 +3409,27 @@ window.PTYPE = (function(){
       if(!had && m === mode){ idx = -1; claudeNext(); }
     }, function(){ busy = false; });
   }
-  function tick(){ if(document.hidden || !CAMS[mode] || (CAMS[mode].video && !inClaude)) return; if(inClaude) claudeNext(); else webNext(0); }
+  function tick(){ if(document.hidden || !CAMS[mode] || CAMS[mode].live || (CAMS[mode].video && !inClaude)) return; if(inClaude) claudeNext(); else webNext(0); }
   function fit(){
-    var f = lay.querySelector("iframe"); if(!f) return;
+    var fs = lay.querySelectorAll("iframe"); if(!fs.length) return;
     var w = b.offsetWidth || window.innerWidth, h = b.offsetHeight || 300;
     var W = Math.max(w, h * 16 / 9), H = W * 9 / 16; if(H < h){ H = h; W = H * 16 / 9; }
-    f.style.width = Math.ceil(W) + "px"; f.style.height = Math.ceil(H) + "px";
+    [].forEach.call(fs, function(f){ f.style.width = Math.ceil(W) + "px"; f.style.height = Math.ceil(H) + "px"; });
+  }
+  /* live-only rotation (Oahu): one muted YouTube live stream at a time, next one every 60 s, crossfaded (Mark, Nov 14, 2026, 5:03 p.m.) */
+  var li = -1, LIVE_ROTATE = 60000;
+  function nextLive(c){
+    li = (li + 1) % c.live.length; var id = c.live[li], f0 = c.frames[li], m = mode;
+    var f = document.createElement("iframe");
+    f.src = "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&controls=0&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1";
+    f.title = f0.name; f.allow = "autoplay; encrypted-media; picture-in-picture"; f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true");
+    f.style.opacity = "0"; f.style.transition = "opacity 1.2s ease"; lay.appendChild(f); fit();
+    setTimeout(function(){ if(m !== mode || !f.parentNode) return; f.style.opacity = "1"; cap.textContent = f0.cap; linkTo(f0);
+      setTimeout(function(){ [].forEach.call(lay.querySelectorAll("iframe"), function(o){ if(o !== f && o.parentNode) o.parentNode.removeChild(o); }); }, 1400); }, 3500);
+  }
+  function liveRot(c){
+    lay.style.backgroundImage = ""; [].forEach.call(lay.querySelectorAll("iframe"), function(o){ o.parentNode.removeChild(o); });
+    li = -1; nextLive(c); timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE);
   }
   window.addEventListener("resize", fit);
   function video(c){
@@ -3424,13 +3445,14 @@ window.PTYPE = (function(){
     mode = CAMS[m] ? m : "sb";
     var c = CAMS[mode];
     root.classList.toggle("cam-alt", !!c); root.classList.toggle("cam-dv", mode === "dv"); root.classList.toggle("cam-sv", mode === "sv"); root.classList.toggle("cam-hi", mode === "hi"); root.classList.toggle("cam-ik", !!c && ["dv","sv","hi"].indexOf(mode) < 0);
-    var fr = lay.querySelector("iframe"); if(fr && !(c && c.video)) fr.parentNode.removeChild(fr);
+    [].forEach.call(lay.querySelectorAll("iframe"), function(fr){ if(!(c && c.video) || (c && c.live)) fr.parentNode.removeChild(fr); });
     links.forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
     if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
     if(timer){ clearInterval(timer); timer = null; }
     idx = -1;
     if(!c){ var play = getPlay(); if(play && play.hasAttribute("data-sb-href")){ play.href = play.getAttribute("data-sb-href"); play.title = play.getAttribute("data-sb-title"); } return; }
     root.classList.add("has-banner"); if(!(c.video && !inClaude)) lay.style.backgroundImage = ""; cap.textContent = c.frames[0].cap || (c.resort + " live cams"); linkTo(c.frames[0]);
+    if(c.live){ lay.style.backgroundImage = ""; if(inClaude){ cap.textContent = c.resort + " \u00b7 live cams play on skiinut.com"; return; } liveRot(c); return; }
     if(inClaude){
       if(!set_[mode]){ try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-set") || "null"); if(sv && sv.set && sv.set.length){ set_[mode] = sv.set; setAt[mode] = sv.at; } }catch(e){} }
       claudeNext(); fetchSet();
