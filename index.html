@@ -6794,8 +6794,10 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
   function draw(){
     var d = new Date(), h = d.getHours(), h12 = h % 12 || 12, night = h >= 20 || h < 8;
     el.classList.toggle("sk-day", !night);
-    var on = night && mq && mq.matches && getComputedStyle(el).display !== "none";
-    clock(!on); if(!on) return;
+    /* scrolled down (Mark, Nov 15, 2026, 7:00 a.m.): back to the digital clock until the page is at the top again */
+    var atTop = (window.pageYOffset || document.documentElement.scrollTop || 0) < 8;
+    var on = night && atTop && mq && mq.matches && getComputedStyle(el).display !== "none";
+    el.style.visibility = on ? "" : "hidden"; clock(!on); if(!on) return;
     var H = window.innerHeight, W = window.innerWidth;
     var logo = document.querySelector(".wt-mast h1.wt-name") || document.querySelector(".wt-mast"), ban = document.getElementById("wt-banner");
     var lr = logo ? logo.getBoundingClientRect() : {bottom: 60}, br = ban ? ban.getBoundingClientRect() : {top: 0, bottom: H, left: 0, right: W};
@@ -6823,6 +6825,7 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
     el.style.left = Math.round(cx - cw / 2 - sw) + "px"; el.style.top = Math.round(bot - ch - sw) + "px";
   }
   setInterval(draw, 5000);
+  var sraf = 0; window.addEventListener("scroll", function(){ if(!sraf) sraf = requestAnimationFrame(function(){ sraf = 0; draw(); }); }, {passive: true});
   window.addEventListener("resize", function(){ setTimeout(draw, 120); });
   window.addEventListener("orientationchange", function(){ setTimeout(draw, 400); });
   try{ new MutationObserver(function(){ setTimeout(draw, 60); }).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
