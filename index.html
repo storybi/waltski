@@ -5936,7 +5936,7 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
       /* Desktop and sideways phones / iPads in Show stats (Mark, Nov 15, 2026, 3:52 p.m.): the photo, and with it the frost bar holding
          the weather strip, runs down to the bottom edge of the visible screen. The stats keep their size; only the photo gets taller. */
       if(!phone && window.SK_WXF_H && !root.classList.contains("full-image")){
-        var vh = document.documentElement.clientHeight || window.innerHeight || 0;
+        var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0, (window.visualViewport && window.visualViewport.height) || 0);   /* phones: the full visible height, not the smaller toolbar-out height (Mark, 4:03 p.m.) */
         if(vh) want = Math.max(120, Math.round(vh - top));
       }
     }
