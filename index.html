@@ -1209,6 +1209,24 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
         <span class="radar-src">NWS NEXRAD mosaic via Iowa Environmental Mesonet · clouds: GOES-West infrared via NASA GIBS · satellite imagery © Esri, Maxar, Earthstar Geographics · <a href="https://radar.weather.gov/station/kmtx/standard" target="_blank" rel="noopener">NWS radar</a></span>
       </div>
     </div>
+    <!-- Composite snow forecast (Mark, Nov 15, 2026, 2:20 p.m.): a 10-day blend of NWS Salt Lake City, the University of Utah snow
+         ensemble and the global models, for the region of the picked resort (or general Utah). Right under the Live Doppler radar (Mark moved it up, Nov 15, 2026, 3:04 p.m.). Drawn by the
+         "Composite snow forecast" script from var COMPOSITE, which scripts/composite.py refreshes every hour. -->
+    <div class="ec-snow sk-comp" id="sk-comp">
+      <div class="ec-head">
+        <h3>Composite snow forecast <span id="cf-region">Utah</span></h3>
+        <span class="ec-time" id="cf-asof"></span>
+      </div>
+      <div class="cf-body">
+        <p class="cf-note" id="cf-note" hidden></p>
+        <p class="cf-sum" id="cf-sum"></p>
+        <div class="cf-tots" id="cf-tots"></div>
+        <div class="cf-chart" id="cf-chart" role="img" aria-label="Daily snowfall and temperature forecast"></div>
+        <div class="cf-legend"><span><i class="cf-k-snow"></i>Snow (in), best guess</span><span><i class="cf-k-rng"></i>Range of sources</span><span><i class="cf-k-hi"></i>High °F</span><span><i class="cf-k-lo"></i>Low °F</span></div>
+        <p class="cf-nws" id="cf-nws" hidden></p>
+      </div>
+      <div class="ec-foot"><span id="cf-src"></span><span>Global models scaled to NWS mountain totals</span></div>
+    </div>
     <!-- ECMWF snowfall map (Mark, Nov 15, 2026, 7:29 a.m.): ECMWF Open Charts "Precipitation rate", snowfall-rate layer, North America, right under
          the big Live Doppler radar. Rendered by the "ECMWF snowfall map" script; keep as is. -->
     <div class="ec-snow" id="ec-snow">
@@ -1229,24 +1247,6 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="pl-tabs" id="pl-tabs" role="tablist"></div>
       <a class="ec-map" id="pl-link" href="https://weather.utah.edu/" target="_blank" rel="noopener"><img id="pl-img" alt="7-day snowfall forecast plume" decoding="async"></a>
       <div class="ec-foot"><span>Snowfall plumes from the GEFS ensemble</span><span>© <a href="https://weather.utah.edu/" target="_blank" rel="noopener">University of Utah Atmospheric Sciences</a> · via <a href="https://powderbuoy.com/dashboard/" target="_blank" rel="noopener">Powder Buoy</a></span></div>
-    </div>
-    <!-- Composite snow forecast (Mark, Nov 15, 2026, 2:20 p.m.): a 10-day blend of NWS Salt Lake City, the University of Utah snow
-         ensemble and the global models, for the region of the picked resort (or general Utah). Under the snow plumes. Drawn by the
-         "Composite snow forecast" script from var COMPOSITE, which scripts/composite.py refreshes every hour. -->
-    <div class="ec-snow sk-comp" id="sk-comp">
-      <div class="ec-head">
-        <h3>Composite snow forecast <span id="cf-region">Utah</span></h3>
-        <span class="ec-time" id="cf-asof"></span>
-      </div>
-      <div class="cf-body">
-        <p class="cf-note" id="cf-note" hidden></p>
-        <p class="cf-sum" id="cf-sum"></p>
-        <div class="cf-tots" id="cf-tots"></div>
-        <div class="cf-chart" id="cf-chart" role="img" aria-label="Daily snowfall and temperature forecast"></div>
-        <div class="cf-legend"><span><i class="cf-k-snow"></i>Snow (in), best guess</span><span><i class="cf-k-rng"></i>Range of sources</span><span><i class="cf-k-hi"></i>High °F</span><span><i class="cf-k-lo"></i>Low °F</span></div>
-        <p class="cf-nws" id="cf-nws" hidden></p>
-      </div>
-      <div class="ec-foot"><span id="cf-src"></span><span>Global models scaled to NWS mountain totals</span></div>
     </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
     <div class="wx-cams">
