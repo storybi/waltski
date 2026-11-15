@@ -819,6 +819,10 @@ body::before{display:none;}
 #wt-banner .dv-layer{position:absolute; inset:0; overflow:hidden; background:#1d2630 center 45%/cover no-repeat; opacity:0; transition:opacity 1s ease; z-index:0;}
 #wt-banner .dv-layer iframe{position:absolute; top:50%; left:50%; border:0; transform:translate(-50%,-50%); pointer-events:none;}
 html.cam-alt #wt-banner .dv-layer{opacity:1;}
+/* Header radar for places with no cam pictures (Mark, Nov 14, 2026, 8:05 p.m.) */
+#wt-banner #sk-hdr-radar{position:absolute; inset:0; z-index:1; opacity:0; transition:opacity .8s ease; background:#1d2630; pointer-events:none;}
+#wt-banner #sk-hdr-radar.on{opacity:1;}
+#wt-banner #sk-hdr-radar.leaflet-container{background:#1d2630;}
 html.cam-alt #wt-banner .bl, html.cam-alt #wt-banner img.wt-live{opacity:0!important;}
 html.cam-alt .wt-banner-cap, html.cam-alt .wt-vid-cap{display:none!important;}
 .wt-dv-cap{display:none; z-index:2; position:absolute; right:10px; bottom:6px; font:500 10px var(--font-body); letter-spacing:.06em; color:rgba(255,255,255,.85); text-shadow:0 1px 2px rgba(0,0,0,.8);}
@@ -2931,6 +2935,29 @@ window.PTYPE = (function(){
       setInterval(function(){ if(!document.hidden && mclouds) mclouds.redraw(); }, 10*60000);
     }
     setInterval(function(){ if(!document.hidden){ cloudBust = Math.floor(Date.now() / 600000); cloudCache = {}; clouds.redraw(); } }, 10*60000);
+    /* Header radar (Mark, Nov 14, 2026, 8:05 p.m.): when the picked place has no cam pictures (only the satellite view), the same animated
+       Doppler (satellite base, clouds, smoothed radar frames, orange dot) fills the header photo area instead. Built on first use. */
+    var hbox = null, hmap = null, hLayers = [], hclouds = null, hdot = null;
+    window.skHdrRadar = function(on){
+      var ban = document.getElementById("wt-banner"); if(!ban) return;
+      if(on && !hbox){ hbox = document.createElement("div"); hbox.id = "sk-hdr-radar"; hbox.setAttribute("aria-hidden", "true"); ban.appendChild(hbox); }
+      if(!hbox) return;
+      hbox.classList.toggle("on", !!on); if(!on) return;
+      document.documentElement.classList.add("has-banner");
+      if(!hmap){
+        hmap = L.map(hbox, {zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, touchZoom: false, tap: false}).setView(V().c, V().z);
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 13, minZoom: 5}).addTo(hmap);
+        hmap.createPane("radar"); hmap.getPane("radar").style.zIndex = 350; hmap.getPane("radar").className += " radar-pane";
+        hmap.createPane("clouds"); hmap.getPane("clouds").style.zIndex = 330; hmap.getPane("clouds").style.pointerEvents = "none"; hmap.getPane("clouds").style.filter = "blur(3px)";
+        hclouds = new Clouds({pane: "clouds", opacity: 0.75, maxZoom: 13, minZoom: 5}).addTo(hmap);
+        hdot = L.circleMarker(V().fc, {radius: 6, color: "#ffffff", weight: 2, fillColor: "#E2733A", fillOpacity: 1, interactive: false}).addTo(hmap);
+        if(window.ResizeObserver){ var ht = null; new ResizeObserver(function(){ clearTimeout(ht); ht = setTimeout(function(){ if(hmap){ hmap.invalidateSize({pan: false}); hmap.setView(V().c, V().z, {animate: false}); } }, 150); }).observe(hbox); }
+        setInterval(function(){ if(!document.hidden && hclouds) hclouds.redraw(); }, 10*60000);
+        idx = OFFS.length - 1; build();
+      }
+      setTimeout(function(){ hmap.invalidateSize({pan: false}); hmap.setView(V().c, V().z, {animate: false}); hdot.setLatLng(V().fc); }, 60);
+    };
+    if(window.skHdrRadarWant) setTimeout(function(){ window.skHdrRadar(true); }, 0);
     PLACES.forEach(function(p){
       L.circleMarker([p[1], p[2]], {radius: 6, color: "#ffffff", weight: 2, fillColor: "#E2733A", fillOpacity: 1}).addTo(map)
         .bindTooltip(p[0], {permanent: true, direction: "right", offset: [8, 0], className: "radar-tip"});
@@ -3010,7 +3037,7 @@ window.PTYPE = (function(){
     }
     updateFx();
     map.on("moveend zoomend", function(){ fx.innerHTML = ""; updateFx(); });
-    if(pick) pick.addEventListener("change", function(){ setView(pick.value); kind = null; var nw = document.getElementById("radar-now"); if(nw) nw.textContent = ""; map.setView(V().c, V().z); if(window.miniRadarFit) window.miniRadarFit(); idx = OFFS.length - 1; build(); });
+    if(pick) pick.addEventListener("change", function(){ setView(pick.value); kind = null; var nw = document.getElementById("radar-now"); if(nw) nw.textContent = ""; map.setView(V().c, V().z); if(window.miniRadarFit) window.miniRadarFit(); if(hmap){ hmap.setView(V().c, V().z, {animate: false}); hdot.setLatLng(V().fc); } idx = OFFS.length - 1; build(); });
     setInterval(function(){ if(!document.hidden){ kind = null; updateFx(); } }, 5*60000);
     var OFFS = [50,45,40,35,30,25,20,15,10,5,0], layers = [], ready = 0, idx = OFFS.length - 1, timer = null, base = null, gen = 0;
     /* Smoothed radar (Oct 27, 2026): each frame's NWS tiles are read pixel by pixel, turned back into reflectivity (dBZ),
@@ -3080,7 +3107,7 @@ window.PTYPE = (function(){
       base = new Date(Math.floor(Date.now() / 300000) * 300000);
       getKind(function(k){
         if(my !== gen) return;
-        var palKey = (k && k.k) || "rain", list = V().ridge ? [radTiles()] : OFFS.map(frameUrl), fresh = new Array(list.length), freshMini = new Array(list.length), got = 0;
+        var palKey = (k && k.k) || "rain", list = V().ridge ? [radTiles()] : OFFS.map(frameUrl), fresh = new Array(list.length), freshMini = new Array(list.length), freshH = new Array(list.length), got = 0;
         var order = []; for(var q = list.length - 1; q >= 0; q--) order.push(q);
         (function next(){
           if(my !== gen) return;
@@ -3091,10 +3118,12 @@ window.PTYPE = (function(){
             var ov = src ? L.imageOverlay(src, bounds, {opacity: 0, pane: "radar", interactive: false}) : L.layerGroup();
             ov.addTo(map); fresh[i] = ov; got++;
             if(mini && src){ freshMini[i] = L.imageOverlay(src, bounds, {opacity: 0, pane: "radar", interactive: false}).addTo(mini); }
+            if(hmap && src){ freshH[i] = L.imageOverlay(src, bounds, {opacity: 0, pane: "radar", interactive: false}).addTo(hmap); }
             if(i === list.length - 1){
               layers.forEach(function(l){ map.removeLayer(l); });
               if(mini) miniLayers.forEach(function(l){ if(l) mini.removeLayer(l); });
-              layers = fresh; miniLayers = freshMini; ready = 0; idx = list.length - 1; show(idx);
+              if(hmap) hLayers.forEach(function(l){ if(l) hmap.removeLayer(l); });
+              layers = fresh; miniLayers = freshMini; hLayers = freshH; ready = 0; idx = list.length - 1; show(idx);
               if(V().ridge) tl.textContent = "Latest scan · NWS Molokai radar";
             }
             if(got === list.length) ready = list.length;
@@ -3106,6 +3135,7 @@ window.PTYPE = (function(){
     function show(i){
       layers.forEach(function(l, k){ if(l && l.setOpacity) l.setOpacity(k === i ? OPA : 0); });
       miniLayers.forEach(function(l, k){ if(l && l.setOpacity) l.setOpacity(k === i ? OPA : 0); });
+      hLayers.forEach(function(l, k){ if(l && l.setOpacity) l.setOpacity(k === i ? OPA : 0); });
       var mt = document.getElementById("rs-radar-tag"); if(mt) mt.textContent = V().ridge ? "Radar \u00b7 latest" : (OFFS[i] ? "Radar \u00b7 \u2212" + OFFS[i] + " min" : "Radar \u00b7 now");
       if(V().ridge) return;
       var m = OFFS[i], t = new Date(base.getTime() - m * 60000);
@@ -3521,7 +3551,7 @@ window.PTYPE = (function(){
   window.skCamStep = function(d){
     d = d < 0 ? -1 : 1; var c = CAMS[mode];
     if(!c){ if(window.skSbLiveStep && window.skSbLiveStep(d)) return; if(window.skSbBannerStep) window.skSbBannerStep(d); return; }
-    if(c.video && !inClaude) return;
+    if((c.video && !inClaude) || window.skHdrRadarWant) return;
     if(timer){ clearInterval(timer); timer = null; }
     if(c.live){ if(inClaude) return; var n = c.live.length; li = ((li + d - 1) % n + n) % n; nextLive(c);
       timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE); return; }
@@ -3547,8 +3577,15 @@ window.PTYPE = (function(){
     if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
     if(timer){ clearInterval(timer); timer = null; }
     idx = -1;
-    if(!c){ var play = getPlay(); if(play && play.hasAttribute("data-sb-href")){ play.href = play.getAttribute("data-sb-href"); play.title = play.getAttribute("data-sb-title"); } return; }
+    if(!c){ window.skHdrRadarWant = false; root.classList.remove("hdr-radar"); if(window.skHdrRadar) window.skHdrRadar(false);
+      var play = getPlay(); if(play && play.hasAttribute("data-sb-href")){ play.href = play.getAttribute("data-sb-href"); play.title = play.getAttribute("data-sb-title"); } return; }
     root.classList.add("has-banner"); if(!(c.video && !inClaude)) lay.style.backgroundImage = ""; cap.textContent = c.frames[0].cap || (c.resort + " live cams"); linkTo(c.frames[0]);
+    /* No pictures, only the satellite view (Mark, Nov 14, 2026, 8:05 p.m.): show the live Doppler radar behind the header instead
+       (skiinut.com; inside claude.ai the satellite picture stays). */
+    var satOnly = !c.live && !c.video && c.frames.length > 0 && c.frames.every(function(f){ return /satellite view/i.test(f.name || ""); });
+    window.skHdrRadarWant = satOnly && !inClaude; root.classList.toggle("hdr-radar", window.skHdrRadarWant);
+    if(window.skHdrRadar) window.skHdrRadar(window.skHdrRadarWant);
+    if(window.skHdrRadarWant){ lay.style.backgroundImage = ""; cap.textContent = c.resort + " \u00b7 live Doppler radar"; return; }
     if(c.live){ lay.style.backgroundImage = ""; if(inClaude){ cap.textContent = c.resort + " \u00b7 live cams play on skiinut.com"; return; } liveRot(c); return; }
     if(inClaude){
       if(!set_[mode]){ try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-set") || "null"); if(sv && sv.set && sv.set.length){ set_[mode] = sv.set; setAt[mode] = sv.at; } }catch(e){} }
@@ -5854,7 +5891,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
 #lg-wrap .g{position:absolute;}
 /* frosted backing (Mark, Nov 14, 2026, 1:06 p.m.): a softly blurred, slightly darkened pane behind the whole line */
 #lg-wrap .lg-frost{position:absolute; border-radius:0; -webkit-backdrop-filter:blur(8px) saturate(110%) brightness(.72); backdrop-filter:blur(8px) saturate(110%) brightness(.72);   /* more see-through (Mark, 3:12 p.m.; was blur 12 / brightness .55), still dark enough for the white labels */
-  background:linear-gradient(to bottom, rgba(14,20,32,.2), rgba(14,20,32,.28)); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(255,255,255,.08);}
+  background:linear-gradient(to bottom, rgba(14,20,32,.2), rgba(14,20,32,.28)); box-shadow:inset 0 -1px 0 rgba(255,255,255,.08);}   /* no thin top line (Mark, Nov 14, 2026, 8:05 p.m.) */
 #lg-wrap .gl{position:absolute; inset:0; -webkit-backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1); backdrop-filter:blur(2.5px) saturate(125%) brightness(1.1);
   -webkit-mask-size:100% 100%; mask-size:100% 100%; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;}
 /* adaptive border (Mark, Nov 14, 2026): the photo behind a thin band around each digit, inverted and grayed, so the outline turns
@@ -6571,21 +6608,22 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
 })();
 </script>
 <style>
-/* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): a left caret on the left edge and a right caret on the right edge of the header photo,
-   in the Liquid Glass clock's font (Saira Extra Condensed 700, frosted white), with a thin border that reads on light and dark
-   photos (a dark hairline stroke plus a soft light halo). Each tap steps to the previous / next picture of the current place. Keep as is. */
-.sk-arw{position:fixed; z-index:40; top:0; width:44px; height:84px; margin-top:-42px; padding:0; border:0; background:none; cursor:pointer; display:none;
-  font:700 78px/84px "Saira Extra Condensed","Barlow Condensed","Arial Narrow",sans-serif; text-align:center; -webkit-tap-highlight-color:transparent;
-  color:rgba(255,255,255,.9); background-image:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.92) 45%,rgba(222,232,245,.78) 100%);
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-  -webkit-text-stroke:1px rgba(10,16,26,.55);
-  filter:drop-shadow(0 0 1px rgba(255,255,255,.7)) drop-shadow(0 1px 2px rgba(0,0,0,.45)) drop-shadow(0 0 8px rgba(0,0,0,.18));
-  opacity:.82; transition:opacity .2s ease, transform .15s ease;}
+/* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.; restyled 8:05 p.m.): a left caret and a right caret on the header photo, brought in
+   from the edges, larger, sitting just above the frost line. Liquid glass: a translucent, blurred pane with a slight light border and a
+   soft shadow (reads on light and dark photos), the caret in the clock's Saira Extra Condensed. Each tap steps to the previous / next
+   picture of the current place. Keep as is. */
+.sk-arw{position:fixed; z-index:40; top:0; width:58px; height:92px; margin-top:-46px; padding:0 0 6px; cursor:pointer; display:none; border-radius:20px;
+  font:700 82px/80px "Saira Extra Condensed","Barlow Condensed","Arial Narrow",sans-serif; text-align:center; color:rgba(255,255,255,.94);
+  background:linear-gradient(160deg, rgba(255,255,255,.22), rgba(255,255,255,.07) 55%, rgba(255,255,255,.12));
+  -webkit-backdrop-filter:blur(12px) saturate(150%); backdrop-filter:blur(12px) saturate(150%);
+  border:1px solid rgba(255,255,255,.38); box-shadow:0 0 0 .5px rgba(10,16,26,.28), 0 6px 18px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.35);
+  text-shadow:0 1px 2px rgba(0,0,0,.35); -webkit-tap-highlight-color:transparent; transition:background .2s ease, transform .15s ease, opacity .2s ease; opacity:.9;}
 .sk-arw.on{display:block;}
-.sk-arw:hover,.sk-arw:focus-visible{opacity:1; outline:none;}
-.sk-arw:active{transform:scale(.92);}
-.sk-arw-l{left:6px;} .sk-arw-r{right:6px;}
-@media (max-width:700px){ .sk-arw{width:30px; height:64px; margin-top:-32px; font-size:60px; line-height:64px;} .sk-arw-l{left:2px;} .sk-arw-r{right:2px;} }
+.sk-arw:hover,.sk-arw:focus-visible{opacity:1; outline:none; background:linear-gradient(160deg, rgba(255,255,255,.3), rgba(255,255,255,.12) 55%, rgba(255,255,255,.18));}
+.sk-arw:active{transform:scale(.94);}
+.sk-arw-l{left:24px;} .sk-arw-r{right:24px;}
+@media (max-width:700px){ .sk-arw{width:44px; height:70px; margin-top:-35px; font-size:62px; line-height:60px; border-radius:16px;} .sk-arw-l{left:12px;} .sk-arw-r{right:12px;} }
+html.hdr-radar .sk-arw{display:none!important;}
 </style>
 <script>
 /* Banner arrows (Mark, Nov 14, 2026, 7:56 p.m.) — "‹" / "›" on the left / right edge of the header photo, at its middle; they follow the
@@ -6604,6 +6642,10 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
     var r = b.getBoundingClientRect(), vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
     var on = root.classList.contains("has-banner") && vis > 140 && r.height > 140;
     var y = Math.round(Math.max(r.top, 0) + vis / 2);
+    /* just above the frost line when the frost bar shows (Mark, 8:05 p.m.) */
+    var fr = document.querySelector("#lg-wrap .lg-frost"), h = (L.offsetHeight || 92);
+    if(fr && fr.offsetParent){ var fb = fr.getBoundingClientRect(); if(fb.height > 10 && fb.top > r.top + h + 20) y = Math.round(fb.top - 10 - h / 2); }
+    if(y < h / 2 + 4) on = false;
     [L, R].forEach(function(x){ x.classList.toggle("on", on); if(on) x.style.top = y + "px"; });
   }
   function q(){ if(!raf) raf = requestAnimationFrame(pos); }
