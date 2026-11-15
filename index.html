@@ -1216,7 +1216,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
         <h3>ECMWF snowfall forecast <span>North America</span></h3>
         <div class="ec-step"><button type="button" class="ec-btn" id="ec-prev" aria-label="Earlier">&#8249;</button><span class="ec-time" id="ec-time">Loading…</span><button type="button" class="ec-btn" id="ec-next" aria-label="Later">&#8250;</button></div>
       </div>
-      <a class="ec-map" id="ec-link" href="https://charts.ecmwf.int/products/medium-rain-rate?layer_name=sf_rate&amp;projection=opencharts_north_america" target="_blank" rel="noopener"><img id="ec-img" alt="ECMWF forecast map of snowfall rate over North America" decoding="async"></a>
+      <a class="ec-map" id="ec-link" href="https://charts.ecmwf.int/products/medium-rain-rate?layer_name=sf_rate&amp;projection=opencharts_north_america" target="_blank" rel="noopener"><img id="ec-img" alt="ECMWF forecast map of snowfall rate over North America" decoding="async"><img class="ec-states" src="https://www.skiinut.com/ecmwf_states.svg" alt="" aria-hidden="true"></a>
       <div class="ec-foot"><span id="ec-run"></span><span>Snowfall rate · © <a href="https://charts.ecmwf.int/" target="_blank" rel="noopener">ECMWF</a> Open Charts, CC BY 4.0</span></div>
     </div>
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
@@ -7039,7 +7039,8 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
 .ec-btn{width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:transparent; color:var(--fg); font:600 20px/1 var(--font-body); cursor:pointer; padding:0 0 3px;}
 .ec-btn:disabled{opacity:.3; cursor:default;}
 .ec-map{display:block; background:#fff; line-height:0;}
-.ec-map img{display:block; width:100%; height:auto; min-height:120px;}
+.ec-map{position:relative;} .ec-map img{display:block; width:100%; height:auto; min-height:120px;}
+.ec-map img.ec-states{position:absolute; inset:0; height:100%; min-height:0; pointer-events:none;}   /* US state lines (Mark, Nov 15, 2026, 7:49 a.m.) */
 .ec-foot{display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:space-between; padding:8px 14px; font-size:11px; color:var(--fg-faint);}
 .ec-foot a{color:var(--accent);}
 </style>
