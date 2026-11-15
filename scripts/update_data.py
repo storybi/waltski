@@ -659,7 +659,7 @@ def do_holdings(s, now_mt):
 _OCR_LOCK = __import__("threading").BoundedSemaphore(2)
 
 
-def _img_flags(b):
+def _img_flags(b, ocr=True):
     """(black, text, info) for one cam picture: black = almost entirely dark; text = text over the picture
     (an error slate, a label or weather overlay, a promo card) found by tesseract OCR."""
     import os, subprocess, tempfile
@@ -671,6 +671,8 @@ def _img_flags(b):
     p90 = px[int(len(px) * .9)]
     if mean < 24 and p90 < 60:
         return True, False, "black lum=%d" % mean
+    if not ocr:   # snow stakes: the ruler's numbers are the point, so black test only (Nov 14, 2026)
+        return False, False, "stake"
     w = 1280
     h = max(1, int(im.height * w / im.width))
     f = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -702,6 +704,59 @@ def _img_flags(b):
     return False, text, "words=%s" % [t for t, _ in words][:6]
 
 
+_OTS_DROP = re.compile(r"(?i)water ?park|aquatopia|indoor|tubing|wsdot|udot|highway|town webcam")
+
+
+def do_ots_cams(s, now_mt):
+    """OTS_CAMS (Mark, Nov 14, 2026, 5:52 p.m.: "Show more ski cams and pics available"): every resort's current cam pictures from
+    OnTheSnow's webcam page (<ots path>/webcams). Pictures older than 6 hours, road cams, tubing and water parks are left out.
+    The page adds the ones a resort doesn't already have to its header rotation."""
+    import html as _h
+    from concurrent.futures import ThreadPoolExecutor
+    k = s.find("window.IKON = {")
+    if k < 0:
+        return s
+    line = s[k:s.index("\n", k)]
+    res = re.findall(r'"(\w+)":\{"name":"([^"]+)"[^{}]*?"ots":"([^"]+)"', line)
+
+    def age_h(t):
+        t = t.strip().lower()
+        m = re.match(r"(\d+|an?|one) (minute|hour|day|week|month|year)s? ago", t)
+        if not m:
+            return 0 if "now" in t or "second" in t else 99
+        n = 1 if m.group(1) in ("a", "an", "one") else int(m.group(1))
+        return n * {"minute": 1 / 60.0, "hour": 1, "day": 24, "week": 168, "month": 720, "year": 8760}[m.group(2)]
+
+    def one(r):
+        key, name, path = r
+        try:
+            x = get("https://www.onthesnow.com/%s/webcams" % path, binary=True, tries=2,
+                    headers={"Accept": "text/html", "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36"}).decode("utf-8", "replace")
+        except Exception as e:  # noqa: BLE001
+            return key, None
+        out, seen = [], set()
+        for m in re.finditer(r'<img src="(https://ots-webcams\.s3\.amazonaws\.com/[^"]+?)/la\.jpg" alt="([^"]*)"[^>]*/><span[^>]*>([^<]*)</span>', x):
+            nm = _h.unescape(m.group(2)).strip()
+            if " - " in nm:
+                nm = nm.split(" - ")[-1].strip()
+            nm = re.sub(r"(?i)\s+(hd\s+)?(web)?cam( stream)?$", "", nm).strip() or "Mountain view"
+            if _OTS_DROP.search(nm) or age_h(m.group(3)) > 6 or nm.lower() in seen:
+                continue
+            seen.add(nm.lower())
+            out.append({"name": nm, "img": m.group(1) + "/xl.jpg"})
+        return key, out
+
+    with ThreadPoolExecutor(8) as ex:
+        got = list(ex.map(one, res))
+    cams = {k2: v for k2, v in got if v}
+    if not any(v is not None for _, v in got):
+        log("  ots cams: all fetches failed, left as is")
+        return s
+    s, ok = set_var(s, "OTS_CAMS", json.dumps(cams, separators=(",", ":"), ensure_ascii=False))
+    log("  ots cams: %d resorts, %d pictures" % (len(cams), sum(len(v) for v in cams.values())))
+    return s
+
+
 def do_cam_quality(s, now_mt):
     """CAM_SKIP (Mark, Nov 14, 2026): every header cam picture the page can rotate through (Deer Valley / Sun Valley / Ikon resorts) is
     checked each run; pictures that are all black or have text over them are listed so the page skips them."""
@@ -711,12 +766,31 @@ def do_cam_quality(s, now_mt):
     k = s.find("window.IKON = {")
     if k >= 0:
         urls += re.findall(r'"img":"(https?://[^"]+)"', s[k:s.index("\n", k)])
+    m = re.search(r"var OTS_CAMS = (\{.*?\});\n", s)
+    stake = set()
+    if m:
+        try:
+            for v in json.loads(m.group(1)).values():
+                for f in v:
+                    urls.append(f["img"])
+                    if re.search(r"(?i)stake", f["name"]):
+                        stake.add(f["img"])
+        except ValueError:
+            pass
+    for i, n in re.findall(r'hd\("([0-9a-f-]{36})", "([^"]*stake[^"]*)"', s, re.I):
+        stake.add("https://img.hdrelay.com/camera/%s/snapshot" % i)
+    k = s.find("Every scenic Snowbasin cam")
+    if k >= 0:
+        seg = s[k:s.index("return ok.length", k) if "return ok.length" in s[k:] else k + 1500]
+        urls += ["https://img.hdrelay.com/camera/%s/snapshot" % i for i in re.findall(r'\["([0-9a-f]{24})", "', seg)]
+        for u in re.findall(r'src: "(https://img\.hdrelay\.com/frames/[^"]+)", name: "Snow stake"', seg):
+            urls.append(u); stake.add(u)
     urls = list(dict.fromkeys(urls))
 
     def chk(u):
         try:
             b = get(u + ("&" if "?" in u else "?") + "t=%d" % time.time(), binary=True, tries=1, headers={"Accept": "image/*"})
-            black, text, info = _img_flags(b)
+            black, text, info = _img_flags(b, ocr=u not in stake)
             return u, black or text, info
         except Exception as e:  # noqa: BLE001
             return u, False, "fetch failed: %s" % e
@@ -738,7 +812,7 @@ def main():
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_cam_quality):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ots_cams, do_cam_quality):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
