@@ -36,6 +36,9 @@ jobs:
       - name: Install Pillow (for cam snapshots)
         run: pip install --quiet pillow
 
+      - name: Install tesseract (cam quality: skip black or text-covered cam pictures)
+        run: (sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr) > /dev/null 2>&1 || true
+
       - name: Refresh data in index.html
         run: python3 scripts/update_data.py index.html
 

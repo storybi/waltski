@@ -2212,10 +2212,17 @@ var HOLD = {"asof":1794603600,"q":{"AAPL":{"t":[1794234600,1794236400,1794238200
     try{ if(at){ var d = new Date(at); s += " \u00b7 " + d.toLocaleString("en-US",{timeZone:"America/Denver",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; } }catch(e){}
     cap.textContent = s;
   }
+  /* skip pictures that are (almost) all black (Mark, Nov 14, 2026); readable pictures only (the cam frames here are data: URLs) */
+  function isBlack(im){ try{ var c = document.createElement("canvas"); c.width = 48; c.height = 27; var x = c.getContext("2d"); x.drawImage(im, 0, 0, 48, 27);
+    var d = x.getImageData(0, 0, 48, 27).data, L = []; for(var k = 0; k < d.length; k += 4) L.push(.3 * d[k] + .59 * d[k + 1] + .11 * d[k + 2]); L.sort(function(a, b){ return a - b; });
+    var m = 0; L.forEach(function(v){ m += v; }); m /= L.length; return m < 24 && L[Math.floor(L.length * .9)] < 60; }catch(e){ return false; } }
+  var blackTries = 0;
   function paint(i){
     var f = frames[i]; if(!f) return;
     var next = 1 - front, img = new Image();
     img.onload = function(){
+      if(isBlack(img) && frames.length > 1 && blackTries < frames.length){ blackTries++; idx = (i + 1) % frames.length; paint(idx); return; }
+      blackTries = 0;
       /* Smooth crossfade (Mark, Oct 29, 2026): the new photo fades in ON TOP of the old one (no dip to dark), then the old layer is cleared. */
       var nl = L[next], old = L[front];
       nl.style.transition = "none"; nl.classList.remove("on"); nl.style.backgroundImage = 'url("' + f.src + '")';
@@ -3329,6 +3336,7 @@ window.PTYPE = (function(){
     var fr = r.frames.length ? r.frames : [{name: "Satellite view", cap: r.name + " \u00b7 " + r.where + " \u00b7 satellite view \u00a9 Esri", img: r.aerial, watch: r.cams}];
     CAMS[k] = {resort: r.name, title: "Watch " + r.name + "'s cams live", frames: fr}; });
   var KEY = "wsj-head-cam", ROTATE = 20000, REFRESH_CLAUDE = 10*60000;
+  var CAM_SKIP = {};   /* cam pictures that are all black or have text over them: filled every run by scripts/update_data.py (do_cam_quality), skipped in the rotation (Mark, Nov 14, 2026) */
   var root = document.documentElement, b = document.getElementById("wt-banner");
   var links = document.querySelectorAll(".wt-edition a.wt-stake[data-cam]");
   if(!b || !links.length) return;
@@ -3366,6 +3374,7 @@ window.PTYPE = (function(){
     var m = mode, c = CAMS[m]; if(!c) return;
     tries = tries || 0; if(tries >= c.frames.length) return;
     idx = (idx + 1) % c.frames.length; var f = c.frames[idx];
+    if(CAM_SKIP[f.img]){ webNext(tries + 1); return; }   /* black or text-covered picture: skip it */
     var u = f.img + (f.img.indexOf("?") < 0 ? "?t=" : "&t=") + Date.now(), probe = new Image();
     probe.onload = function(){ if(probe.naturalWidth > 200) show(u, f, new Date().toISOString(), m); else webNext(tries + 1); };
     probe.onerror = function(){ webNext(tries + 1); };
@@ -3386,6 +3395,22 @@ window.PTYPE = (function(){
       "    im=Image.open(io.BytesIO(r)).convert('RGB')\n" +
       "    if im.width<200: continue\n" +
       "    lum=ImageStat.Stat(im.convert('L')).mean[0]\n" +
+      "    px=sorted(im.convert('L').resize((96,54)).getdata())\n" +
+      "    if sum(px)/len(px)<24 and px[int(len(px)*.9)]<60: continue\n" +
+      "    try:\n" +
+      "      import subprocess,tempfile,os\n" +
+      "      g=im.convert('L');w=1280;h=max(1,int(im.height*w/im.width));fn=tempfile.mktemp('.png');g.resize((w,h)).save(fn)\n" +
+      "      out=subprocess.run(['tesseract',fn,'stdout','--psm','11','tsv'],capture_output=True,text=True,timeout=40).stdout;os.unlink(fn)\n" +
+      "      W=[];A=0\n" +
+      "      for ln in out.splitlines()[1:]:\n" +
+      "        c=ln.split('\\t')\n" +
+      "        if len(c)<12: continue\n" +
+      "        try: cf=float(c[10])\n" +
+      "        except Exception: continue\n" +
+      "        tt=c[11].strip()\n" +
+      "        if cf>=70 and sum(x.isalnum() for x in tt)>=3 and sum(x.isalpha() for x in tt)>=2: W.append(int(c[9]));A+=int(c[8])*int(c[9])\n" +
+      "      if any(x>=h*.06 for x in W) or A/float(w*h)>=.025 or len(W)>=6: continue\n" +
+      "    except Exception: pass\n" +
       "    im.thumbnail((800,800));o=io.BytesIO();im.save(o,'JPEG',quality=60,optimize=True)\n" +
       "    print(k+'|'+str(int(lum))+'|'+base64.b64encode(o.getvalue()).decode())\n" +
       "  except Exception as e: pass\n" +

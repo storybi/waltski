@@ -655,13 +655,85 @@ def do_holdings(s, now_mt):
     return s
 
 
+# ------------------------------------------------------------------------------------- cam quality
+def _img_flags(b):
+    """(black, text, info) for one cam picture: black = almost entirely dark; text = text over the picture
+    (an error slate, a label or weather overlay, a promo card) found by tesseract OCR."""
+    import os, subprocess, tempfile
+    from PIL import Image
+    im = Image.open(io.BytesIO(b)).convert("RGB")
+    g = im.convert("L")
+    px = sorted(g.resize((96, 54)).getdata())
+    mean = sum(px) / len(px)
+    p90 = px[int(len(px) * .9)]
+    if mean < 24 and p90 < 60:
+        return True, False, "black lum=%d" % mean
+    w = 1280
+    h = max(1, int(im.height * w / im.width))
+    f = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    g.resize((w, h)).save(f.name)
+    f.close()
+    try:
+        out = subprocess.run(["tesseract", f.name, "stdout", "--psm", "11", "tsv"], capture_output=True, text=True, timeout=40).stdout
+    except Exception:  # noqa: BLE001  (no tesseract: black check only)
+        out = ""
+    finally:
+        os.unlink(f.name)
+    words, area = [], 0
+    for ln in out.splitlines()[1:]:
+        c = ln.split("\t")
+        if len(c) < 12:
+            continue
+        try:
+            conf = float(c[10])
+        except ValueError:
+            continue
+        t = c[11].strip()
+        if conf >= 70 and sum(ch.isalnum() for ch in t) >= 3 and sum(ch.isalpha() for ch in t) >= 2:
+            words.append((t, int(c[9])))
+            area += int(c[8]) * int(c[9])
+    big = [t for t, hh in words if hh >= h * .06]
+    text = bool(big) or area / float(w * h) >= .025 or len(words) >= 6
+    return False, text, "words=%s" % [t for t, _ in words][:6]
+
+
+def do_cam_quality(s, now_mt):
+    """CAM_SKIP (Mark, Nov 14, 2026): every header cam picture the page can rotate through (Deer Valley / Sun Valley / Ikon resorts) is
+    checked each run; pictures that are all black or have text over them are listed so the page skips them."""
+    from concurrent.futures import ThreadPoolExecutor
+    urls = ["https://i.ytimg.com/vi/%s/maxresdefault_live.jpg" % v for v in re.findall(r'yt\("([A-Za-z0-9_-]{11})"', s)]
+    urls += ["https://%s.hdrelay.com/camera/%s/snapshot" % (h or "img", i) for i, h in re.findall(r'hd\("([0-9a-f-]{36})", "[^"]*"(?:, "(\w+)")?\)', s)]
+    k = s.find("window.IKON = {")
+    if k >= 0:
+        urls += re.findall(r'"img":"(https?://[^"]+)"', s[k:s.index("\n", k)])
+    urls = list(dict.fromkeys(urls))
+
+    def chk(u):
+        try:
+            b = get(u + ("&" if "?" in u else "?") + "t=%d" % time.time(), binary=True, tries=1, headers={"Accept": "image/*"})
+            black, text, info = _img_flags(b)
+            return u, black or text, info
+        except Exception as e:  # noqa: BLE001
+            return u, False, "fetch failed: %s" % e
+
+    with ThreadPoolExecutor(6) as ex:
+        res = list(ex.map(chk, urls))
+    skip = {u: 1 for u, bad, _ in res if bad}
+    for u, bad, info in res:
+        if bad:
+            log("  cam skip:", u[-60:], info)
+    s, ok = set_var(s, "CAM_SKIP", json.dumps(skip, separators=(",", ":")))
+    log("  cam quality: %d checked, %d skipped" % (len(urls), len(skip)))
+    return s
+
+
 def main():
     path = sys.argv[1]
     s = open(path, encoding="utf-8").read()
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_cam_quality):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
