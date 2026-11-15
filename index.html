@@ -5600,6 +5600,10 @@ html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.sho
   -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%); box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
   font:600 15px/1.2 var(--font-body, -apple-system, sans-serif); display:none;}
 #sk-view.on{display:block;}
+/* Full image hides any and all stats (Mark, 9:18 p.m.): no clock / temperature line, no current-hour weather bar, no cam caption */
+html.full-image #wt-clock, html.full-image #wt-pclock, html.full-image #wx-nowbar, html.full-image #wx-nowrad, html.full-image #wx-now,
+html.full-image #lg-wrap, html.full-image #lg-precip, html.full-image #lg-slot,
+html.full-image .wt-dv-cap, html.full-image .wt-vid-cap, html.full-image .wt-banner-cap{display:none!important;}
 #sk-view button{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:0; border-radius:9px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer;}
 #sk-view button:hover, #sk-view button:focus-visible{background:rgba(255,255,255,.1); outline:none;}
 #sk-view button .ck{width:14px; flex:0 0 14px; color:#E2733A; font-weight:800;}
