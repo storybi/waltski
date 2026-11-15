@@ -225,7 +225,7 @@ def js(asof, rows):
 # --------------------------------------------------------------------------------------------- 24-hour outlook
 # Today's hour-by-hour rain and snow outlook for each radar location (Mark, Oct 28, 2026), shown under the resort cams.
 # Keys match the resort picker (every US Ikon resort, plus hi). Each location uses its own local day, 12 a.m. to 11 p.m.
-OUTLOOK_PLACES = [(r[0], r[1], r[3], r[4]) for r in IKON] + [("hi", "Kailua", 21.4022, -157.7394)]
+OUTLOOK_PLACES = [(r[0], r[1], r[3], r[4]) for r in IKON] + [("hi", "Oahu", 21.4022, -157.7394)]
 
 
 def fetch_outlook():
@@ -254,8 +254,8 @@ def fetch_outlook():
     return out
 
 
-RWX_WHERE = dict([(r[0], r[6]) for r in IKON] + [("hi", "Windward O\u02bbahu, Hawaii")])
-RWX_NAME = dict([(r[0], r[1]) for r in IKON] + [("hi", "Kailua, O\u02bbahu")])
+RWX_WHERE = dict([(r[0], r[6]) for r in IKON] + [("hi", "Waik\u012bk\u012b \u00b7 Ala Moana \u00b7 North Shore")])
+RWX_NAME = dict([(r[0], r[1]) for r in IKON] + [("hi", "O\u02bbahu, Hawaii")])
 
 
 def fetch_resort_wx():
