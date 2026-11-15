@@ -3246,12 +3246,15 @@ window.PTYPE = (function(){
   /* hooks for the Sound menu (Mark, Nov 14, 2026, 2:39 p.m.) */
   window.skKing = {on: function(){ return on; }, blocked: function(){ return blocked; }, play: function(){ unwait(); if(blocked){ window.open(PLAYER, "_blank", "noopener"); return; } play(false); },
     stop: function(user){ unwait(); stop(); auto = false; if(user && inWin(new Date())){ skipDay = new Date().toDateString(); try{ localStorage.setItem("wsj-music-skip", skipDay); }catch(e){} } }};
-  function stop(){ if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
+  /* any music played on this page stops after 5 hours (Mark, Nov 14, 2026, 7:40 p.m.) */
+  var kT = 0, K_LEN = 5 * 3600 * 1000;
+  function stop(){ clearTimeout(kT); if(a){ a.pause(); a.removeAttribute("src"); a.load(); } on = false; label(); }
   var auto = false, waiting = false, skipDay = "";
   function play(isAuto){
     if(!a){ a = new Audio(); a.preload = "none"; a.addEventListener("error", function(){ if(on || a.getAttribute("src")){ blocked = true; on = false; auto = false; label(); } }); }
     a.src = STREAM + "?t=" + Date.now();
     on = true; auto = !!isAuto; label();
+    clearTimeout(kT); kT = setTimeout(function(){ if(on){ stop(); auto = false; } }, K_LEN);
     var p = a.play();
     if(p && p.catch) p.catch(function(e){ if(e && e.name === "AbortError") return; on = false; auto = false;
       if(isAuto && e && e.name === "NotAllowedError"){ a.removeAttribute("src"); wait(); label(); return; }
@@ -6155,7 +6158,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
    first, the button pulses and the first tap anywhere resumes it). Morning music doesn't start over the rain. Keep as is during routine refreshes. */
 (function(){
   var b = document.getElementById("wt-radio"); if(!b) return;
-  var VID = "rt_i7pqZNpo", LINK = "https://youtu.be/rt_i7pqZNpo", KEY = "skiinut-rain", LEN = 8 * 3600 * 1000;
+  var VID = "rt_i7pqZNpo", LINK = "https://youtu.be/rt_i7pqZNpo", KEY = "skiinut-rain", LEN = 5 * 3600 * 1000;   /* rain stops after 5 hours (Mark, Nov 14, 2026, 7:40 p.m.) */
   var st = null; try{ st = JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){}
   if(st && !(Date.now() - st.start < LEN)) st = null;
   var yt = null, box = null, playing = false, waiting = false, timer = 0;
@@ -6171,8 +6174,8 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   window.skSoundLabel = label;
   /* menu */
   var m = document.createElement("div"); m.id = "sk-snd"; m.setAttribute("role", "menu");
-  m.innerHTML = '<button type="button" role="menuitemradio" data-v="music"><span class="ck"></span>Music<small>KING FM</small></button>' +
-                '<button type="button" role="menuitemradio" data-v="rain"><span class="ck"></span>Rain sounds<small>8 hr</small></button>' +
+  m.innerHTML = '<button type="button" role="menuitemradio" data-v="music"><span class="ck"></span>Music<small>KING FM \u2197</small></button>' +
+                '<button type="button" role="menuitemradio" data-v="rain"><span class="ck"></span>Rain sounds<small>5 hr</small></button>' +
                 '<button type="button" role="menuitemradio" data-v="mute"><span class="ck"></span>Mute</button>';
   document.body.appendChild(m);
   function mode(){ var k = window.skKing; return st ? "rain" : (k && k.on()) ? "music" : "mute"; }
@@ -6187,7 +6190,8 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
   window.addEventListener("scroll", function(){ if(m.classList.contains("on")) place(); }, {passive: true});
   m.addEventListener("click", function(e){ var x = e.target.closest("button"); if(!x) return; var v = x.getAttribute("data-v"); close();
     var k = window.skKing;
-    if(v === "music"){ stopRain(); if(k && !k.on()) k.play(); }
+    /* Music (Mark, Nov 14, 2026, 7:39 p.m.): opens classicalking.org in a new tab (press Listen Live there); nothing plays on this page. */
+    if(v === "music"){ stopRain(); if(k && k.on()) k.stop(); window.open("https://classicalking.org/", "_blank", "noopener"); }
     else if(v === "rain"){ if(k && k.on()) k.stop(); st = {start: Date.now(), pos: 0}; save(); startRain(true); }
     else { stopRain(); if(k && k.on()) k.stop(true); }
     label(); });
