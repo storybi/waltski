@@ -156,6 +156,7 @@ a.wt-play:hover, a.wt-play:focus-visible{text-decoration:underline;}
 </head>
 <body>
 <script>
+window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark, Nov 15, 2026, 3:29 p.m.); read by the photo-position scripts */
 /* Reload at the top (Mark, Nov 6, 2026): every page reload — the hourly reload or a manual refresh — opens at the very top so the
    header temperatures are always showing. The browser's own scroll restore is switched off, and the page is pinned to the top through
    load and the late layout shifts (photo banner, landscape re-measure) until the reader touches, scrolls or types. Keep as is. */
@@ -4294,7 +4295,7 @@ html:not(.view-news) #ecov{display:none!important;}
        keep the bar inside the picture (Mark, Nov 12, 2026). */
     if(mqP.matches){ var bn = document.getElementById("wt-banner");
       if(bn){ var bw = bn.getBoundingClientRect(), img = bn.querySelector("img.wt-live"), ratio = (img && img.naturalWidth) ? img.naturalHeight / img.naturalWidth : 9 / 16;
-        top = Math.max(top, bw.bottom + sy - bw.width * ratio + 8); } }
+        if(!window.SK_PFILL) top = Math.max(top, bw.bottom + sy - bw.width * ratio + 8); } }
     return {top: top, bottom: bottom, sy: sy};
   }
   function mirror(){
@@ -4319,7 +4320,7 @@ html:not(.view-news) #ecov{display:none!important;}
     var b = photoBox();
     var bn2 = document.getElementById("wt-banner"), ib = bn2 ? bn2.getBoundingClientRect() : null;
     var it = ib ? ib.top + b.sy : b.top, ibm = ib ? ib.bottom + b.sy : b.bottom;
-    if(mqP.matches){ if(ib){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); } }
+    if(mqP.matches){ if(ib && !window.SK_PFILL){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); } }
     else { it = 0; ibm = Math.max(ibm, window.innerHeight || document.documentElement.clientHeight || 0); }
     if(ibm - it < 80) ibm = it + 80;
     bar.style.top = Math.round(it) + "px"; bar.style.height = Math.round(ibm - it) + "px";
@@ -4902,6 +4903,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 })();
 </script>
 <script>
+window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark, Nov 15, 2026, 3:29 p.m.) */
 /* Snow stake framing in the header photo (Mark, Nov 15, 2026, 2:54 p.m.): "when the snow stick pic is used in the rotating photos on the
    background header, ensure that the base of the stick is visible up and over the frost line of the stats line".
    Whenever a snow-stake picture is the header photo (Snowbasin, Sun Valley, or any resort's OnTheSnow stake picture), this sizes and
@@ -4956,7 +4958,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
     if(target < 30){ reset(el); return; }
     var fx = sp[0], fy = sp[1];
     /* Keep the page's own scale (no zoom): full width on upright phones in Show image, otherwise filling the photo area. */
-    var fit = root.classList.contains("show-image") && window.matchMedia && matchMedia("(orientation:portrait) and (max-width:700px)").matches;
+    var fit = false;   /* portrait now fills the header too (Nov 15, 3:29 p.m.) */
     var Hd = fit ? W * h / w : Math.max(W / w, Hb / h) * h, Wd = w * Hd / h;
     var oy = target - fy * Hd;
     oy = fit ? Math.min(Hb - Hd, oy) : Math.min(0, oy);
@@ -5811,10 +5813,15 @@ a.wt-home-logo .wt-logo{width:1.15em; height:1.15em; flex:0 0 auto; margin-right
 html.show-image #rs-hero{display:none!important;}
 html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.45) 0, rgba(5,14,26,0) 26%, rgba(5,14,26,0) 88%, var(--bg) 100%)!important;}
 html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.show-image #wt-banner .dv-layer{background-position:center center!important;}
-@media (orientation:portrait) and (max-width:700px){
-  html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.show-image #wt-banner .dv-layer{background-size:100% auto!important; background-position:center bottom!important;}
-  html.show-image #wt-banner img.wt-live{object-fit:contain!important; object-position:center bottom!important;}
-  html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,0) 0, rgba(5,14,26,0) 96%, var(--bg) 100%)!important;}
+/* Portrait phones / iPads (Mark, Nov 15, 2026, 3:29 p.m.): "use more of the image in portrait mode, and lift the image to the top of the
+   portrait screen and have the logo and buttons overlay over the background image." The photo now fills the whole header area from the
+   top of the screen (cover), like landscape and desktop, instead of a full-width band at the bottom; the logo and buttons sit over it.
+   window.SK_PFILL tells the scripts that used to measure the bottom band that the photo starts at the top. */
+@media (orientation:portrait) and (max-width:700px), (orientation:portrait) and (any-pointer:coarse){
+  html.show-image #wt-banner .bl, html.show-image #wt-banner img.wt-live, html.show-image #wt-banner .dv-layer{background-size:cover!important; background-position:center center!important;}
+  html.show-image #wt-banner img.wt-live{object-fit:cover!important; object-position:center center!important;}
+  /* soft dark shade at the top so the logo and the white buttons stay readable over a bright sky */
+  html.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.62) 0, rgba(5,14,26,.32) 14%, rgba(5,14,26,0) 32%, rgba(5,14,26,0) 90%, var(--bg) 100%)!important;}
 }
 #wt-imgtog[aria-pressed="true"]{background:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
 /* View menu (Mark, Nov 14, 2026, 9:11 p.m.): the button opens a pop-up with Show stats / Show card / Full image (same look as the Sound menu) */
@@ -5874,7 +5881,7 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
     var want = null;
     if(root.classList.contains("show-image")){
       var top = he.getBoundingClientRect().top + window.scrollY;
-      var phone = window.matchMedia && window.matchMedia("(orientation:portrait) and (max-width:700px)").matches;
+      var phone = window.matchMedia && window.matchMedia("(orientation:portrait) and (max-width:700px), (orientation:portrait) and (any-pointer:coarse)").matches;
       var target = phone ? top + 34 + window.innerWidth * 9 / 16 : Math.min(window.innerWidth * 9 / 16, window.innerHeight * 0.92);
       want = Math.max(40, Math.round(target - top - 16));
     }
@@ -6245,7 +6252,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   }
   /* top of the photo: upright phones draw the picture full width at the bottom of #wt-banner, so its top is banner bottom - width x ratio */
   function picTop(bn){ if(!bn) return 0; var r = bn.getBoundingClientRect(), t = Math.max(0, r.top);
-    if(mqP.matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; t = Math.max(t, r.bottom - r.width * rt); }
+    if(mqP.matches && !window.SK_PFILL){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; t = Math.max(t, r.bottom - r.width * rt); }
     return t; }
   function num(el, sel){ var n = el && (sel ? el.querySelector(sel) : el); var m = n && n.textContent.match(/-?\d+/); return m ? +m[0] : null; }
   function readWind(){
@@ -6385,7 +6392,7 @@ html.show-image.lg-on.lg-wet:not(.banner-lock) #lg-precip{display:block; positio
     if(!k && !mi && !sn){ mist = 0; if(root.classList.contains("lg-wet")) root.classList.remove("lg-wet"); kind = ""; stop(); return; }
     var bn = document.getElementById("wt-banner"), he = document.getElementById("wt-head-end"), gt = document.getElementById("games-top");
     var top = bn ? Math.max(0, bn.getBoundingClientRect().top) : 0, br = bn ? bn.getBoundingClientRect() : null;
-    if(br && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
+    if(br && !window.SK_PFILL && window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches){ var im = bn.querySelector("img.wt-live"), rt = (im && im.naturalWidth) ? im.naturalHeight / im.naturalWidth : 9 / 16; top = Math.max(top, br.bottom - br.width * rt); }
     var bot = he ? he.getBoundingClientRect().bottom : top + 300;
     if(gt && gt.offsetHeight > 0) bot = Math.min(bot, gt.getBoundingClientRect().top);
     var w = (document.documentElement.clientWidth || window.innerWidth) - ((mq.matches || window.matchMedia("(orientation:portrait) and (any-pointer:coarse)").matches) ? 20 : 0), h = Math.max(40, bot - top), sy = window.scrollY || 0;
