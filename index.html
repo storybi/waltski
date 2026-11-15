@@ -7008,5 +7008,15 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
   });
 })();
 </script>
+<script>
+/* Suggest bar at the bottom (Mark, Nov 15, 2026, 7:05 a.m.): the "Suggest a resort here!" bar left in the docked group moves to the
+   bottom of that group, below the site buttons (Other News, Snow, Weather, Trail Map, Home ...). Keep as is. */
+(function(){
+  var dock = document.getElementById("wt-dock"); if(!dock) return;
+  var fs = dock.querySelectorAll(":scope > form.gbar.sug"); if(!fs.length) return;
+  for(var i = 0; i < fs.length; i++){ fs[i].classList.add("sug-bot"); dock.appendChild(fs[i]); }
+  try{ window.dispatchEvent(new Event("resize")); }catch(e){}
+})();
+</script>
 </body>
 </html>
