@@ -4902,6 +4902,97 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 })();
 </script>
 <script>
+/* Snow stake framing in the header photo (Mark, Nov 15, 2026, 2:54 p.m.): "when the snow stick pic is used in the rotating photos on the
+   background header, ensure that the base of the stick is visible up and over the frost line of the stats line".
+   Whenever a snow-stake picture is the header photo (Snowbasin, Sun Valley, or any resort's OnTheSnow stake picture), this sizes and
+   places that picture so the bottom of the stick sits about 14px above the top edge of the frosted resort panel (#rs-hero).
+   It zooms in only as much as it needs to (at most 2.6x the normal fill); if the stick base still would not clear the panel, the picture is raised and the strip it leaves behind the panel is filled with a normal-size copy. Other pictures are left alone. Keep as is. */
+(function(){
+  var ban = document.getElementById("wt-banner"); if(!ban) return;
+  /* Where the base of the stick is in each picture, as a share of width (x) and height (y). */
+  var SPOT = [
+    [/09f922af-169d-4949-9bb7-295c6a859daa/, .38, .82],   /* Snowbasin 8,000 ft "24 Hour Total" stake (HD Relay frame) */
+    [/9d9a56b7-bf9e-4162-be9c-06c42ca208ff/, .20, .90],   /* Sun Valley snow stake (HD Relay) */
+    [/4vi7EiWba7E/, .80, .88]                              /* Deer Valley Ontario snow stake */
+  ];
+  var DEF = [.5, .86];
+  var stakeUrls = {};
+  try{ var O = window.OTS_CAMS || {}; Object.keys(O).forEach(function(k){ (O[k] || []).forEach(function(c){
+    if(/stake|snow ?stick|ruler/i.test(c.name || "") && c.img) stakeUrls[c.img.split("?")[0]] = 1; }); }); }catch(e){}
+  var dims = {};
+  function urlOf(el){
+    if(el.tagName === "IMG") return el.currentSrc || el.src || "";
+    var m = /url\(["']?(.*?)["']?\)/.exec(el.style.backgroundImage || ""); return m ? m[1] : "";
+  }
+  function capSaysStake(){ var c = ban.querySelector(".wt-banner-cap, .wt-vid-cap"); return !!(c && /stake|snow ?stick/i.test(c.textContent || "")); }
+  function spotFor(u, el){
+    if(!u) return null;
+    for(var i = 0; i < SPOT.length; i++) if(SPOT[i][0].test(u)) return [SPOT[i][1], SPOT[i][2]];
+    if(stakeUrls[u.split("?")[0]] || /stake/i.test(u)) return DEF;
+    /* claude.ai paints the Snowbasin frames as data: pictures; the caption names the cam. */
+    if(u.indexOf("data:") === 0 && el.classList.contains("on") && capSaysStake()) return [.38, .82];
+    return null;
+  }
+  function reset(el){
+    if(!el.hasAttribute("data-stk")) return;
+    el.removeAttribute("data-stk");
+    ["background-size", "background-position", "object-fit", "object-position", "width", "height", "left", "top", "right", "bottom", "inset"].forEach(function(p){ el.style.removeProperty(p); });
+  }
+  function setP(el, p, v){ if(el.style.getPropertyValue(p) !== v || el.style.getPropertyPriority(p) !== "important") el.style.setProperty(p, v, "important"); }
+  function place(el, sp, w, h){
+    var hero = document.getElementById("rs-hero"), br = ban.getBoundingClientRect();
+    if(!hero || !w || !h || !br.height || document.documentElement.classList.contains("banner-lock")){ reset(el); return; }
+    var W = br.width, Hb = br.height, target = hero.getBoundingClientRect().top - br.top - 14;
+    if(target < 40 || target > Hb){ reset(el); return; }
+    var fx = sp[0], fy = sp[1], cover = Math.max(W / w, Hb / h) * h;
+    var Hd = Math.max(cover, (Hb - target) / (1 - fy), target / fy);
+    Hd = Math.min(Hd, cover * 2.6);
+    var Wd = w * Hd / h, isImg = el.tagName === "IMG";
+    /* The picture always fills the top; any strip left at the bottom sits behind the frosted panel and is filled with a second,
+       normal-size copy of the same picture. */
+    var oy = Math.min(0, isImg ? Math.max(Hb - Hd, target - fy * Hd) : target - fy * Hd);
+    var ox = Math.min(0, Math.max(W - Wd, W / 2 - fx * Wd));
+    el.setAttribute("data-stk", "1");
+    if(el.tagName === "IMG"){
+      setP(el, "inset", "auto");
+      setP(el, "object-fit", "fill");
+      setP(el, "left", Math.round(ox) + "px");
+      setP(el, "top", Math.round(oy) + "px");
+      setP(el, "width", Math.round(Wd) + "px");
+      setP(el, "height", Math.round(Hd) + "px");
+    } else {
+      var u = urlOf(el);
+      if(oy + Hd < Hb - 1 && (el.style.backgroundImage.match(/url\(/g) || []).length < 2) el.style.backgroundImage = 'url("' + u + '"), url("' + u + '")';
+      setP(el, "background-size", Math.round(Wd) + "px " + Math.round(Hd) + "px, cover");
+      setP(el, "background-position", Math.round(ox) + "px " + Math.round(oy) + "px, center center");
+    }
+  }
+  function each(){
+    var els = ban.querySelectorAll(".bl, img.wt-live, .dv-layer");
+    for(var i = 0; i < els.length; i++){
+      (function(el){
+        var u = urlOf(el), sp = spotFor(u, el);
+        if(!sp){ reset(el); return; }
+        var d = dims[u];
+        if(d){ place(el, sp, d[0], d[1]); return; }
+        if(el.tagName === "IMG" && el.naturalWidth){ dims[u] = [el.naturalWidth, el.naturalHeight]; place(el, sp, el.naturalWidth, el.naturalHeight); return; }
+        if(d === 0) return; dims[u] = 0;   /* loading, or the picture would not load */
+        var im = new Image(); im.onload = function(){ dims[u] = [im.naturalWidth, im.naturalHeight]; each(); }; im.src = u;
+      })(els[i]);
+    }
+  }
+  var q = null; function soon(){ if(q) return; q = setTimeout(function(){ q = null; each(); }, 60); }
+  try{ new MutationObserver(soon).observe(ban, {subtree: true, childList: true, attributes: true, attributeFilter: ["style", "src", "class"], characterData: true}); }catch(e){}
+  try{ new MutationObserver(soon).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
+  window.addEventListener("resize", soon); window.addEventListener("orientationchange", soon); window.addEventListener("scroll", soon, {passive: true});
+  setInterval(each, 3000); each();
+})();
+</script>
+<script>
+/* Snow stake readings (Mark, Nov 15, 2026): Claude reads each resort's snow stake (snow stick) picture on every daily run and writes
+   whole inches here, with the time it read it. The resort card's New 24h uses a reading when it is under 24 hours old;
+   otherwise it falls back to the new snow the resort reports (OnTheSnow, in SKI). Keys match window.IKON. */
+var STAKE_READ = {"sb":{"n":0,"at":"2026-11-15T14:51:00-07:00","cam":"24 Hour Total stake"}};
 /* Resort hub (Mark, Oct 30, 2026): one resort picker for the whole Ski Weather page. Every US resort on the 2026/27 Ikon Pass
    (window.IKON, from the "Ikon resorts" script near the top), plus Kailua for the beach view. The radar menu (#radar-view) holds the
    choice; the big picker in the header (#rs-pick) mirrors it. Picking a resort changes the header photo, radar, cams, outlook,
@@ -4949,9 +5040,15 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       if(s[7]) st = "Open" + (s[9] != null && s[10] ? " · " + s[9] + "/" + s[10] + " lifts" : "");
       else if(s[8]){ var d = s[8].split("-"); st = "Opens " + MON[+d[1]-1] + " " + (+d[2]); }
       else st = "Closed"; }
-    if(STAKE[k]){ var a = txt(STAKE[k][0]), b = txt(STAKE[k][1]); if(a !== "") nw = a; if(b !== "") base = b; }
+    if(STAKE[k]){ var b = txt(STAKE[k][1]); if(b !== "") base = b; }
+    /* New 24h: a fresh snow-stake reading (Claude reads the stake pictures daily) wins; otherwise the resort's reported new snow. */
+    var sr = (window.STAKE_READ || {})[k], srcLbl = "New 24h", srcTip = "New snow reported by the resort (OnTheSnow)";
+    if(sr && sr.n != null && sr.at && (Date.now() - Date.parse(sr.at)) < 24*3600e3){
+      nw = sr.n; srcLbl = "Stake 24h";
+      var t = new Date(sr.at); srcTip = "Read from the " + (sr.cam || "snow stake") + " picture, " + MON[t.getMonth()] + " " + t.getDate() + " " + t.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+    }
     var html = '' +
-      '<div class="rs-stats">' + stat("New 24h", nw == null ? "—" : nw, nw == null ? "" : "″", +nw > 0 ? "fresh" : "") +
+      '<div class="rs-stats">' + stat(srcLbl, nw == null ? "—" : nw, nw == null ? "" : "″", +nw > 0 ? "fresh" : "").replace('class="rs-stat', 'title="' + esc(srcTip) + '" class="rs-stat') +
       stat("Base", base == null ? "—" : base, base == null ? "" : "″") +
       stat("Now", temp == null ? "—" : temp, temp == null ? "" : "°F", window.tempCls ? window.tempCls(temp) : "") +
       '<div class="rs-stat rs-status' + (s && s[7] ? " open" : "") + '"><span class="v">' + esc(st || "—") + '</span><span class="l">Status</span></div></div>' +
