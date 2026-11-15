@@ -4905,13 +4905,15 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
 /* Snow stake framing in the header photo (Mark, Nov 15, 2026, 2:54 p.m.): "when the snow stick pic is used in the rotating photos on the
    background header, ensure that the base of the stick is visible up and over the frost line of the stats line".
    Whenever a snow-stake picture is the header photo (Snowbasin, Sun Valley, or any resort's OnTheSnow stake picture), this sizes and
-   places that picture so the bottom of the stick sits about 14px above the top edge of the frosted resort panel (#rs-hero).
-   It zooms in only as much as it needs to (at most 2.6x the normal fill); if the stick base still would not clear the panel, the picture is raised and the strip it leaves behind the panel is filled with a normal-size copy. Other pictures are left alone. Keep as is. */
+   places that picture so the bottom of the stick sits about 14px above the top of whatever covers the photo's bottom: the frosted
+   Local Time / Local / Resort bar in Show image (fixed Nov 15, 3:14 p.m.: it was lining up with the hidden resort card), or the
+   resort card in Show card. No zoom: the picture keeps the page's own scale and is only raised; the strip a raised picture leaves at
+   the bottom (behind the bar) is filled with a normal-size copy of the same picture. Other pictures are left alone. Keep as is. */
 (function(){
   var ban = document.getElementById("wt-banner"); if(!ban) return;
   /* Where the base of the stick is in each picture, as a share of width (x) and height (y). */
   var SPOT = [
-    [/09f922af-169d-4949-9bb7-295c6a859daa/, .38, .82],   /* Snowbasin 8,000 ft "24 Hour Total" stake (HD Relay frame) */
+    [/09f922af-169d-4949-9bb7-295c6a859daa/, .38, .86],   /* Snowbasin 8,000 ft "24 Hour Total" stake (HD Relay frame) */
     [/9d9a56b7-bf9e-4162-be9c-06c42ca208ff/, .20, .90],   /* Sun Valley snow stake (HD Relay) */
     [/4vi7EiWba7E/, .80, .88]                              /* Deer Valley Ontario snow stake */
   ];
@@ -4930,7 +4932,7 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
     for(var i = 0; i < SPOT.length; i++) if(SPOT[i][0].test(u)) return [SPOT[i][1], SPOT[i][2]];
     if(stakeUrls[u.split("?")[0]] || /stake/i.test(u)) return DEF;
     /* claude.ai paints the Snowbasin frames as data: pictures; the caption names the cam. */
-    if(u.indexOf("data:") === 0 && el.classList.contains("on") && capSaysStake()) return [.38, .82];
+    if(u.indexOf("data:") === 0 && el.classList.contains("on") && capSaysStake()) return [.38, .86];
     return null;
   }
   function reset(el){
@@ -4939,18 +4941,25 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
     ["background-size", "background-position", "object-fit", "object-position", "width", "height", "left", "top", "right", "bottom", "inset"].forEach(function(p){ el.style.removeProperty(p); });
   }
   function setP(el, p, v){ if(el.style.getPropertyValue(p) !== v || el.style.getPropertyPriority(p) !== "important") el.style.setProperty(p, v, "important"); }
+  /* What covers the bottom of the photo: the frosted time / temperature bar (#lg-wrap .lg-frost, Show image) and/or the resort card
+     (#rs-hero, Show card). The stick base goes 14px above whichever starts higher. */
+  function coverTop(br){
+    var t = Infinity, a = [document.querySelector("#lg-wrap .lg-frost"), document.getElementById("rs-hero")];
+    a.forEach(function(e){ if(!e || !e.getClientRects().length) return; var r = e.getBoundingClientRect(); if(r.height > 4 && r.top > br.top + 30 && r.top < br.bottom) t = Math.min(t, r.top); });
+    return t === Infinity ? null : t;
+  }
   function place(el, sp, w, h){
-    var hero = document.getElementById("rs-hero"), br = ban.getBoundingClientRect();
-    if(!hero || !w || !h || !br.height || document.documentElement.classList.contains("banner-lock")){ reset(el); return; }
-    var W = br.width, Hb = br.height, target = hero.getBoundingClientRect().top - br.top - 14;
-    if(target < 40 || target > Hb){ reset(el); return; }
-    var fx = sp[0], fy = sp[1], cover = Math.max(W / w, Hb / h) * h;
-    var Hd = Math.max(cover, (Hb - target) / (1 - fy), target / fy);
-    Hd = Math.min(Hd, cover * 2.6);
-    var Wd = w * Hd / h, isImg = el.tagName === "IMG";
-    /* The picture always fills the top; any strip left at the bottom sits behind the frosted panel and is filled with a second,
-       normal-size copy of the same picture. */
-    var oy = Math.min(0, isImg ? Math.max(Hb - Hd, target - fy * Hd) : target - fy * Hd);
+    var br = ban.getBoundingClientRect(), root = document.documentElement;
+    if(!w || !h || !br.height || root.classList.contains("banner-lock")){ reset(el); return; }
+    var ct = coverTop(br); if(ct == null){ reset(el); return; }
+    var W = br.width, Hb = br.height, target = ct - br.top - 14;
+    if(target < 30){ reset(el); return; }
+    var fx = sp[0], fy = sp[1];
+    /* Keep the page's own scale (no zoom): full width on upright phones in Show image, otherwise filling the photo area. */
+    var fit = root.classList.contains("show-image") && window.matchMedia && matchMedia("(orientation:portrait) and (max-width:700px)").matches;
+    var Hd = fit ? W * h / w : Math.max(W / w, Hb / h) * h, Wd = w * Hd / h;
+    var oy = target - fy * Hd;
+    oy = fit ? Math.min(Hb - Hd, oy) : Math.min(0, oy);
     var ox = Math.min(0, Math.max(W - Wd, W / 2 - fx * Wd));
     el.setAttribute("data-stk", "1");
     if(el.tagName === "IMG"){
@@ -4962,7 +4971,8 @@ html:not(.view-news) .wt-nav a.wt-to-ski, html.view-news .wt-nav a.wt-to-news{di
       setP(el, "height", Math.round(Hd) + "px");
     } else {
       var u = urlOf(el);
-      if(oy + Hd < Hb - 1 && (el.style.backgroundImage.match(/url\(/g) || []).length < 2) el.style.backgroundImage = 'url("' + u + '"), url("' + u + '")';
+      /* raised picture: the strip it leaves at the bottom (behind the bar / card) gets a normal-size copy of the same picture */
+      if(!fit && oy + Hd < Hb - 1 && (el.style.backgroundImage.match(/url\(/g) || []).length < 2) el.style.backgroundImage = 'url("' + u + '"), url("' + u + '")';
       setP(el, "background-size", Math.round(Wd) + "px " + Math.round(Hd) + "px, cover");
       setP(el, "background-position", Math.round(ox) + "px " + Math.round(oy) + "px, center center");
     }
