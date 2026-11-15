@@ -6479,22 +6479,36 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
 .wt-edition select.wt-locpick:focus-visible{outline:2px solid #E2733A; outline-offset:2px;}
 .wt-edition select.wt-locpick option,.wt-edition select.wt-locpick optgroup{color:#0d1b2a; background:#fff; font:500 15px var(--font-body);}
 #rs-hero .rs-top .rs-pickwrap{display:none!important;}
+/* No menu on the big Live Doppler radar (Mark, Nov 14, 2026, 7:48 p.m.): #radar-view stays in the page (it still drives the radar view)
+   but is hidden; the top-row location menu is the one place to choose. */
+#radar-view{display:none!important;}
 #rs-hero .rs-top .rs-name{font:700 clamp(22px,5.6vw,38px)/1.05 var(--font-title); font-size:var(--rs-pick-fs, clamp(22px,5.6vw,38px)); letter-spacing:.01em;
   text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto; max-width:72%;}
 </style>
 <script>
 /* Location menu in the top button row (Mark, Nov 14, 2026, 7:32 p.m.) — a copy of the resort list (same choices as the radar menu,
-   "My local weather" included) sits first in the top button row and always shows "Choose location". Picking a place hands it to the
-   card's resort menu (#rs-pick, now hidden), so everything follows exactly as before, then the top menu goes back to "Choose location".
+   "My local weather" included) sits first in the top button row and shows "Choose location" until a place is chosen here, then the
+   place's one-word name. Picking a place hands it to the card's resort menu (#rs-pick, now hidden), so everything follows exactly as before.
    The resort card shows the picked place as a plain title (.rs-name). Keep as is. */
 (function(){
   var hp = document.getElementById("rs-pick"), pick = document.getElementById("radar-view");
   if(!hp || !pick) return;
   var sel = document.createElement("select");
   sel.id = "wt-locpick"; sel.className = "wt-next wt-locpick"; sel.setAttribute("aria-label", "Choose location"); sel.title = "Choose a resort or your local weather";
+  /* Once a location has been chosen here, the closed menu shows the place's one-word name (Mark, Nov 14, 2026, 7:47 p.m.);
+     before that it reads "Choose location". Remembered on this device (localStorage "sk-loc-chosen"). */
+  var SHORT = {local:"Local", sb:"Snowbasin", powmow:"Powder", alta:"Alta", snowbird:"Snowbird", brighton:"Brighton", solitude:"Solitude", dv:"Deer Valley",
+    abasin:"A-Basin", aspen:"Aspen", copper:"Copper", eldora:"Eldora", steamboat:"Steamboat", winterpark:"Winter Park", bigsky:"Big Sky", jackson:"Jackson",
+    taos:"Taos", sv:"Sun Valley", schweitzer:"Schweitzer", mammoth:"Mammoth", june:"June", palisades:"Palisades", sierra:"Sierra", bigbear:"Big Bear",
+    snowvalley:"Snow Valley", crystal:"Crystal", snoqualmie:"Snoqualmie", bachelor:"Bachelor", alyeska:"Alyeska", killington:"Killington", stratton:"Stratton",
+    sugarbush:"Sugarbush", sugarloaf:"Sugarloaf", sundayriver:"Sunday River", loon:"Loon", windham:"Windham", bluemtn:"Blue", camelback:"Camelback",
+    snowshoe:"Snowshoe", boyne:"Boyne", highlands:"Highlands", snowriver:"Snowriver", lutsen:"Lutsen", granitepeak:"Granite", hi:"Oahu"};
+  var chosen = false; try{ chosen = localStorage.getItem("sk-loc-chosen") === "1"; }catch(e){}
+  function shortOf(k){ if(SHORT[k]) return SHORT[k]; var o = hp.querySelector('option[value="' + k + '"]'); var t = o ? o.text.split(",")[0] : ""; return t.replace(/^(Mt\.|Mount|The)\s+/i, "").split(/\s+/)[0] || "Choose location"; }
+  function surf(){ return chosen && hp.value ? shortOf(hp.value) : "Choose location"; }
   function fill(){
     var cur = sel.value;
-    sel.innerHTML = '<option value="" selected>Choose location</option>' + hp.innerHTML;
+    sel.innerHTML = '<option value="" selected>' + surf() + '</option>' + hp.innerHTML;
     [].forEach.call(sel.querySelectorAll("option"), function(o){ o.selected = false; o.removeAttribute("selected"); });
     var lo = sel.querySelector('option[value="local"]'); if(lo) lo.text = "My local weather";
     sel.value = "";
@@ -6503,7 +6517,9 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
   sel.addEventListener("focus", fill); sel.addEventListener("mousedown", function(){ if(sel.options.length < 3) fill(); });
   sel.addEventListener("change", function(){
     var k = sel.value; sel.value = ""; sel.blur(); if(!k) return;
+    chosen = true; try{ localStorage.setItem("sk-loc-chosen", "1"); }catch(e){}
     if(hp.value !== k){ hp.value = k; hp.dispatchEvent(new Event("change", {bubbles: true})); }
+    fill(); fitW();
     setTimeout(name, 50); setTimeout(name, 800);
   });
   function place(){
@@ -6513,9 +6529,9 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
     first.parentNode.insertBefore(sel, first); fitW();
     return true;
   }
-  /* as wide as "Choose location" (a select is otherwise as wide as its longest choice) */
+  /* as wide as the text on its surface (a select is otherwise as wide as its longest choice) */
   function fitW(){ if(!sel.parentNode) return; try{
-    var m = document.createElement("span"); m.className = "wt-next wt-locpick"; m.textContent = "Choose location";
+    var m = document.createElement("span"); m.className = "wt-next wt-locpick"; m.textContent = surf();
     m.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;display:inline-block;";
     sel.parentNode.appendChild(m); var w = m.getBoundingClientRect().width; m.parentNode.removeChild(m);
     if(w > 20) sel.style.width = Math.ceil(w + 16) + "px"; }catch(e){} }
@@ -6524,7 +6540,8 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
   /* the card's title */
   var top = hp.closest(".rs-top"), nm = document.createElement("span"); nm.className = "rs-name"; nm.id = "rs-name";
   var wrap = hp.closest(".rs-pickwrap"); if(top && wrap) top.insertBefore(nm, wrap.nextSibling);
-  function name(){ var o = hp.options[hp.selectedIndex]; var t = o ? o.text : ""; if(nm.textContent !== t) nm.textContent = t; }
+  function name(){ var o = hp.options[hp.selectedIndex]; var t = o ? o.text : ""; if(nm.textContent !== t) nm.textContent = t;
+    if(document.activeElement !== sel && sel.options[0] && sel.options[0].text !== surf()){ sel.options[0].text = surf(); fitW(); } }
   name();
   document.addEventListener("change", function(e){ if(e.target === hp || e.target === pick) setTimeout(name, 30); });
   setInterval(name, 1500);
