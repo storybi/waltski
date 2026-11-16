@@ -3,7 +3,7 @@ name: SKIINUT Monday outlook email
 # Every Monday at about 5:30 a.m. Mountain Time, email each SKIINUT subscriber the week's outlook for their home resort
 # (scripts/monday_email.py; Mark, Nov 16, 2026). GitHub cron runs in UTC, so two schedules cover both Mountain Standard Time
 # (12:30 UTC) and Mountain Daylight Time (11:30 UTC); the "Is it 5 a.m. in Denver?" step lets only the right one through.
-# Secrets (repo Settings > Secrets and variables > Actions): MAILCHIMP_API_KEY, MAILCHIMP_LIST_ID, MAILCHIMP_FROM.
+# Secrets (repo Settings > Secrets and variables > Actions): BREVO_API_KEY, BREVO_LIST_ID, BREVO_FROM (Brevo, Mark, Nov 16, 2026).
 # Without them the run is a dry run that only builds previews (downloadable as the "email-preview" artifact).
 
 on:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       test_email:
-        description: "Send as Mailchimp test emails to this address instead of the audience (leave blank to send for real)"
+        description: "Send only to this address as a test (leave blank to send for real)"
         required: false
       only:
         description: "Only these resort keys, comma separated (e.g. sb,alta); blank = every resort with subscribers"
@@ -48,9 +48,9 @@ jobs:
       - name: Build and send
         if: steps.when.outputs.go == '1'
         env:
-          MAILCHIMP_API_KEY: ${{ secrets.MAILCHIMP_API_KEY }}
-          MAILCHIMP_LIST_ID: ${{ secrets.MAILCHIMP_LIST_ID }}
-          MAILCHIMP_FROM: ${{ secrets.MAILCHIMP_FROM }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
+          BREVO_FROM: ${{ secrets.BREVO_FROM }}
         run: |
           ARGS="index.html"
           if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="$ARGS --only ${{ github.event.inputs.only }}"; fi

@@ -6918,11 +6918,11 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
 })();
 </script>
 <script>
-/* SKIINUT Monday outlook subscribe (Mark, Nov 16, 2026). Sends the email and home resort to Mailchimp (JSONP, no page reload).
+/* SKIINUT Monday outlook subscribe (Mark, Nov 16, 2026). Sends the email and home resort to the Brevo signup form (no page reload).
    The resort menu lists every resort in the site's location menu (window.IKON), Utah first. Also: skiinut.com/?resort=<key> (the
    link in the Monday email) opens that resort. */
 (function(){
-  var MC = "", f = document.getElementById("gbar");
+  var BV = "", f = document.getElementById("gbar");
   var IK = window.IKON || {}, order = (IK.order || []).filter(function(k){ return k !== "hi" && IK.r && IK.r[k]; });
   function nm(k){ var r = IK.r[k]; return r.name + (r.state ? ", " + r.state : ""); }
   /* open the resort named in ?resort= */
@@ -6941,15 +6941,16 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
     if(hp.value){ say("Thanks! Check your inbox to confirm.", "ok"); f.reset(); return; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)){ say("Enter a valid email address.", "err"); em.focus(); return; }
     if(!res){ say("Pick your home resort.", "err"); sel.focus(); return; }
-    if(!MC){ say("SKIINUT email alerts open soon \u2014 check back shortly.", "err"); return; }
+    if(!BV){ say("SKIINUT email alerts open soon \u2014 check back shortly.", "err"); return; }
     b.disabled = true; say("Subscribing\u2026");
-    var cb = "skSub" + Date.now(), s = document.createElement("script"), done = false;
-    window[cb] = function(r){ done = true; delete window[cb]; s.remove(); b.disabled = false;
-      if(r && r.result === "success"){ say("Almost done \u2014 check your inbox to confirm your SKIINUT Monday outlook for " + nm(res) + ".", "ok"); f.reset(); }
-      else{ var m = (r && r.msg || "").replace(/<[^>]*>/g, ""); say(/already subscribed/i.test(m) ? "You\u2019re already subscribed. Thanks!" : (m || "Sorry, that didn\u2019t go through. Please try again."), /already/i.test(m) ? "ok" : "err"); } };
-    s.src = MC + (MC.indexOf("?") < 0 ? "?" : "&") + "EMAIL=" + encodeURIComponent(mail) + "&RESORT=" + encodeURIComponent(res) + "&c=" + cb;
-    s.onerror = function(){ if(!done){ delete window[cb]; b.disabled = false; say("Sorry, that didn\u2019t go through. Please try again in a minute.", "err"); } };
-    document.body.appendChild(s);
+    function body(){ var d = new FormData(); d.append("EMAIL", mail); d.append("RESORT", res); d.append("email_address_check", ""); d.append("locale", "en"); return d; }
+    function ok(){ b.disabled = false; say("You\u2019re in \u2014 check your inbox to confirm your SKIINUT Monday outlook for " + nm(res) + ".", "ok"); f.reset(); }
+    function bad(t){ b.disabled = false; say(t || "Sorry, that didn\u2019t go through. Please try again in a minute.", "err"); }
+    fetch(BV, {method: "POST", body: body(), headers: {"Accept": "application/json"}})
+      .then(function(r){ return r.json().catch(function(){ return {success: r.ok}; }); })
+      .then(function(j){ if(j && j.success !== false) ok(); else bad(j && j.message ? String(j.message).replace(/<[^>]*>/g, "") : ""); })
+      .catch(function(){ /* the form host may not allow reading the answer; send it anyway */
+        fetch(BV, {method: "POST", body: body(), mode: "no-cors"}).then(ok, function(){ bad(); }); });
   });
 })();
 </script>

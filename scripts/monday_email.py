@@ -7,20 +7,20 @@ email with the week's outlook for the home resort they picked when they subscrib
     composite snow forecast for their region (NWS Salt Lake City + University of Utah ensemble + global models; scripts/composite.py).
   * Every other resort gets its 7-day forecast (Open-Meteo; the same data as the site's resort weather card, var RWX).
 
-Subscribers live in a Mailchimp audience. The subscribe form on skiinut.com stores the home resort's key (e.g. "sb") in the audience's
-RESORT merge field. This script makes one Mailchimp campaign per resort that has at least one subscribed member, aimed at a segment
-"RESORT is <key>", and sends it. Mailchimp adds nothing; unsubscribe and the postal address come from the merge tags in the footer.
+Subscribers live in a Brevo contact list. The subscribe form on skiinut.com (a Brevo form) stores the home resort's key (e.g. "sb") in
+the contact attribute RESORT. Each Monday this script copies the subscribers of each resort into a list "SKIINUT <key>" (folder
+"SKIINUT resorts", made automatically), then creates and sends one Brevo email campaign per resort to that list. Brevo handles
+unsubscribes ({{ unsubscribe }} link in the footer).
 
-Environment (GitHub secrets / variables):
-  MAILCHIMP_API_KEY   e.g. 0123abcd...-us21  (the part after the dash is the data centre)
-  MAILCHIMP_LIST_ID   the audience ID
-  MAILCHIMP_FROM      the sender address, verified in Mailchimp (e.g. outlook@skiinut.com)
-Without MAILCHIMP_API_KEY it does a dry run: it writes one preview HTML file per resort into ./email-preview/ and sends nothing.
+Environment (GitHub secrets):
+  BREVO_API_KEY   starts with xkeysib-  (Brevo > SMTP & API > API keys)
+  BREVO_LIST_ID   the number of the signup list (Contacts > Lists)
+  BREVO_FROM      the sender address, verified in Brevo (Senders, domains & dedicated IPs)
+Without them it does a dry run: it writes one preview HTML file per resort into ./email-preview/ and sends nothing.
 
 Usage:  python3 scripts/monday_email.py index.html [--only sb,alta] [--test you@example.com]
-  --test   sends the campaigns as Mailchimp test emails to that address instead of to the audience.
+  --test   sends the emails (default: Snowbasin) only to that address, as Brevo transactional emails; nobody else gets anything.
 """
-import base64
 import datetime as dt
 import html
 import json
@@ -95,8 +95,8 @@ def shell(title, pre, body):
 %(body)s
 <tr><td style="padding:18px 26px 26px;font:12px/1.6 Helvetica,Arial,sans-serif;color:#6b7785;border-top:1px solid #e6ebf0;">
   You're getting this because you subscribed to the SKIINUT Monday outlook on skiinut.com for your home resort.<br>
-  <a href="*|UPDATE_PROFILE|*" style="color:#6b7785;">Change your home resort</a> &middot; <a href="*|UNSUB|*" style="color:#6b7785;">Unsubscribe</a><br>
-  *|HTML:LIST_ADDRESS_HTML|*
+  To change your home resort, subscribe again on <a href="https://www.skiinut.com/" style="color:#6b7785;">skiinut.com</a> with the new one.<br>
+  <a href="{{ unsubscribe }}" style="color:#6b7785;">Unsubscribe</a>
 </td></tr>
 </table></td></tr></table></body></html>""" % {"t": html.escape(title), "pre": html.escape(pre), "body": body, "navy": NAVY, "or": ORANGE}
 
@@ -221,52 +221,91 @@ def build_all(src, here, only=None):
     return out
 
 
-# ---------- Mailchimp ----------
+# ---------- Brevo ----------
 
-class MC:
+API = "https://api.brevo.com/v3"
+
+
+class Brevo:
     def __init__(self, key):
         self.key = key
-        self.base = "https://%s.api.mailchimp.com/3.0" % key.rsplit("-", 1)[1]
 
     def call(self, method, path, body=None):
-        req = urllib.request.Request(self.base + path, method=method, data=json.dumps(body).encode() if body is not None else None)
-        req.add_header("Authorization", "Basic " + base64.b64encode(("skiinut:" + self.key).encode()).decode())
-        req.add_header("Content-Type", "application/json")
+        req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body is not None else None)
+        req.add_header("api-key", self.key)
+        req.add_header("accept", "application/json")
+        req.add_header("content-type", "application/json")
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 t = r.read().decode()
-                return json.loads(t) if t else {}
+                return json.loads(t) if t.strip() else {}
         except urllib.error.HTTPError as e:
             raise RuntimeError("%s %s -> %s %s" % (method, path, e.code, e.read().decode()[:400]))
 
+    def list_emails(self, list_id):
+        """All contacts on a list: {email: attributes}, skipping blocklisted/unsubscribed ones."""
+        out, off = {}, 0
+        while True:
+            r = self.call("GET", "/contacts/lists/%s/contacts?limit=500&offset=%d" % (list_id, off))
+            cs = r.get("contacts", [])
+            for c in cs:
+                if c.get("emailBlacklisted") or int(list_id) in (c.get("listUnsubscribed") or []):
+                    continue
+                out[c["email"].lower()] = c.get("attributes") or {}
+            off += 500
+            if not cs or off >= r.get("count", 0):
+                return out
 
-def subscriber_resorts(mc, list_id):
-    found, off = {}, 0
-    while True:
-        r = mc.call("GET", "/lists/%s/members?status=subscribed&count=1000&offset=%d&fields=members.merge_fields,total_items" % (list_id, off))
-        for m in r.get("members", []):
-            k = (m.get("merge_fields", {}).get("RESORT") or "").strip()
-            if k:
-                found[k] = found.get(k, 0) + 1
-        off += 1000
-        if off >= r.get("total_items", 0):
-            return found
+
+def subscribers(bv, list_id):
+    """{resort key: [emails]} from the signup list's RESORT attribute."""
+    found = {}
+    for em, at in bv.list_emails(list_id).items():
+        k = str(at.get("RESORT") or "").strip()
+        if k:
+            found.setdefault(k, []).append(em)
+    return found
 
 
-def send_campaign(mc, list_id, frm, key, subj, body, test=None):
-    camp = mc.call("POST", "/campaigns", {
-        "type": "regular",
-        "recipients": {"list_id": list_id, "segment_opts": {"match": "all", "conditions": [
-            {"condition_type": "TextMerge", "field": "RESORT", "op": "is", "value": key}]}},
-        "settings": {"subject_line": subj, "title": "SKIINUT Monday %s %s" % (dt.datetime.now(MT).strftime("%Y-%m-%d"), key),
-                     "from_name": "SKIINUT", "reply_to": frm, "auto_footer": False, "inline_css": False}})
-    mc.call("PUT", "/campaigns/%s/content" % camp["id"], {"html": body})
-    if test:
-        mc.call("POST", "/campaigns/%s/actions/test" % camp["id"], {"test_emails": [test], "send_type": "html"})
-        print("  test sent to", test)
-    else:
-        mc.call("POST", "/campaigns/%s/actions/send" % camp["id"])
-        print("  sent")
+def resort_list(bv, key, cache={}):
+    """The per-resort list "SKIINUT <key>" in the folder "SKIINUT resorts" (made the first time)."""
+    if "folder" not in cache:
+        fs = bv.call("GET", "/contacts/folders?limit=50").get("folders") or []
+        f = next((x for x in fs if x.get("name") == "SKIINUT resorts"), None)
+        cache["folder"] = f["id"] if f else bv.call("POST", "/contacts/folders", {"name": "SKIINUT resorts"})["id"]
+        ls = bv.call("GET", "/contacts/folders/%s/lists?limit=50" % cache["folder"]).get("lists") or []
+        cache["lists"] = {x["name"]: x["id"] for x in ls}
+    name = "SKIINUT " + key
+    if name not in cache["lists"]:
+        cache["lists"][name] = bv.call("POST", "/contacts/lists", {"name": name, "folderId": cache["folder"]})["id"]
+    return cache["lists"][name]
+
+
+def sync_list(bv, lid, emails):
+    """Make the resort list hold exactly these emails (people who switch resorts move lists)."""
+    have = set(bv.list_emails(lid))
+    want = set(emails)
+    add, rm = sorted(want - have), sorted(have - want)
+    for i in range(0, len(add), 150):
+        bv.call("POST", "/contacts/lists/%s/contacts/add" % lid, {"emails": add[i:i + 150]})
+    for i in range(0, len(rm), 150):
+        bv.call("POST", "/contacts/lists/%s/contacts/remove" % lid, {"emails": rm[i:i + 150]})
+
+
+def send_campaign(bv, lid, frm, key, subj, body):
+    camp = bv.call("POST", "/emailCampaigns", {
+        "name": "SKIINUT Monday %s %s" % (dt.datetime.now(MT).strftime("%Y-%m-%d"), key),
+        "subject": subj, "sender": {"name": "SKIINUT", "email": frm}, "replyTo": frm,
+        "htmlContent": body, "recipients": {"listIds": [lid]}})
+    bv.call("POST", "/emailCampaigns/%s/sendNow" % camp["id"])
+    print("  sent")
+
+
+def send_test(bv, frm, to, subj, body):
+    body = body.replace("{{ unsubscribe }}", SITE).replace("{{ update_profile }}", SITE)
+    bv.call("POST", "/smtp/email", {"sender": {"name": "SKIINUT", "email": frm}, "to": [{"email": to}],
+                                    "subject": "[TEST] " + subj, "htmlContent": body})
+    print("  test sent to", to)
 
 
 def main():
@@ -280,22 +319,30 @@ def main():
         test = args[args.index("--test") + 1]
     here = os.path.dirname(os.path.abspath(__file__))
     src = open(page, encoding="utf-8").read()
-    key = os.environ.get("MAILCHIMP_API_KEY", "").strip()
-    list_id = os.environ.get("MAILCHIMP_LIST_ID", "").strip()
-    frm = os.environ.get("MAILCHIMP_FROM", "").strip()
+    key = os.environ.get("BREVO_API_KEY", "").strip()
+    list_id = os.environ.get("BREVO_LIST_ID", "").strip()
+    frm = os.environ.get("BREVO_FROM", "").strip()
 
     if not (key and list_id and frm):
         emails = build_all(src, here, only)
         os.makedirs("email-preview", exist_ok=True)
         for k, (subj, body) in emails.items():
             open(os.path.join("email-preview", k + ".html"), "w", encoding="utf-8").write(body)
-        print("Dry run (no MAILCHIMP_API_KEY / MAILCHIMP_LIST_ID / MAILCHIMP_FROM): wrote %d previews to email-preview/" % len(emails))
+        print("Dry run (no BREVO_API_KEY / BREVO_LIST_ID / BREVO_FROM): wrote %d previews to email-preview/" % len(emails))
         return
+    if not key.startswith("xkeysib-"):
+        sys.exit("BREVO_API_KEY should start with xkeysib- (Brevo > SMTP & API > API keys). Check the GitHub secret.")
 
-    mc = MC(key)
-    counts = subscriber_resorts(mc, list_id)
-    want = only or sorted(counts)
-    print("Subscribers by home resort:", counts)
+    bv = Brevo(key)
+    if test:
+        emails = build_all(src, here, only or ["sb"])
+        for k, (subj, body) in emails.items():
+            print("%s: %s" % (k, subj))
+            send_test(bv, frm, test, subj, body)
+        return
+    subs = subscribers(bv, list_id)
+    print("Subscribers by home resort:", {k: len(v) for k, v in subs.items()})
+    want = [k for k in (only or sorted(subs)) if subs.get(k)]
     if not want:
         print("No subscribers yet; nothing to send.")
         return
@@ -305,8 +352,10 @@ def main():
             print("No forecast for", k, "- skipped")
             continue
         subj, body = emails[k]
-        print("%s (%d): %s" % (k, counts.get(k, 0), subj))
-        send_campaign(mc, list_id, frm, k, subj, body, test)
+        print("%s (%d): %s" % (k, len(subs[k]), subj))
+        lid = resort_list(bv, k)
+        sync_list(bv, lid, subs[k])
+        send_campaign(bv, lid, frm, k, subj, body)
 
 
 if __name__ == "__main__":

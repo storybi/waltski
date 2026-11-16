@@ -72,7 +72,7 @@ public_css = """<style>
 """
 
 # 4b. Subscribe bar (Mark, Nov 16, 2026; replaces the Suggest-a-resort bar of Oct 29, 2026): an email box, a home-resort menu and a
-#     Subscribe button. Signups go to Mark's Mailchimp audience (email + RESORT merge field = the resort key, e.g. "sb"); every Monday at
+#     Subscribe button. Signups go to Mark's Brevo contact list (email + RESORT attribute = the resort key, e.g. "sb"); every Monday at
 #     5:30 a.m. MT scripts/monday_email.py emails each subscriber the SKIINUT outlook for their resort. It keeps the "gbar" class and id
 #     (bar styling, 9 p.m.-7 a.m. black-out) and the "sug" class (the dock script moves it to the bottom of the docked group).
 GBAR_HTML = """
@@ -317,11 +317,11 @@ head = """<!doctype html>
 # Greeting by the reader's clock: since Oct 31, 2026 the page itself sets the greeting and date from the reader's clock every minute
 # (the "Waltmark Times dateline" script), so the public page needs no extra greeting script. Kept as an empty string.
 greet_js = ""
-# 6b. Subscribe (Mark, Nov 16, 2026; replaces the ntfy resort suggestions). MC_POST_URL is the Mailchimp audience's embedded-form
-#     address with /post changed to /post-json (Mailchimp > Audience > Signup forms > Embedded forms > the <form action="...">), e.g.
-#     https://skiinut.us21.list-manage.com/subscribe/post-json?u=XXXX&id=YYYY . Until it is filled in, the form says signups open soon.
-#     The audience needs a text merge field with the tag RESORT. Mailchimp sends its own confirmation email (double opt-in).
-MC_POST_URL = ""
+# 6b. Subscribe (Mark, Nov 16, 2026; Brevo since 11:40 a.m., replacing Mailchimp). BREVO_FORM_URL is the Brevo signup form's address:
+#     Brevo > Contacts > Forms > the SKIINUT form > Share > Embed > the <form ... action="https://....sibforms.com/serve/...">. The form
+#     must have the EMAIL field and a RESORT field (text contact attribute RESORT). Until it is filled in, the form says signups open soon.
+#     Brevo sends its own confirmation email if double opt-in is on for the form.
+BREVO_FORM_URL = ""
 SUGGEST_CSS = """<style>
 /* Subscribe bar (Mark, Nov 16, 2026): email + home resort + Subscribe; status line under it; honeypot hidden */
 .gbar.sug{position:relative; flex-wrap:wrap;}
@@ -340,11 +340,11 @@ html.clock-night .gbar.sub select{background:#0d0d0d; border-color:#222; color:#
 </style>
 """
 SUGGEST_JS = """<script>
-/* SKIINUT Monday outlook subscribe (Mark, Nov 16, 2026). Sends the email and home resort to Mailchimp (JSONP, no page reload).
+/* SKIINUT Monday outlook subscribe (Mark, Nov 16, 2026). Sends the email and home resort to the Brevo signup form (no page reload).
    The resort menu lists every resort in the site's location menu (window.IKON), Utah first. Also: skiinut.com/?resort=<key> (the
    link in the Monday email) opens that resort. */
 (function(){
-  var MC = "%s", f = document.getElementById("gbar");
+  var BV = "%s", f = document.getElementById("gbar");
   var IK = window.IKON || {}, order = (IK.order || []).filter(function(k){ return k !== "hi" && IK.r && IK.r[k]; });
   function nm(k){ var r = IK.r[k]; return r.name + (r.state ? ", " + r.state : ""); }
   /* open the resort named in ?resort= */
@@ -363,19 +363,20 @@ SUGGEST_JS = """<script>
     if(hp.value){ say("Thanks! Check your inbox to confirm.", "ok"); f.reset(); return; }
     if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(mail)){ say("Enter a valid email address.", "err"); em.focus(); return; }
     if(!res){ say("Pick your home resort.", "err"); sel.focus(); return; }
-    if(!MC){ say("SKIINUT email alerts open soon \\u2014 check back shortly.", "err"); return; }
+    if(!BV){ say("SKIINUT email alerts open soon \\u2014 check back shortly.", "err"); return; }
     b.disabled = true; say("Subscribing\\u2026");
-    var cb = "skSub" + Date.now(), s = document.createElement("script"), done = false;
-    window[cb] = function(r){ done = true; delete window[cb]; s.remove(); b.disabled = false;
-      if(r && r.result === "success"){ say("Almost done \\u2014 check your inbox to confirm your SKIINUT Monday outlook for " + nm(res) + ".", "ok"); f.reset(); }
-      else{ var m = (r && r.msg || "").replace(/<[^>]*>/g, ""); say(/already subscribed/i.test(m) ? "You\\u2019re already subscribed. Thanks!" : (m || "Sorry, that didn\\u2019t go through. Please try again."), /already/i.test(m) ? "ok" : "err"); } };
-    s.src = MC + (MC.indexOf("?") < 0 ? "?" : "&") + "EMAIL=" + encodeURIComponent(mail) + "&RESORT=" + encodeURIComponent(res) + "&c=" + cb;
-    s.onerror = function(){ if(!done){ delete window[cb]; b.disabled = false; say("Sorry, that didn\\u2019t go through. Please try again in a minute.", "err"); } };
-    document.body.appendChild(s);
+    function body(){ var d = new FormData(); d.append("EMAIL", mail); d.append("RESORT", res); d.append("email_address_check", ""); d.append("locale", "en"); return d; }
+    function ok(){ b.disabled = false; say("You\\u2019re in \\u2014 check your inbox to confirm your SKIINUT Monday outlook for " + nm(res) + ".", "ok"); f.reset(); }
+    function bad(t){ b.disabled = false; say(t || "Sorry, that didn\\u2019t go through. Please try again in a minute.", "err"); }
+    fetch(BV, {method: "POST", body: body(), headers: {"Accept": "application/json"}})
+      .then(function(r){ return r.json().catch(function(){ return {success: r.ok}; }); })
+      .then(function(j){ if(j && j.success !== false) ok(); else bad(j && j.message ? String(j.message).replace(/<[^>]*>/g, "") : ""); })
+      .catch(function(){ /* the form host may not allow reading the answer; send it anyway */
+        fetch(BV, {method: "POST", body: body(), mode: "no-cors"}).then(ok, function(){ bad(); }); });
   });
 })();
 </script>
-""" % MC_POST_URL
+""" % BREVO_FORM_URL
 public_css += SUGGEST_CSS
 
 # Never add a second copy (Mark, Nov 15, 2026): the artifact can already carry the newest public-site scripts (snow stake, CAM_SKIP,
