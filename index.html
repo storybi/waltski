@@ -5087,10 +5087,14 @@ html.wxf-on.show-image #wt-banner::after{background:linear-gradient(to bottom, r
 #snow .rwx-cams .wx-cams .cams-head h4{font-size:13px!important;}
 html.cam-hi #snow .rwx-cams{display:none;}
 html.cam-hi #snow .rwx{margin-bottom:16px!important; border-bottom:1px solid var(--border)!important; border-radius:var(--card-r, 14px)!important; box-shadow:var(--shadow)!important;}
-/* All buttons in the top row are orange (Mark, Nov 15, 2026, 5:13 p.m.): Choose location, Show stats, Sound, Dark (and Next / Watch Live).
-   Sound keeps its own colour while the music plays, so you can tell it is on. */
-.wt-edition .wt-next, .wt-edition .wt-play, .wt-edition .wt-dv-watch, .wt-edition select.wt-locpick, #wt-imgtog{background-color:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
-.wt-edition .wt-next:hover, .wt-edition .wt-play:hover, .wt-edition .wt-dv-watch:hover, .wt-edition select.wt-locpick:hover, #wt-imgtog:hover{background-color:#cc6230!important; border-color:#cc6230!important;}
+/* Top-row buttons orange (Mark, Nov 15, 2026, 5:13 p.m.): Choose location, Show stats (and Next / Watch Live). Sound and Light/Dark were taken
+   back off orange at 7:45 p.m. */
+.wt-edition .wt-next:not(.wt-radio):not(.wt-theme), .wt-edition .wt-play, .wt-edition .wt-dv-watch, .wt-edition select.wt-locpick, #wt-imgtog{background-color:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
+.wt-edition .wt-next:not(.wt-radio):not(.wt-theme):hover, .wt-edition .wt-play:hover, .wt-edition .wt-dv-watch:hover, .wt-edition select.wt-locpick:hover, #wt-imgtog:hover{background-color:#cc6230!important; border-color:#cc6230!important;}
+/* Mark, Nov 15, 2026, 7:45 p.m.: Sound and Light/Dark are NOT orange (they keep their glass look); the whole top button row is 10% larger
+   (font and buttons); in portrait the row stays clear of the narrow temperature bar on the right edge of the header. */
+.wt-mast#top > .wt-edition{zoom:1.1;}
+@media (orientation:portrait){ .wt-mast#top > .wt-edition{padding-right:34px!important;} }
 .wt-edition select.wt-locpick option{color:#111; background:#fff;}
 </style>
 <script>
