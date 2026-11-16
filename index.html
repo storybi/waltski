@@ -3625,7 +3625,10 @@ window.PTYPE = (function(){
      stops while showing is replaced right away. */
   var LBAD_KEY = "sk-live-bad", LBAD = {};
   try{ LBAD = JSON.parse(localStorage.getItem(LBAD_KEY) || "{}") || {}; }catch(e){ LBAD = {}; }
-  function liveBad(id){ return LBAD[id] && Date.now() - LBAD[id] < 30*60000; }
+  /* Blacked-out streams are blocked for good on this device (Mark, Nov 15, 2026, 6:23 p.m.: "On the Hawaii Oahu location I never want to see
+     this blacked out cam image pop up again"): a stream that fails, stalls or shows "This stream is temporarily unavailable" is never
+     loaded again here. Only if every stream has been blocked does the list start over. */
+  function liveBad(id){ return !!LBAD[id]; }
   function markBad(id){ LBAD[id] = Date.now(); try{ localStorage.setItem(LBAD_KEY, JSON.stringify(LBAD)); }catch(e){} }
   var liveTry = 0, liveWatch = null;
   function nextLive(c){
@@ -3633,12 +3636,26 @@ window.PTYPE = (function(){
     do { li = (li + 1) % n; k++; } while(liveBad(c.live[li]) && k < n);
     if(liveBad(c.live[li])){ LBAD = {}; }   /* every stream marked down: give them all another chance */
     var id = c.live[li], f0 = c.frames[li], m = mode, shown = false, my = ++liveTry;
+    /* Stall watch (6:23 p.m.): YouTube sends the playing position (currentTime) while a stream really plays. The stream is faded in only
+       once that position has moved on, and it is dropped and blocked as soon as the position stops moving for 10 s (the frozen
+       "temporarily unavailable" screen keeps reporting itself as playing or buffering). */
+    var tSeen = false, tFirst = null, tLast = null, tAdv = Date.now(), ok1 = 0, stallIv = null;
+    function reveal(){
+      if(shown) return; shown = true; clearTimeout(t15);
+      if(m !== mode || !f.parentNode) return;
+      f.style.opacity = "1"; cap.textContent = f0.cap; linkTo(f0);
+      setTimeout(function(){ [].forEach.call(lay.querySelectorAll("iframe"), function(o){ if(o !== f && o.parentNode) o.parentNode.removeChild(o); }); }, 1400);
+      stallIv = setInterval(function(){
+        if(!f.parentNode){ clearInterval(stallIv); return; }
+        if(tSeen && !document.hidden && Date.now() - tAdv > 10000){ clearInterval(stallIv); fail(); }
+      }, 2500);
+    }
     var f = document.createElement("iframe");
     f.src = "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&controls=0&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=" + encodeURIComponent(location.origin || "");
     f.title = f0.name; f.allow = "autoplay; encrypted-media; picture-in-picture"; f.setAttribute("tabindex", "-1"); f.setAttribute("aria-hidden", "true");
     f.style.opacity = "0"; f.style.transition = "opacity 1.2s ease"; lay.appendChild(f); fit();
     function drop(){ if(f.parentNode) f.parentNode.removeChild(f); }
-    function fail(){ window.removeEventListener("message", onMsg); markBad(id); var wasShown = shown; drop();
+    function fail(){ clearInterval(stallIv); window.removeEventListener("message", onMsg); markBad(id); var wasShown = shown; drop();
       if(m === mode && CAMS[mode] === c && (my === liveTry || wasShown)) nextLive(c); }
     function onMsg(ev){
       if(ev.source !== f.contentWindow) return;
@@ -3646,12 +3663,19 @@ window.PTYPE = (function(){
       if(!d || !d.event) return;
       var st = d.event === "onStateChange" ? d.info : (d.event === "infoDelivery" && d.info && typeof d.info.playerState === "number" ? d.info.playerState : null);
       if(d.event === "onError"){ fail(); return; }
+      if(d.event === "infoDelivery" && d.info && typeof d.info.currentTime === "number"){
+        var ct = d.info.currentTime; tSeen = true;
+        if(tFirst === null) tFirst = ct;
+        if(tLast === null || ct > tLast + 0.05){ tAdv = Date.now(); }
+        tLast = ct;
+        if(!shown && ct - tFirst >= 1.5) reveal();   /* really playing: the picture is moving */
+      }
       if(st === 1 && !shown){
-        shown = true; clearTimeout(t15);
-        if(m !== mode || !f.parentNode) return;
-        f.style.opacity = "1"; cap.textContent = f0.cap; linkTo(f0);
-        setTimeout(function(){ [].forEach.call(lay.querySelectorAll("iframe"), function(o){ if(o !== f && o.parentNode) o.parentNode.removeChild(o); }); }, 1400);
-      } else if(shown && (st === 0 || st === 5 || st === -1)){
+        if(!ok1) ok1 = Date.now();
+        /* no position reports from this browser: fall back to "playing" held for 4 s */
+        setTimeout(function(){ if(!shown && !tSeen && ok1 && f.parentNode) reveal(); }, 4000);
+      } else if(st !== null && st !== 1 && !shown){ ok1 = 0;
+      } else if(shown && (st === 0 || st === 5 || st === -1 || st === 3)){
         clearTimeout(liveWatch); liveWatch = setTimeout(function(){ if(f.parentNode && my === liveTry) fail(); }, 15000);
       } else if(shown && st === 1){ clearTimeout(liveWatch); }
     }
