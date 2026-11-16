@@ -321,7 +321,7 @@ greet_js = ""
 #     Brevo > Contacts > Forms > the SKIINUT form > Share > Embed > the <form ... action="https://....sibforms.com/serve/...">. The form
 #     must have the EMAIL field and a RESORT field (text contact attribute RESORT). Until it is filled in, the form says signups open soon.
 #     Brevo sends its own confirmation email if double opt-in is on for the form.
-BREVO_FORM_URL = ""
+BREVO_FORM_URL = "https://ab21955b.sibforms.com/serve/MUIFAOWk10_Wyime34jL6x6Tb9gyGbV-UoI-PpvkxPUyYsMTqIg8j-HM3_NjVST5VX6g0txrJz7KiDFc6GtndKvQUT9aDa2ioug08ggo576Bho0zcnfNfV17V2BsEeRpI4gwA8soESSmIRhBHknYAG7LJmnsetOT8t5OeDsXMWEfYowZvk5LIvD_3VWDONqIv13l0EfPzDGVjFe2pg=="
 SUGGEST_CSS = """<style>
 /* Subscribe bar (Mark, Nov 16, 2026): email + home resort + Subscribe; status line under it; honeypot hidden */
 .gbar.sug{position:relative; flex-wrap:wrap;}
