@@ -5049,6 +5049,11 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
 html.wxf-on #wt-dock .wxbar{display:none;}
 /* no fade to the page colour at the photo's bottom edge while the strip sits there (it would wash out the strip) */
 html.wxf-on.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.55) 0, rgba(5,14,26,.28) 14%, rgba(5,14,26,0) 32%, rgba(5,14,26,0) 100%)!important;}
+/* All buttons in the top row are orange (Mark, Nov 15, 2026, 5:13 p.m.): Choose location, Show stats, Sound, Dark (and Next / Watch Live).
+   Sound keeps its own colour while the music plays, so you can tell it is on. */
+.wt-edition .wt-next, .wt-edition .wt-play, .wt-edition .wt-dv-watch, .wt-edition select.wt-locpick, #wt-imgtog{background-color:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
+.wt-edition .wt-next:hover, .wt-edition .wt-play:hover, .wt-edition .wt-dv-watch:hover, .wt-edition select.wt-locpick:hover, #wt-imgtog:hover{background-color:#cc6230!important; border-color:#cc6230!important;}
+.wt-edition select.wt-locpick option{color:#111; background:#fff;}
 </style>
 <script>
 /* Snow stake readings (Mark, Nov 15, 2026): Claude reads each resort's snow stake (snow stick) picture on every daily run and writes
