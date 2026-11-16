@@ -7047,6 +7047,29 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
   var mq = window.matchMedia ? window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)") : null;
   var cv = document.createElement("canvas").getContext("2d");
   function clock(show){ var g = document.querySelector("#lg-wrap .g"); if(g) g.style.visibility = show ? "" : "hidden"; }
+  /* Outline width (as a share of the font size) that leaves half the hollow area the 3.9% outline left; measured once per number. */
+  var HW = {};
+  function hollowW(txt, ff){
+    var key = txt + "|" + ff; if(HW[key]) return HW[key];
+    try{
+      var S = 200, cc = document.createElement("canvas"), x = cc.getContext("2d");
+      x.font = "700 " + S + "px " + ff; var m = x.measureText(txt);
+      var a = m.actualBoundingBoxAscent || S * .72, dd = m.actualBoundingBoxDescent || 0, l = m.actualBoundingBoxLeft || 0, w = (m.actualBoundingBoxRight || m.width) + l;
+      var pad = 30; cc.width = Math.ceil(w + 2 * pad); cc.height = Math.ceil(a + dd + 2 * pad);
+      function hollow(r){
+        x.globalCompositeOperation = "source-over"; x.clearRect(0, 0, cc.width, cc.height);
+        x.font = "700 " + S + "px " + ff; x.textBaseline = "alphabetic"; x.lineJoin = "round"; x.fillStyle = "#fff"; x.strokeStyle = "#fff";
+        x.fillText(txt, pad + l, pad + a); x.globalCompositeOperation = "destination-out"; x.lineWidth = r * S; x.strokeText(txt, pad + l, pad + a);
+        x.globalCompositeOperation = "source-over";
+        var px = x.getImageData(0, 0, cc.width, cc.height).data, n = 0; for(var i = 3; i < px.length; i += 4) if(px[i] > 127) n++; return n;
+      }
+      var goal = hollow(.039) * .5, lo = .039, hi = .3;
+      for(var it = 0; it < 14; it++){ var mid = (lo + hi) / 2; if(hollow(mid) > goal) lo = mid; else hi = mid; }
+      var r = (lo + hi) / 2;
+      if(document.fonts && document.fonts.status === "loaded") HW[key] = r;   /* cache only once the real font is in */
+      return r;
+    }catch(e){ return .06; }
+  }
   function draw(){
     var d = new Date(), h = d.getHours(), h12 = h % 12 || 12, night = h >= 20 || h < 8;
     el.classList.toggle("sk-day", !night);
@@ -7060,6 +7083,10 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     var top = Math.max(lr.bottom, br.top) + 8, bot = Math.min(br.bottom, H) - 4;
     var fr = document.querySelector("#lg-wrap .lg-frost");
     if(fr && fr.offsetParent){ var fb = fr.getBoundingClientRect(); if(fb.height > 10) bot = Math.min(fb.bottom, H) - 2; }
+    /* sit above the weather strip inside the frost (Mark, Nov 15, 2026, 10:02 p.m.: "lift the big hour numbers a bit so they don't block
+       the other weather ticker temps") */
+    var wxs = document.getElementById("wxf");
+    if(wxs && getComputedStyle(wxs).display !== "none"){ var wsr = wxs.getBoundingClientRect(); if(wsr.height > 4 && wsr.top < bot) bot = wsr.top - 6; }
     var gs = document.querySelectorAll("#lg-wrap .g"), g0 = gs[0], gr = g0 && g0.offsetParent ? g0.getBoundingClientRect() : null;
     var cx = gr && gr.width ? gr.left + gr.width / 2 : Math.max(0, br.left) + 160;
     var right = gs[1] && gs[1].offsetParent ? gs[1].getBoundingClientRect().left - 10 : W - 20;
@@ -7073,7 +7100,9 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     /* Hollow hour that fills up through the hour (Mark, Nov 15, 2026, 9:19 p.m., option B "Frosted inside"): a bold outline in the hour's
        colour, a faint frosted tint inside, and the solid colour rising from the bottom of the digits as the minutes pass — empty at :00,
        half full at :30, nearly full at :59. The outline is ~2.6% of the font size (at least 3 px) so the whole number reads easily. */
-    var fsz = F * k, lw = Math.max(4.5, fsz * .039);   /* outline 50% thicker (Mark, Nov 15, 2026, 9:26 p.m.; was 2.6%, min 3 px) */
+    /* outline 50% thicker (9:26 p.m.), then thick enough that the hollow inside is half what it was with that outline (10:02 p.m.: "reduce
+       the inside hollow area by 50%"): hollowW() finds that width per number by measuring the hollow area at 200 px. */
+    var fsz = F * k, lw = Math.max(4.5, fsz * .039), lwIn = fsz * hollowW(txt, ff);   /* lw: the outer edge as at 9:26 p.m.; lwIn: thickened inward only */
     var cw = wd * k, ch = ink * k, dpr = Math.min(3, window.devicePixelRatio || 1), sw = lw / 2 + 1;
     /* colors: orange through the night, yellow from 5 a.m., green from 6 a.m. (Mark, Nov 15, 2026, 4:50 / 6:49 a.m.) */
     var col = h === 5 ? "#F5C518" : (h === 6 || h === 7) ? "#2EB85C" : "#E2733A";
@@ -7086,6 +7115,11 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     c.globalAlpha = .16; c.fillStyle = "#ffffff"; c.fillText(txt, tx, ty); c.globalAlpha = 1;   /* frosted inside */
     var lvl = sw + ch * (1 - frac);                                                              /* the fill line, from the ink's bottom */
     if(frac > 0){ c.save(); c.beginPath(); c.rect(0, lvl, cw + 2 * sw, ch + 2 * sw); c.clip(); c.fillStyle = col; c.fillText(txt, tx, ty); c.restore(); }
+    /* inner band: a wide stroke kept only inside the digits, so the hollow shrinks while the number's outer shape stays the same */
+    if(lwIn > lw){ var oc = draw.oc || (draw.oc = document.createElement("canvas")); oc.width = cnv.width; oc.height = cnv.height;
+      var o = oc.getContext("2d"); o.setTransform(dpr, 0, 0, dpr, 0, 0); o.font = c.font; o.textBaseline = "alphabetic"; o.lineJoin = "round";
+      o.strokeStyle = col; o.lineWidth = lwIn; o.strokeText(txt, tx, ty); o.globalCompositeOperation = "destination-in"; o.fillStyle = "#000"; o.fillText(txt, tx, ty);
+      o.globalCompositeOperation = "source-over"; c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(oc, 0, 0); c.restore(); }
     c.strokeStyle = col; c.lineWidth = lw; c.strokeText(txt, tx, ty);                            /* bold outline */
     el.style.left = Math.round(cx - cw / 2 - sw) + "px"; el.style.top = Math.round(bot - ch - sw) + "px";
   }
