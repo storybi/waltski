@@ -1249,6 +1249,20 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <a class="ec-map" id="pl-link" href="https://weather.utah.edu/" target="_blank" rel="noopener"><img id="pl-img" alt="7-day snowfall forecast plume" decoding="async"></a>
       <div class="ec-foot"><span>Snowfall plumes from the GEFS ensemble</span><span>© <a href="https://weather.utah.edu/" target="_blank" rel="noopener">University of Utah Atmospheric Sciences</a> · via <a href="https://powderbuoy.com/dashboard/" target="_blank" rel="noopener">Powder Buoy</a></span></div>
     </div>
+    <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
+    <div class="olk" id="olk" aria-labelledby="olk-h">
+      <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
+        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix <i class="k-temp"></i>Temp °F</span></div>
+      <p class="olk-sum" id="olk-sum"></p>
+      <div class="olk-days" id="olk-days"></div>
+      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
+      <div class="olk-x" id="olk-x"></div>
+      <p class="olk-note" id="olk-note">Orange column = temperature, rising above or dropping below the 32°F freezing line (right axis). Rain or snow stacks on top: short = light, medium = moderate, tall = heavy; a faint sliver = a chance with no measurable amount. Tap or hover a column for details.</p>
+    </div>
+    <div class="rwx" id="rwx" aria-live="polite"></div>
+    <!-- Resort cam thumbnails tucked into the bottom of the resort weather card (Mark, Nov 15, 2026, 6:00 p.m.): the four cam rows moved here
+         from above the 48-hour outlook; #rwx-cams joins #rwx as one card (see the "Cams in the resort weather card" CSS). -->
+    <div class="rwx-cams" id="rwx-cams">
     <!-- Resort cams (moved under the radar, Oct 26, 2026) -->
     <div class="wx-cams">
       <div class="cams-head"><h4>Snowbasin Cams</h4><span class="cams-status" id="cams-status" role="status" aria-live="polite">Showing the latest snapshot. Tap a frame to open it live.</span><button type="button" class="cams-refresh" id="cams-refresh" hidden>Refresh cams</button></div>
@@ -1270,17 +1284,7 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="cams-head"><h4 id="ik-h">Resort Cams</h4><span class="cams-status" id="ik-status"></span><a class="cams-refresh dv-link" id="ik-link" href="#" target="_blank" rel="noopener">All cams</a></div>
       <div class="cams" id="ik-grid"></div>
     </div>
-    <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
-    <div class="olk" id="olk" aria-labelledby="olk-h">
-      <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
-        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix <i class="k-temp"></i>Temp °F</span></div>
-      <p class="olk-sum" id="olk-sum"></p>
-      <div class="olk-days" id="olk-days"></div>
-      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
-      <div class="olk-x" id="olk-x"></div>
-      <p class="olk-note" id="olk-note">Orange column = temperature, rising above or dropping below the 32°F freezing line (right axis). Rain or snow stacks on top: short = light, medium = moderate, tall = heavy; a faint sliver = a chance with no measurable amount. Tap or hover a column for details.</p>
     </div>
-    <div class="rwx" id="rwx" aria-live="polite"></div>
     <!-- Suggest-a-resort box (skiinut.com) and resort ticker, moved here from the sticky dock (Mark, Nov 1, 2026); filled by the "Resort feed" script. -->
     <div class="ski-feed" id="ski-feed"></div>
     <div class="wxv" id="wxv">
@@ -5049,6 +5053,16 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
 html.wxf-on #wt-dock .wxbar{display:none;}
 /* no fade to the page colour at the photo's bottom edge while the strip sits there (it would wash out the strip) */
 html.wxf-on.show-image #wt-banner::after{background:linear-gradient(to bottom, rgba(5,14,26,.55) 0, rgba(5,14,26,.28) 14%, rgba(5,14,26,0) 32%, rgba(5,14,26,0) 100%)!important;}
+/* Cams in the resort weather card (Mark, Nov 15, 2026, 6:00 p.m.): "Tuck the thumbnail image links to the resort cams in the bottom of the
+   resort weather card." #rwx (the card) and #rwx-cams (the cam rows right under it) read as one card. */
+#snow .rwx:has(+ .rwx-cams){margin-bottom:0!important; border-bottom:0!important; border-bottom-left-radius:0!important; border-bottom-right-radius:0!important; box-shadow:none!important;}
+#snow .rwx-cams{background:var(--surface); border:1px solid var(--border); border-top:0; border-radius:0 0 var(--card-r, 14px) var(--card-r, 14px); box-shadow:var(--shadow); margin:0 0 16px; padding:0 16px 12px; overflow:hidden;}
+#snow .rwx:empty + .rwx-cams{border-top:1px solid var(--border); border-radius:var(--card-r, 14px);}
+#snow .rwx-cams .wx-cams{background:transparent!important; border:0!important; border-radius:0!important; box-shadow:none!important; margin:0!important; padding:0!important;}
+#snow .rwx-cams .wx-cams .cams-head{margin-top:0!important; padding-top:10px!important; border-top:1px solid var(--border)!important;}
+#snow .rwx-cams .wx-cams .cams-head h4{font-size:13px!important;}
+html.cam-hi #snow .rwx-cams{display:none;}
+html.cam-hi #snow .rwx{margin-bottom:16px!important; border-bottom:1px solid var(--border)!important; border-radius:var(--card-r, 14px)!important; box-shadow:var(--shadow)!important;}
 /* All buttons in the top row are orange (Mark, Nov 15, 2026, 5:13 p.m.): Choose location, Show stats, Sound, Dark (and Next / Watch Live).
    Sound keeps its own colour while the music plays, so you can tell it is on. */
 .wt-edition .wt-next, .wt-edition .wt-play, .wt-edition .wt-dv-watch, .wt-edition select.wt-locpick, #wt-imgtog{background-color:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
