@@ -71,16 +71,18 @@ public_css = """<style>
 </style>
 """
 
-# 4b. Suggest-a-resort bar at the top of the sticky dock (Mark, Oct 29, 2026) — replaces the free Google search bar (Oct 26, 2026).
-#     Visitors type a resort they'd like added and press Send; it reaches Mark's phone as a push notification (see 6b below).
-#     It keeps the "gbar" class and id, so the existing bar styling and the 9 p.m.–7 a.m. black-out still apply.
+# 4b. Subscribe bar (Mark, Nov 16, 2026; replaces the Suggest-a-resort bar of Oct 29, 2026): an email box, a home-resort menu and a
+#     Subscribe button. Signups go to Mark's Mailchimp audience (email + RESORT merge field = the resort key, e.g. "sb"); every Monday at
+#     5:30 a.m. MT scripts/monday_email.py emails each subscriber the SKIINUT outlook for their resort. It keeps the "gbar" class and id
+#     (bar styling, 9 p.m.-7 a.m. black-out) and the "sug" class (the dock script moves it to the bottom of the docked group).
 GBAR_HTML = """
-  <form class="gbar sug" id="gbar" autocomplete="off" aria-label="Suggest a resort">
-    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l6.5-11 4 6.5 2.5-4L21 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-    <input type="text" id="sug-resort" maxlength="80" required placeholder="Suggest a resort here!" aria-label="Suggest a resort">
-    <input type="text" id="sug-web" tabindex="-1" autocomplete="off" aria-hidden="true" class="sug-hp">
-    <button type="submit" class="gbar-ai" id="sug-send">Send</button>
-    <span class="sug-msg" id="sug-msg" role="status" aria-live="polite"></span>
+  <form class="gbar sug sub" id="gbar" autocomplete="on" aria-label="Subscribe to the SKIINUT Monday snow outlook" novalidate>
+    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <input type="email" id="sub-email" name="EMAIL" maxlength="120" required placeholder="Your email" aria-label="Your email" autocomplete="email">
+    <select id="sub-resort" name="RESORT" required aria-label="Your home resort"><option value="">Home resort</option></select>
+    <input type="text" id="sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true" class="sug-hp">
+    <button type="submit" class="gbar-ai" id="sub-send">Subscribe</button>
+    <span class="sug-msg" id="sub-msg" role="status" aria-live="polite"></span>
   </form>"""
 GBAR_CSS = """<style>
 /* Public site: free Google search bar at the top of the sticky dock */
@@ -315,55 +317,72 @@ head = """<!doctype html>
 # Greeting by the reader's clock: since Oct 31, 2026 the page itself sets the greeting and date from the reader's clock every minute
 # (the "Waltmark Times dateline" script), so the public page needs no extra greeting script. Kept as an empty string.
 greet_js = ""
-# 6b. Suggest a resort (Mark, Oct 29, 2026): the bar at the top of the dock (4b) where visitors type a resort they'd like
-#     added. Each suggestion is pushed instantly to Mark's phone through ntfy (free push notifications, no account): he subscribes to
-#     the topic below in the ntfy app. Public site only. Keep the topic name unchanged, or his phone stops getting suggestions.
-SUGGEST_TOPIC = "skiinut-resorts-6eb2b87be4"
+# 6b. Subscribe (Mark, Nov 16, 2026; replaces the ntfy resort suggestions). MC_POST_URL is the Mailchimp audience's embedded-form
+#     address with /post changed to /post-json (Mailchimp > Audience > Signup forms > Embedded forms > the <form action="...">), e.g.
+#     https://skiinut.us21.list-manage.com/subscribe/post-json?u=XXXX&id=YYYY . Until it is filled in, the form says signups open soon.
+#     The audience needs a text merge field with the tag RESORT. Mailchimp sends its own confirmation email (double opt-in).
+MC_POST_URL = ""
 SUGGEST_CSS = """<style>
-/* Suggest-a-resort bar (Mark, Oct 29, 2026): status message shows under the field; honeypot hidden */
+/* Subscribe bar (Mark, Nov 16, 2026): email + home resort + Subscribe; status line under it; honeypot hidden */
 .gbar.sug{position:relative; flex-wrap:wrap;}
+.gbar.sub input[type=email]{flex:1 1 100px; min-width:90px;}
+.gbar.sub select{flex:0 1 auto; max-width:44%; min-width:0; border:1px solid #b9b3a6; background:#fff; color:#111; font:15px var(--font-body); padding:6px 6px; border-radius:3px;}
+.gbar.sub select:focus{outline:0; border-color:#E2733A; box-shadow:0 0 0 2px rgba(226,115,58,.25);}
+.gbar.sub .gbar-ai{background:#E2733A; border-color:#E2733A;}
 .sug-hp{position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important;}
 .sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 22px;}
 .sug-msg:empty{display:none;}
 .sug-msg.ok{color:#2f9e4c;} .sug-msg.err{color:#c8102e;}
 .gbar button:disabled{opacity:.5; cursor:default;}
 html.clock-night .sug-msg{color:#777;}
+html.clock-night .gbar.sub select{background:#0d0d0d; border-color:#222; color:#bbb;}
+@media (max-width:480px){ .gbar.sub select{max-width:34%; font-size:14px;} .gbar.sub input[type=email]{font-size:14px;} }
 </style>
 """
 SUGGEST_JS = """<script>
-/* Suggest a resort — sends the suggestion to Mark's phone as an ntfy push notification. Light spam guards: hidden honeypot field,
-   length limits, and at most 3 suggestions per browser per hour. */
+/* SKIINUT Monday outlook subscribe (Mark, Nov 16, 2026). Sends the email and home resort to Mailchimp (JSONP, no page reload).
+   The resort menu lists every resort in the site's location menu (window.IKON), Utah first. Also: skiinut.com/?resort=<key> (the
+   link in the Monday email) opens that resort. */
 (function(){
-  var TOPIC = "%s", f = document.getElementById("gbar"); if(!f) return;
-  var r = document.getElementById("sug-resort"), hp = document.getElementById("sug-web"),
-      b = document.getElementById("sug-send"), msg = document.getElementById("sug-msg"), KEY = "skiinut-sug-times";
+  var MC = "%s", f = document.getElementById("gbar");
+  var IK = window.IKON || {}, order = (IK.order || []).filter(function(k){ return k !== "hi" && IK.r && IK.r[k]; });
+  function nm(k){ var r = IK.r[k]; return r.name + (r.state ? ", " + r.state : ""); }
+  /* open the resort named in ?resort= */
+  try{ var want = new URLSearchParams(location.search).get("resort"), pick = document.getElementById("rs-pick");
+    if(want && pick && pick.querySelector('option[value="' + want.replace(/[^a-z0-9_-]/gi, "") + '"]')){
+      setTimeout(function(){ pick.value = want; pick.dispatchEvent(new Event("change", {bubbles: true})); try{ localStorage.setItem("sk-loc-chosen", "1"); }catch(_){} }, 400); } }catch(e){}
+  if(!f) return;
+  var em = document.getElementById("sub-email"), sel = document.getElementById("sub-resort"), hp = document.getElementById("sub-hp"),
+      b = document.getElementById("sub-send"), msg = document.getElementById("sub-msg");
+  order.forEach(function(k){ var o = document.createElement("option"); o.value = k; o.textContent = nm(k); sel.appendChild(o); });
+  try{ var cur = (document.getElementById("rs-pick") || {}).value; if(cur && cur !== "hi" && cur !== "local" && sel.querySelector('option[value="' + cur + '"]')) sel.value = cur; }catch(e){}
   function say(t, c){ msg.textContent = t; msg.className = "sug-msg" + (c ? " " + c : ""); }
-  function recent(){ try{ var a = JSON.parse(localStorage.getItem(KEY) || "[]"); return a.filter(function(x){ return Date.now() - x < 3600000; }); }catch(e){ return []; } }
   f.addEventListener("submit", function(e){
     e.preventDefault();
-    var name = r.value.replace(/\\s+/g, " ").trim();
-    if(hp.value){ say("Thanks! Your suggestion was sent.", "ok"); f.reset(); return; }
-    if(name.length < 2){ say("Please type a resort name.", "err"); r.focus(); return; }
-    var t = recent(); if(t.length >= 3){ say("Thanks — you\\u2019ve sent a few already. Please try again later.", "err"); return; }
-    b.disabled = true; say("Sending\\u2026");
-    fetch("https://ntfy.sh/" + TOPIC, {method: "POST", body: "Resort: " + name,
-      headers: {"Title": "Skiinut: resort suggestion", "Tags": "ski", "Priority": "default"}})
-      .then(function(res){ if(!res.ok) throw new Error(res.status);
-        t.push(Date.now()); try{ localStorage.setItem(KEY, JSON.stringify(t)); }catch(_){}
-        say("Thanks! \\u201c" + name + "\\u201d was sent to Skiinut.", "ok"); f.reset(); setTimeout(function(){ if(msg.className.indexOf("ok") > 0) say(""); }, 8000); })
-      .catch(function(){ say("Sorry, that didn\\u2019t go through. Please try again in a minute.", "err"); })
-      .then(function(){ b.disabled = false; });
+    var mail = em.value.trim(), res = sel.value;
+    if(hp.value){ say("Thanks! Check your inbox to confirm.", "ok"); f.reset(); return; }
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(mail)){ say("Enter a valid email address.", "err"); em.focus(); return; }
+    if(!res){ say("Pick your home resort.", "err"); sel.focus(); return; }
+    if(!MC){ say("SKIINUT email alerts open soon \\u2014 check back shortly.", "err"); return; }
+    b.disabled = true; say("Subscribing\\u2026");
+    var cb = "skSub" + Date.now(), s = document.createElement("script"), done = false;
+    window[cb] = function(r){ done = true; delete window[cb]; s.remove(); b.disabled = false;
+      if(r && r.result === "success"){ say("Almost done \\u2014 check your inbox to confirm your SKIINUT Monday outlook for " + nm(res) + ".", "ok"); f.reset(); }
+      else{ var m = (r && r.msg || "").replace(/<[^>]*>/g, ""); say(/already subscribed/i.test(m) ? "You\\u2019re already subscribed. Thanks!" : (m || "Sorry, that didn\\u2019t go through. Please try again."), /already/i.test(m) ? "ok" : "err"); } };
+    s.src = MC + (MC.indexOf("?") < 0 ? "?" : "&") + "EMAIL=" + encodeURIComponent(mail) + "&RESORT=" + encodeURIComponent(res) + "&c=" + cb;
+    s.onerror = function(){ if(!done){ delete window[cb]; b.disabled = false; say("Sorry, that didn\\u2019t go through. Please try again in a minute.", "err"); } };
+    document.body.appendChild(s);
   });
 })();
 </script>
-""" % SUGGEST_TOPIC
+""" % MC_POST_URL
 public_css += SUGGEST_CSS
 
 # Never add a second copy (Mark, Nov 15, 2026): the artifact can already carry the newest public-site scripts (snow stake, CAM_SKIP,
 # banner arrows). A second, older copy ran a second banner rotator without them, so some Snowbasin cams never showed.
 if "/* Public site: load the Snowbasin cams" in body:
     live_js = ""
-if "/* Suggest a resort \u2014 sends the suggestion" in body:
+if "/* SKIINUT Monday outlook subscribe" in body:
     SUGGEST_JS = ""
 page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + SUGGEST_JS + "</body>\n</html>\n"
 

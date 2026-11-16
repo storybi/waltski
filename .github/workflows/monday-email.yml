@@ -1,0 +1,66 @@
+name: SKIINUT Monday outlook email
+
+# Every Monday at about 5:30 a.m. Mountain Time, email each SKIINUT subscriber the week's outlook for their home resort
+# (scripts/monday_email.py; Mark, Nov 16, 2026). GitHub cron runs in UTC, so two schedules cover both Mountain Standard Time
+# (12:30 UTC) and Mountain Daylight Time (11:30 UTC); the "Is it 5 a.m. in Denver?" step lets only the right one through.
+# Secrets (repo Settings > Secrets and variables > Actions): MAILCHIMP_API_KEY, MAILCHIMP_LIST_ID, MAILCHIMP_FROM.
+# Without them the run is a dry run that only builds previews (downloadable as the "email-preview" artifact).
+
+on:
+  schedule:
+    - cron: "30 11 * * 1"   # 5:30 a.m. MDT
+    - cron: "30 12 * * 1"   # 5:30 a.m. MST
+  workflow_dispatch:
+    inputs:
+      test_email:
+        description: "Send as Mailchimp test emails to this address instead of the audience (leave blank to send for real)"
+        required: false
+      only:
+        description: "Only these resort keys, comma separated (e.g. sb,alta); blank = every resort with subscribers"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monday-email
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Is it 5 a.m. in Denver?
+        id: when
+        run: |
+          H=$(TZ=America/Denver date +%H)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$H" = "05" ]; then echo "go=1" >> "$GITHUB_OUTPUT"; else echo "go=0" >> "$GITHUB_OUTPUT"; echo "Not 5 a.m. MT ($H), skipping"; fi
+
+      - uses: actions/checkout@v4
+        if: steps.when.outputs.go == '1'
+
+      - uses: actions/setup-python@v5
+        if: steps.when.outputs.go == '1'
+        with:
+          python-version: "3.12"
+
+      - name: Build and send
+        if: steps.when.outputs.go == '1'
+        env:
+          MAILCHIMP_API_KEY: ${{ secrets.MAILCHIMP_API_KEY }}
+          MAILCHIMP_LIST_ID: ${{ secrets.MAILCHIMP_LIST_ID }}
+          MAILCHIMP_FROM: ${{ secrets.MAILCHIMP_FROM }}
+        run: |
+          ARGS="index.html"
+          if [ -n "${{ github.event.inputs.only }}" ]; then ARGS="$ARGS --only ${{ github.event.inputs.only }}"; fi
+          if [ -n "${{ github.event.inputs.test_email }}" ]; then ARGS="$ARGS --test ${{ github.event.inputs.test_email }}"; fi
+          python3 scripts/monday_email.py $ARGS
+
+      - name: Keep previews (dry run)
+        if: steps.when.outputs.go == '1' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: email-preview
+          path: email-preview/
+          if-no-files-found: ignore
