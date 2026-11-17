@@ -7190,7 +7190,10 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     c.font = "700 " + fsz + "px " + ff; c.textBaseline = "alphabetic"; c.lineJoin = "round";
     c.globalAlpha = .16; c.fillStyle = "#ffffff"; c.fillText(txt, tx, ty); c.globalAlpha = 1;   /* frosted inside */
     var lvl = sw + ch * (1 - frac);                                                              /* the fill line, from the ink's bottom */
-    if(frac > 0){ c.save(); c.beginPath(); c.rect(0, lvl, cw + 2 * sw, ch + 2 * sw); c.clip(); c.fillStyle = col; c.fillText(txt, tx, ty); c.restore(); }
+    /* the rising fill is a much lighter shade of the outline colour so it stands out against it (Mark, Nov 17, 2026, 1:22 a.m.) */
+    var fillCol = (function(hx, t){ var n = parseInt(hx.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255];
+      return "rgb(" + rgb.map(function(v){ return Math.round(v + (255 - v) * t); }).join(",") + ")"; })(col, .62);
+    if(frac > 0){ c.save(); c.beginPath(); c.rect(0, lvl, cw + 2 * sw, ch + 2 * sw); c.clip(); c.fillStyle = fillCol; c.fillText(txt, tx, ty); c.restore(); }
     /* inner band: a wide stroke kept only inside the digits, so the hollow shrinks while the number's outer shape stays the same */
     if(lwIn > lw){ var oc = draw.oc || (draw.oc = document.createElement("canvas")); oc.width = cnv.width; oc.height = cnv.height;
       var o = oc.getContext("2d"); o.setTransform(dpr, 0, 0, dpr, 0, 0); o.font = c.font; o.textBaseline = "alphabetic"; o.lineJoin = "round";
