@@ -4353,6 +4353,11 @@ html:not(.view-news) #ecov{display:none!important;}
     if(mqP.matches){ if(ib && !window.SK_PFILL){ var im2 = bn2.querySelector("img.wt-live"), rt = (im2 && im2.naturalWidth) ? im2.naturalHeight / im2.naturalWidth : 9 / 16; it = Math.max(it, ibm - ib.width * rt); } }
     else { it = 0; ibm = Math.max(ibm, window.innerHeight || document.documentElement.clientHeight || 0); }
     if(ibm - it < 80) ibm = it + 80;
+    /* Locked to the header photo (Mark, Nov 17, 2026, 5:34 a.m.: it tracked down the right edge while scrolling): once the page is scrolled
+       (or the photo band is locked to the top), keep the size and place measured at the top of the page instead of re-measuring. */
+    var scrolled = b.sy > 8 || root.classList.contains("banner-lock");
+    if(scrolled && place.box && place.box.p === mqP.matches){ it = place.box.it; ibm = place.box.ibm; }
+    else if(!scrolled){ place.box = {it: it, ibm: ibm, p: mqP.matches}; }
     bar.style.top = Math.round(it) + "px"; bar.style.height = Math.round(ibm - it) + "px";
     var left = bar.classList.contains("on") ? W - 16 : W - 14;
     window.NOWBAR_LEFT = left;
@@ -7111,7 +7116,7 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     var fsz = F * k, lw = Math.max(4.5, fsz * .039), lwIn = fsz * hollowW(txt, ff);   /* lw: the outer edge as at 9:26 p.m.; lwIn: thickened inward only */
     var cw = wd * k, ch = ink * k, dpr = Math.min(3, window.devicePixelRatio || 1), sw = lw / 2 + 1;
     /* colors: orange through the night, yellow from 5 a.m., green from 6 a.m. (Mark, Nov 15, 2026, 4:50 / 6:49 a.m.) */
-    var col = h === 5 ? "#F5C518" : (h === 6 || h === 7) ? "#2EB85C" : "#E2733A";
+    var col = "#E2733A";   /* orange that matches the buttons all night (Mark, Nov 17, 2026, 5:34 a.m.; was yellow at 5 a.m., green 6-8 a.m.) */
     var frac = (d.getMinutes() + d.getSeconds() / 60) / 60;
     cnv.width = Math.ceil((cw + 2 * sw) * dpr); cnv.height = Math.ceil((ch + 2 * sw) * dpr);
     cnv.style.width = (cw + 2 * sw) + "px"; cnv.style.height = (ch + 2 * sw) + "px";
