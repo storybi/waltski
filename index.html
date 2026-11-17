@@ -1229,6 +1229,16 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       </div>
       <div class="ec-foot"><span id="cf-src"></span><span>Global models scaled to NWS mountain totals</span></div>
     </div>
+    <!-- 48-hour rain & snow outlook: moved to just below the composite snow forecast (Mark, Nov 17, 2026, 1:46 a.m.). Keep here. -->
+    <div class="olk" id="olk" aria-labelledby="olk-h">
+      <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
+        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix <i class="k-temp"></i>Temp °F</span></div>
+      <p class="olk-sum" id="olk-sum"></p>
+      <div class="olk-days" id="olk-days"></div>
+      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
+      <div class="olk-x" id="olk-x"></div>
+      <p class="olk-note" id="olk-note">Orange column = temperature, rising above or dropping below the 32°F freezing line (right axis). Rain or snow stacks on top: short = light, medium = moderate, tall = heavy; a faint sliver = a chance with no measurable amount. Tap or hover a column for details.</p>
+    </div>
     <!-- ECMWF snowfall map (Mark, Nov 15, 2026, 7:29 a.m.): ECMWF Open Charts "Precipitation rate", snowfall-rate layer, North America, right under
          the big Live Doppler radar. Rendered by the "ECMWF snowfall map" script; keep as is. -->
     <div class="ec-snow" id="ec-snow">
@@ -1251,15 +1261,6 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
       <div class="ec-foot"><span>Snowfall plumes from the GEFS ensemble</span><span>© <a href="https://weather.utah.edu/" target="_blank" rel="noopener">University of Utah Atmospheric Sciences</a> · via <a href="https://powderbuoy.com/dashboard/" target="_blank" rel="noopener">Powder Buoy</a></span></div>
     </div>
     <!-- Weather With Travis — latest video (added Oct 26, 2026). Rendered by the "Weather With Travis video" script from TRAVIS; keep as is. -->
-    <div class="olk" id="olk" aria-labelledby="olk-h">
-      <div class="olk-head"><h3 id="olk-h">48-hour rain &amp; snow outlook · <span id="olk-name">Snowbasin</span></h3>
-        <span class="olk-key"><i class="k-rain"></i>Rain <i class="k-snow"></i>Snow <i class="k-mix"></i>Mix <i class="k-temp"></i>Temp °F</span></div>
-      <p class="olk-sum" id="olk-sum"></p>
-      <div class="olk-days" id="olk-days"></div>
-      <div class="olk-chart" id="olk-chart" role="img" aria-label="Hourly chance of rain and snow today and tomorrow"></div>
-      <div class="olk-x" id="olk-x"></div>
-      <p class="olk-note" id="olk-note">Orange column = temperature, rising above or dropping below the 32°F freezing line (right axis). Rain or snow stacks on top: short = light, medium = moderate, tall = heavy; a faint sliver = a chance with no measurable amount. Tap or hover a column for details.</p>
-    </div>
     <div class="rwx" id="rwx" aria-live="polite"></div>
     <!-- Resort cam thumbnails tucked into the bottom of the resort weather card (Mark, Nov 15, 2026, 6:00 p.m.): the four cam rows moved here
          from above the 48-hour outlook; #rwx-cams joins #rwx as one card (see the "Cams in the resort weather card" CSS). -->
@@ -7188,12 +7189,9 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     var c = cnv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, cw + 2 * sw, ch + 2 * sw);
     var tx = sw + L * k, ty = sw + asc * k;
     c.font = "700 " + fsz + "px " + ff; c.textBaseline = "alphabetic"; c.lineJoin = "round";
-    c.globalAlpha = .16; c.fillStyle = "#ffffff"; c.fillText(txt, tx, ty); c.globalAlpha = 1;   /* frosted inside */
+    c.fillStyle = "#000"; c.fillText(txt, tx, ty);   /* black inside, above the fill line, for contrast (Mark, Nov 17, 2026, 1:46 a.m.; was a faint frosted tint) */
     var lvl = sw + ch * (1 - frac);                                                              /* the fill line, from the ink's bottom */
-    /* the rising fill is a much lighter shade of the outline colour so it stands out against it (Mark, Nov 17, 2026, 1:22 a.m.) */
-    var fillCol = (function(hx, t){ var n = parseInt(hx.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255];
-      return "rgb(" + rgb.map(function(v){ return Math.round(v + (255 - v) * t); }).join(",") + ")"; })(col, .62);
-    if(frac > 0){ c.save(); c.beginPath(); c.rect(0, lvl, cw + 2 * sw, ch + 2 * sw); c.clip(); c.fillStyle = fillCol; c.fillText(txt, tx, ty); c.restore(); }
+    if(frac > 0){ c.save(); c.beginPath(); c.rect(0, lvl, cw + 2 * sw, ch + 2 * sw); c.clip(); c.fillStyle = col; c.fillText(txt, tx, ty); c.restore(); }   /* fill = the outline colour again (Mark, Nov 17, 2026, 1:46 a.m.) */
     /* inner band: a wide stroke kept only inside the digits, so the hollow shrinks while the number's outer shape stays the same */
     if(lwIn > lw){ var oc = draw.oc || (draw.oc = document.createElement("canvas")); oc.width = cnv.width; oc.height = cnv.height;
       var o = oc.getContext("2d"); o.setTransform(dpr, 0, 0, dpr, 0, 0); o.font = c.font; o.textBaseline = "alphabetic"; o.lineJoin = "round";
