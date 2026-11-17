@@ -330,6 +330,9 @@ SUGGEST_CSS = """<style>
 .gbar.sub .gbar-ai{background:#E2733A; border-color:#E2733A;}
 .gbar.sub #sub-send{order:-1; background:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
 .gbar.sub #sub-send:hover{background:#c85f2a!important; border-color:#c85f2a!important;}
+/* Home resort menu styled like the email box (Mark, Nov 17, 2026, 5:53 a.m.) */
+html body .gbar.sub #sub-resort{border-radius:10px!important; border:1px solid var(--border)!important; background-color:var(--surface-2)!important; color:var(--fg)!important; font-family:var(--font-body)!important;}
+html body .gbar.sub #sub-resort option{background-color:var(--surface-2); color:var(--fg);}
 .sug-hp{position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important;}
 .sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 2px;}
 .sug-msg:empty{display:none;}
