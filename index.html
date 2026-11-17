@@ -57,8 +57,10 @@ html.clock-night .gbar button, html.clock-night .gbar .gbar-ai{background:#111; 
 .gbar.sub select{flex:0 1 auto; max-width:44%; min-width:0; border:1px solid #b9b3a6; background:#fff; color:#111; font:15px var(--font-body); padding:6px 6px; border-radius:3px;}
 .gbar.sub select:focus{outline:0; border-color:#E2733A; box-shadow:0 0 0 2px rgba(226,115,58,.25);}
 .gbar.sub .gbar-ai{background:#E2733A; border-color:#E2733A;}
+.gbar.sub #sub-send{order:-1; background:#E2733A!important; border-color:#E2733A!important; color:#fff!important;}
+.gbar.sub #sub-send:hover{background:#c85f2a!important; border-color:#c85f2a!important;}
 .sug-hp{position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important;}
-.sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 22px;}
+.sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 2px;}
 .sug-msg:empty{display:none;}
 .sug-msg.ok{color:#2f9e4c;} .sug-msg.err{color:#c8102e;}
 .gbar button:disabled{opacity:.5; cursor:default;}
@@ -129,7 +131,7 @@ html.clock-night .gbar button, html.clock-night .gbar .gbar-ai{background:#111; 
 /* Suggest-a-resort bar (Mark, Oct 29, 2026): status message shows under the field; honeypot hidden */
 .gbar.sug{position:relative; flex-wrap:wrap;}
 .sug-hp{position:absolute!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important;}
-.sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 22px;}
+.sug-msg{flex-basis:100%; font:600 12px/1.3 var(--font-body); color:var(--fg-muted); padding:2px 0 1px 2px;}
 .sug-msg:empty{display:none;}
 .sug-msg.ok{color:#2f9e4c;} .sug-msg.err{color:#c8102e;}
 .gbar button:disabled{opacity:.5; cursor:default;}
@@ -1170,11 +1172,10 @@ html.banner-lock .wt-lock-name{opacity:1; visibility:visible;}
   <!-- ================= WEATHER BAR + STOCK TICKER (docked together, locked to the top while scrolling) ================= -->
   <div class="wt-dock" id="wt-dock">
   <form class="gbar sug sub" id="gbar" autocomplete="on" aria-label="Subscribe to the SKIINUT Monday snow outlook" novalidate>
-    <svg class="gbar-g" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+    <button type="submit" class="gbar-ai" id="sub-send">Subscribe</button>
     <input type="email" id="sub-email" name="EMAIL" maxlength="120" required placeholder="Your email" aria-label="Your email" autocomplete="email">
     <select id="sub-resort" name="RESORT" required aria-label="Your home resort"><option value="">Home resort</option></select>
     <input type="text" id="sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true" class="sug-hp">
-    <button type="submit" class="gbar-ai" id="sub-send">Subscribe</button>
     <span class="sug-msg" id="sub-msg" role="status" aria-live="polite"></span>
   </form>
   <div class="wxbar" id="wxbar" role="group" aria-label="Current weather"></div>
