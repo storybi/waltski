@@ -7469,7 +7469,7 @@ var COMPOSITE = {"asof":"Tue 6:37 a.m. MT","regions":{"ogden":{"name":"Ogden Val
   var em = document.getElementById("sub-email"), sel = document.getElementById("sub-resort"), hp = document.getElementById("sub-hp"),
       b = document.getElementById("sub-send"), msg = document.getElementById("sub-msg");
   order.forEach(function(k){ var o = document.createElement("option"); o.value = k; o.textContent = nm(k); sel.appendChild(o); });
-  try{ var cur = (document.getElementById("rs-pick") || {}).value; if(cur && cur !== "hi" && cur !== "local" && sel.querySelector('option[value="' + cur + '"]')) sel.value = cur; }catch(e){}
+  sel.selectedIndex = 0;   /* always starts on "Home resort" (Mark, Nov 17, 2026, 5:49 a.m.; it used to preselect the resort being viewed) */
   function say(t, c){ msg.textContent = t; msg.className = "sug-msg" + (c ? " " + c : ""); }
   f.addEventListener("submit", function(e){
     e.preventDefault();
