@@ -6279,6 +6279,10 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
 #lg-wrap .lg-wi svg{display:block; width:100%; height:100%;}
 #lg-wrap .lg-dv{position:absolute; background:#fff; border-radius:1px; opacity:.3; box-shadow:0 0 1px rgba(0,0,0,.2);}   /* translucent (Mark, 11:52 a.m.) */
 #lg-wrap .lg-mph{position:absolute; font:700 10px/1 "Inter",Arial,sans-serif; color:rgba(255,255,255,.5); text-shadow:0 0 1px rgba(80,80,80,.45);}   /* translucent, like the digits */
+/* Today's high / low / weather stack right of each temp in the frost bar (Mark, Nov 16, 2026, 9:01 a.m.) */
+#lg-wrap .lg-hl{position:absolute; display:flex; flex-direction:column; align-items:center; color:#fff; font-family:"Inter",Arial,sans-serif; font-weight:700; line-height:1; text-shadow:0 1px 2px rgba(0,0,0,.55); white-space:nowrap;}
+#lg-wrap .lg-hl b{display:block; font-weight:700;}
+#lg-wrap .lg-hl svg{display:block; filter:drop-shadow(0 1px 1px rgba(0,0,0,.5));}
 #lg-wrap .lg-arw{position:absolute; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #E2733A; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
 </style>
 <script>
@@ -6353,7 +6357,56 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
   var LBL = .23, LGAP = .08;   /* labels bolder (800) and a bit bigger (Mark, 1:12 p.m.) */
   function temp(t, H, resort){
     var c = window.tempCls ? window.tempCls(t) : "";
-    return gtext(String(t), H, TINT[c] || null, 0, resort ? "RESORT" : "LOCAL", true);   /* no orange arrow under the resort temp (Mark, 12:53 p.m.) */
+    return stk(gtext(String(t), H, TINT[c] || null, 0, resort ? "RESORT" : "LOCAL", true), H, HLON ? (resort ? HL.r : HL.l) : null);   /* no orange arrow under the resort temp (Mark, 12:53 p.m.) */
+  }
+  /* Today's forecast stack (Mark, Nov 16, 2026, 9:01 a.m.): "Next to Local and Resort temps, do a 3 stack of high, low temps forecasted
+     for the day, and finally a weather icon that shows sun, cloud, rain drop, or snow flake. Put this vertical stack to the right of both
+     temps in the frost bar. ... just use white. It's okay for the text and icon in this stack to be small as long as it can be read on an
+     iPhone." High on top, low under it, then the day's icon; never smaller than 10px text. Open-Meteo daily forecast for the local spot
+     (same place as the local temp) and the picked resort, fetched once an hour and kept in localStorage "skiinut-hl" across the hourly reload. */
+  var HL = {l: null, r: null}, HLON = false, hlAt = 0, hlKey = "", hlBusy = false;
+  function wxKind(c){ if(c == null) return ""; if(c <= 1) return "sun"; if((c >= 71 && c <= 77) || c === 85 || c === 86) return "snow"; if(c >= 51) return "rain"; return "cloud"; }
+  var WXI = {
+    sun: '<circle cx="12" cy="12" r="4.2" fill="#fff"/><g stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8"/></g>',
+    cloud: '<path d="M6.8 19h10.6a4.6 4.6 0 0 0 .6-9.15A6.3 6.3 0 0 0 5.9 10.4 4.3 4.3 0 0 0 6.8 19z" fill="#fff"/>',
+    rain: '<path d="M12 2.5c3.4 4.9 6.3 8.3 6.3 12a6.3 6.3 0 0 1-12.6 0c0-3.7 2.9-7.1 6.3-12z" fill="#fff"/>',
+    snow: '<g stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9.3 3.6L12 5.6l2.7-2M9.3 20.4l2.7-2 2.7 2M3.6 10.6l3.1-.9-.5-3.2M20.4 13.4l-3.1.9.5 3.2M3.6 13.4l3.1.9-.5 3.2M20.4 10.6l-3.1-.9.5-3.2"/></g>'
+  };
+  function stk(it, H, d){
+    if(!d || d.hi == null || d.lo == null) return it;
+    var blk = H * (1 + LGAP + LBL), row = blk / 3.2, fs = Math.max(10, Math.round(row * .82)), ih = Math.max(11, Math.round(row * 1.1));
+    mc.font = "700 " + fs + "px Inter, Arial, sans-serif";
+    var tw0 = Math.max(mc.measureText(d.hi + "°").width, mc.measureText(d.lo + "°").width), g = Math.max(3, Math.round(H * .06));
+    var sw = g + Math.ceil(Math.max(tw0, ih)) + 2;
+    it.w += sw; it.stk = {d: d, fs: fs, ih: ih, sw: sw, g: g, blk: blk}; return it;
+  }
+  function hlCoords(){
+    var L = null; try{ L = JSON.parse(localStorage.getItem("skiinut-clock-loc") || "null"); }catch(e){}
+    if(!L || typeof L.lat !== "number"){ L = null; try{ var s0 = JSON.parse(localStorage.getItem("skiinut-local") || "null"); if(s0 && typeof s0.lat === "number") L = {lat: s0.lat, lon: s0.lon}; }catch(e){} }
+    var hp = document.getElementById("rs-pick"), k = hp ? hp.value : "", R = (window.IKON && window.IKON.r) || {};
+    var r = R[k] && typeof R[k].lat === "number" ? {lat: R[k].lat, lon: R[k].lon} : (k === "local" ? L : null);
+    return [L, r];
+  }
+  function hlLoad(){
+    var pts = hlCoords(), key = pts.map(function(p){ return p ? p.lat.toFixed(2) + "," + p.lon.toFixed(2) : "-"; }).join("|"), day = new Date().toDateString();
+    if(key !== hlKey){ HL = {l: null, r: null}; hlAt = 0;
+      try{ var c0 = JSON.parse(localStorage.getItem("skiinut-hl") || "null"); if(c0 && c0.key === key && c0.day === day && Date.now() - c0.at < 3 * 3600000){ HL = {l: c0.l, r: c0.r}; hlAt = c0.at; } }catch(e){}
+      hlKey = key; lastKey = ""; }
+    if(hlBusy || Date.now() - hlAt < 3600000 || (!pts[0] && !pts[1])) return;
+    var use = pts.filter(Boolean); hlBusy = true;
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=" + use.map(function(p){ return p.lat.toFixed(3); }).join(",") + "&longitude=" + use.map(function(p){ return p.lon.toFixed(3); }).join(",") +
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto&forecast_days=1")
+      .then(function(r){ if(!r.ok) throw new Error("http " + r.status); return r.json(); })
+      .then(function(d){ d = Array.isArray(d) ? d : [d];
+        var o = d.map(function(x){ var dl = x && x.daily; if(!dl || !dl.time) return null; var hi = dl.temperature_2m_max[0], lo = dl.temperature_2m_min[0];
+          return hi == null || lo == null ? null : {hi: Math.round(hi), lo: Math.round(lo), k: wxKind(dl.weather_code[0])}; });
+        var j = 0, res = pts.map(function(p){ return p ? o[j++] || null : null; });
+        if(key !== hlKey) return;
+        HL = {l: res[0], r: res[1]}; hlAt = Date.now(); lastKey = "";
+        try{ localStorage.setItem("skiinut-hl", JSON.stringify({key: key, day: day, at: hlAt, l: HL.l, r: HL.r})); }catch(e){}
+        q(); },
+        function(){ hlAt = Date.now() - 50 * 60000; })   /* failed: try again in 10 minutes */
+      .then(function(){ hlBusy = false; });
   }
   function wind(sp, to, H){
     /* speed, then the arrow right against it, and a "WIND" label under them in the same glass (Mark, 12:53 p.m.; label just "WIND", 8:28 p.m.) */
@@ -6405,8 +6458,9 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       top0 = t1; Hs = Math.max(40, cr.top - 4 - t1); left0 = Math.round(cr.left); area = Math.round(cr.width); ptop = t1; stop = t1 + Hs / .3;
     }
     if(root.classList.contains("lg-card") !== !!cardMode) root.classList.toggle("lg-card", !!cardMode);
+    HLON = !cardMode; if(HLON) hlLoad();   /* today's high / low / icon stack, frost bar only (Nov 16, 9:01 a.m.) */
     dpr = Math.min(3, window.devicePixelRatio || 2);
-    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready].join("|");
+    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready, HLON ? JSON.stringify(HL) : ""].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di);
@@ -6431,6 +6485,12 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     if(!cardMode && mqP.matches){ var cH = H * (1 + LGAP + LBL), sh0 = Math.round((fbot - (window.SK_WXF_H || 0) - ftop - cH) / 2 - (base - H - ftop)); if(sh0 > 0) base += sh0; }   /* at the bottom of the photo, leaving room for the labels (Mark, 12:53 p.m.) */
     items.forEach(function(it, i){
       it.el.style.left = Math.round(x - it.px) + "px"; it.el.style.top = Math.round(base - it.by) + "px"; els.push(it.el);
+      if(it.stk){ var S = it.stk, hs = document.createElement("div"), lh = Math.round(S.fs * 1.08), sH = lh * 2 + S.ih + 2; hs.className = "lg-hl";
+        hs.style.fontSize = S.fs + "px"; hs.style.left = Math.round(x + it.w - 2 * it.px - S.sw + S.g) + "px"; hs.style.width = (S.sw - S.g) + "px";
+        hs.style.top = Math.round(base - H + S.blk / 2 - sH / 2) + "px";   /* centered on the digits + label */
+        hs.innerHTML = '<b style="height:' + lh + 'px">' + S.d.hi + '°</b><b style="height:' + lh + 'px">' + S.d.lo + '°</b>' +
+          (WXI[S.d.k] ? '<svg viewBox="0 0 24 24" style="width:' + S.ih + 'px;height:' + S.ih + 'px;margin-top:2px">' + WXI[S.d.k] + '</svg>' : "");
+        els.push(hs); }
       x += it.w - 2 * it.px;
       if(items.di.indexOf(i) >= 0 && i < items.length - 1){ var d = document.createElement("div"); d.className = "lg-dv"; var w = Math.max(2, H * .022);
         d.style.width = w + "px"; d.style.height = (H * .9) + "px"; d.style.left = Math.round(x + gap / 2 - w / 2) + "px"; d.style.top = Math.round(base - H * .9) + "px"; els.push(d); }
