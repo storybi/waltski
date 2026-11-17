@@ -352,6 +352,10 @@ SUGGEST_JS = """<script>
     if(want && pick && pick.querySelector('option[value="' + want.replace(/[^a-z0-9_-]/gi, "") + '"]')){
       setTimeout(function(){ pick.value = want; pick.dispatchEvent(new Event("change", {bubbles: true})); try{ localStorage.setItem("sk-loc-chosen", "1"); }catch(_){} }, 400); } }catch(e){}
   if(!f) return;
+  /* Keep the bar under the site buttons, at the bottom of the docked group (Mark, Nov 16, 2026, 5:20 p.m.): the older "Resort feed"
+     script moves #gbar down into #ski-feed (above Weather With Travis), where Mark couldn't find it. */
+  try{ var dock = document.getElementById("wt-dock");
+    if(dock && f.parentNode !== dock){ dock.appendChild(f); f.classList.add("sug-bot"); window.dispatchEvent(new Event("resize")); } }catch(e){}
   var em = document.getElementById("sub-email"), sel = document.getElementById("sub-resort"), hp = document.getElementById("sub-hp"),
       b = document.getElementById("sub-send"), msg = document.getElementById("sub-msg");
   order.forEach(function(k){ var o = document.createElement("option"); o.value = k; o.textContent = nm(k); sel.appendChild(o); });
