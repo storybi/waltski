@@ -6065,17 +6065,21 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
      "stats" = the photo with the glass stats line and frost (was "Show image"), "card" = the resort card (was "Show card"),
      "full"  = the photo alone, no stats line, frost or card (html.show-image.full-image). Remembered in localStorage "skiinut-view"
      (old "skiinut-show-image" = "1" counts as stats). */
-  var NAMES = {stats: "Show stats", card: "Show card", full: "Full image"}, mode = "card";
+  /* Big stats / Small stats (Mark, Nov 18, 2026, 10:12 a.m.): "stats" is now Big stats; "small" is the same view with the frost bar, its
+     numbers and the big night hour at 1/3 the size (html.show-image.small-stats). */
+  var NAMES = {stats: "Big stats", small: "Small stats", card: "Show card", full: "Full image"}, mode = "card";
   function set(on, m){
     mode = m || (on ? "stats" : "card"); on = mode !== "card";
-    root.classList.toggle("show-image", on); root.classList.toggle("full-image", mode === "full");
+    var was = root.classList.contains("small-stats");
+    root.classList.toggle("show-image", on); root.classList.toggle("full-image", mode === "full"); root.classList.toggle("small-stats", mode === "small");
+    if(was !== (mode === "small")) setTimeout(function(){ try{ window.dispatchEvent(new Event("resize")); }catch(e){} }, 0);
     b.textContent = NAMES[mode] + " \u25be";
     b.setAttribute("aria-pressed", on ? "true" : "false"); b.setAttribute("aria-haspopup", "menu");
-    b.title = "View: Show stats, Show card or Full image";
+    b.title = "View: Big stats, Small stats, Show card or Full image";
     fit();
   }
   var mv = document.createElement("div"); mv.id = "sk-view"; mv.setAttribute("role", "menu");
-  mv.innerHTML = ["stats", "card", "full"].map(function(k){ return '<button type="button" role="menuitemradio" data-v="' + k + '"><span class="ck"></span>' + NAMES[k] + '</button>'; }).join("");
+  mv.innerHTML = ["stats", "small", "card", "full"].map(function(k){ return '<button type="button" role="menuitemradio" data-v="' + k + '"><span class="ck"></span>' + NAMES[k] + '</button>'; }).join("");
   document.body.appendChild(mv);
   function placeM(){ var r = b.getBoundingClientRect(), w = mv.offsetWidth || 184; mv.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, r.left)) + "px"; mv.style.top = Math.round(r.bottom + 6) + "px"; }
   function openM(){ [].forEach.call(mv.querySelectorAll("button"), function(x){ var c = x.getAttribute("data-v") === mode; x.querySelector(".ck").textContent = c ? "\u2713" : ""; x.setAttribute("aria-checked", c ? "true" : "false"); });
@@ -6519,7 +6523,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var nightL = !cardMode && mq.matches && !dayHalf();
     HLON = !cardMode && !nightL; if(HLON) hlLoad();   /* today's high / low / icon stack, frost bar only (Nov 16, 9:01 a.m.) */
     dpr = Math.min(3, window.devicePixelRatio || 2);
-    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready, HLON ? JSON.stringify(HL) : ""].join("|");
+    var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, document.documentElement.classList.contains("small-stats") ? 1 : 0, dpr, ready, HLON ? JSON.stringify(HL) : ""].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
     function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 && !nightL ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null){ a.di.push(di); a.lr = di; }
@@ -6536,7 +6540,8 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     /* size factor first, then one fit to the width (Nov 18, 2026: fitting before halving made desktop / upright / daytime digits smaller than meant) */
     if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; }
     /* sideways phones / iPads (Mark, 2:27 p.m.; overrides earlier size rules): half size 8 a.m.-8 p.m., full "bedside clock" size the rest of the night */
-    else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
+    else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; }
+    if(!cardMode && document.documentElement.classList.contains("small-stats")){ H /= 3; SX = 1; }   /* Small stats: 1/3 of Big stats (Mark, Nov 18, 2026, 10:12 a.m.) */   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
     fit();
     /* numbers closer together (Mark, 8:28 p.m.): the space between items is capped at half a digit height and the group is centered */
     var gap = Math.min((area - vis) / (items.length + 1), mqP.matches ? 1e9 : H * 1.05),   /* upright: spread evenly across the whole frost (Mark, 9:25 p.m.) */   /* spread out a bit more to fill the frost (Mark, 8:35 p.m.; was H * .5) */ base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
@@ -7228,7 +7233,7 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     var H = window.innerHeight, W = window.innerWidth;
     var logo = document.querySelector(".wt-mast h1.wt-name") || document.querySelector(".wt-mast"), ban = document.getElementById("wt-banner");
     var lr = logo ? logo.getBoundingClientRect() : {bottom: 60}, br = ban ? ban.getBoundingClientRect() : {top: 0, bottom: H, left: 0, right: W};
-    var top = Math.max(lr.bottom, br.top) + 8, bot = Math.min(br.bottom, H) - 4;
+    var top = Math.max(lr.bottom, br.top) + 8, bot = Math.min(br.bottom, H) - 4, small = document.documentElement.classList.contains("small-stats");
     var fr = document.querySelector("#lg-wrap .lg-frost");
     if(fr && fr.offsetParent){ var fb = fr.getBoundingClientRect(); if(fb.height > 10) bot = Math.min(fb.bottom, H) - 2; }
     /* sit above the weather strip inside the frost (Mark, Nov 15, 2026, 10:02 p.m.: "lift the big hour numbers a bit so they don't block
@@ -7243,6 +7248,7 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     cv.font = "700 " + F + "px " + ff; var mt = cv.measureText(txt);
     var asc = mt.actualBoundingBoxAscent || F * .72, des = mt.actualBoundingBoxDescent || 0, ink = asc + des;
     var L = mt.actualBoundingBoxLeft || 0, wd = (mt.actualBoundingBoxRight || mt.width) + L;
+    if(small) top = bot - (bot - top) / 3;   /* Small stats: the big hour is 1/3 as tall too (Mark, Nov 18, 2026, 10:12 a.m.) */
     var hgt = Math.max(20, bot - top), k = hgt / ink;
     if(wd * k > 2 * half) k = 2 * half / wd;                    /* too wide: shrink, keep the bottom on the frost edge */
     /* Hollow hour that fills up through the hour (Mark, Nov 15, 2026, 9:19 p.m., option B "Frosted inside"): a bold outline in the hour's
