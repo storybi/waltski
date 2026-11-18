@@ -5014,7 +5014,7 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
   function reset(el){
     if(!el.hasAttribute("data-stk")) return;
     el.removeAttribute("data-stk");
-    ["background-size", "background-position", "object-fit", "object-position", "width", "height", "left", "top", "right", "bottom", "inset"].forEach(function(p){ el.style.removeProperty(p); });
+    ["background-size", "background-position", "object-fit", "object-position", "max-width", "max-height", "width", "height", "left", "top", "right", "bottom", "inset"].forEach(function(p){ el.style.removeProperty(p); });
   }
   function setP(el, p, v){ if(el.style.getPropertyValue(p) !== v || el.style.getPropertyPriority(p) !== "important") el.style.setProperty(p, v, "important"); }
   /* What covers the bottom of the photo: the frosted time / temperature bar (#lg-wrap .lg-frost, Show image) and/or the resort card
@@ -5037,14 +5037,21 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
     var fx = sp[0], fy = sp[1];
     /* Keep the page's own scale (no zoom): full width on upright phones in Show image, otherwise filling the photo area. */
     var fit = false;   /* portrait now fills the header too (Nov 15, 3:29 p.m.) */
-    var Hd = fit ? W * h / w : Math.max(W / w, Hb / h) * h, Wd = w * Hd / h;
+    var Hd = fit ? W * h / w : Math.max(W / w, Hb / h) * h, Wd = w * Hd / h, cx = W / 2;
+    /* Night stake hold, landscape (Mark, Nov 18, 2026, 4:54 a.m.): the stick stands in the gap between the LOCAL and RESORT temps.
+       The picture is zoomed just enough that it can slide sideways that far and still cover the header; that gap's divider line is hidden. */
+    if(root.classList.contains("stake-hold") && LQ.matches){
+      var dv = document.querySelector("#lg-wrap .lg-dv-lr");
+      if(dv && dv.getClientRects().length){ var dr = dv.getBoundingClientRect(); cx = dr.left + dr.width / 2 - br.left;
+        var zs = Math.max(1, cx / (fx * Wd), (W - cx) / ((1 - fx) * Wd)); Wd *= zs; Hd *= zs; }
+    }
     var oy = target - fy * Hd;
     oy = fit ? Math.min(Hb - Hd, oy) : Math.min(0, oy);
-    var ox = Math.min(0, Math.max(W - Wd, W / 2 - fx * Wd));
+    var ox = Math.min(0, Math.max(W - Wd, cx - fx * Wd));
     el.setAttribute("data-stk", "1");
     if(el.tagName === "IMG"){
       setP(el, "inset", "auto");
-      setP(el, "object-fit", "fill");
+      setP(el, "object-fit", "fill"); setP(el, "max-width", "none"); setP(el, "max-height", "none");
       setP(el, "left", Math.round(ox) + "px");
       setP(el, "top", Math.round(oy) + "px");
       setP(el, "width", Math.round(Wd) + "px");
@@ -5073,6 +5080,7 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
   }
   var q = null; function soon(){ if(q) return; q = setTimeout(function(){ q = null; each(); }, 60); }
   try{ new MutationObserver(soon).observe(ban, {subtree: true, childList: true, attributes: true, attributeFilter: ["style", "src", "class"], characterData: true}); }catch(e){}
+  try{ var lgw = document.getElementById("lg-wrap"); if(lgw) new MutationObserver(soon).observe(lgw, {childList: true}); }catch(e){}   /* frost line redrawn: find the LOCAL | RESORT gap again */
   try{ new MutationObserver(soon).observe(document.documentElement, {attributes: true, attributeFilter: ["class"]}); }catch(e){}
   window.addEventListener("resize", soon); window.addEventListener("orientationchange", soon); window.addEventListener("scroll", soon, {passive: true});
   setInterval(each, 3000); each();
@@ -6293,6 +6301,7 @@ html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!import
 /* Night stake hold (Mark, Nov 18, 2026): while the snow stake is held behind the header, the frost bar is fully clear: no tint, blur or shade */
 @media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){   /* landscape only (Mark, Nov 18, 2026, 3:47 a.m.) */
   html.stake-hold #lg-wrap .lg-frost{background:none!important; -webkit-backdrop-filter:none!important; backdrop-filter:none!important; box-shadow:none!important;}
+  html.stake-hold #lg-wrap .lg-dv-lr{opacity:0!important;}   /* the snow stake stands in the LOCAL | RESORT gap (Nov 18, 2026, 4:54 a.m.) */
 }
 html.view-news #lg-wrap .lg-frost{display:none!important;}   /* no frost bar on the Other News page (Mark, Nov 14, 2026, 3:49 p.m.) */
 html.show-image #askbar{display:none!important;}   /* Ask Claude bar hidden while the photo shows (Mark, Nov 14, 2026, 2:35 p.m.) */
@@ -6509,7 +6518,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
     var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready, HLON ? JSON.stringify(HL) : ""].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 && !nightL ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di);
+    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 && !nightL ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null){ a.di.push(di); a.lr = di; }
       if(sn != null){ if(a.length > 1) a.di.push(a.length - 1); a.push(gtext(sn + '"', H, +sn > 0 ? TINT["tc-cold"] : null, 0, "24HR"));   /* label just "24HR" (Mark, Nov 18, 2026) */ }   /* 24h new snow in inches (Mark, 8:28 p.m.) */
       return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
@@ -6540,7 +6549,7 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
           (WXI[S.d.k] ? '<svg viewBox="0 0 24 24" style="width:' + S.ih + 'px;height:' + S.ih + 'px;margin-top:2px">' + WXI[S.d.k] + '</svg>' : "");
         els.push(hs); }
       x += it.w - 2 * it.px;
-      if(items.di.indexOf(i) >= 0 && i < items.length - 1){ var d = document.createElement("div"); d.className = "lg-dv"; var w = Math.max(2, H * .022);
+      if(items.di.indexOf(i) >= 0 && i < items.length - 1){ var d = document.createElement("div"); d.className = i === items.lr ? "lg-dv lg-dv-lr" : "lg-dv"; var w = Math.max(2, H * .022);
         d.style.width = w + "px"; d.style.height = (H * .9) + "px"; d.style.left = Math.round(x + gap / 2 - w / 2) + "px"; d.style.top = Math.round(base - H * .9) + "px"; els.push(d); }
       if(i === items.wi){   /* smooth wind icon between the resort temp and the wind speed (Mark, 1:13 p.m.) */
         var ws = Math.round(Math.min(gap * .8, H * .5)), wi = document.createElement("span"); wi.className = "lg-wi";
