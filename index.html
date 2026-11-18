@@ -5019,7 +5019,11 @@ window.SK_PFILL = true;   /* portrait photo fills the header from the top (Mark,
   function setP(el, p, v){ if(el.style.getPropertyValue(p) !== v || el.style.getPropertyPriority(p) !== "important") el.style.setProperty(p, v, "important"); }
   /* What covers the bottom of the photo: the frosted time / temperature bar (#lg-wrap .lg-frost, Show image) and/or the resort card
      (#rs-hero, Show card). The stick base goes 14px above whichever starts higher. */
+  /* Night stake hold, landscape (Mark, Nov 18, 2026, 3:50 a.m.): the frost bar is clear then, so the picture is lowered to fill the
+     whole header and the base of the stick sits 14px above the header's bottom edge instead of above the bar. */
+  var LQ = window.matchMedia("(orientation:landscape) and (any-pointer:coarse) and (max-height:1100px)");
   function coverTop(br){
+    if(document.documentElement.classList.contains("stake-hold") && LQ.matches) return br.bottom;
     var t = Infinity, a = [document.querySelector("#lg-wrap .lg-frost"), document.getElementById("rs-hero")];
     a.forEach(function(e){ if(!e || !e.getClientRects().length) return; var r = e.getBoundingClientRect(); if(r.height > 4 && r.top > br.top + 30 && r.top < br.bottom + 60) t = Math.min(t, r.top, br.bottom); });   /* desktop: the bar starts right at the photo's bottom edge (Mark, 3:22 p.m.) */
     return t === Infinity ? null : t;
