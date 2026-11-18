@@ -2375,7 +2375,7 @@ var HOLD = {"asof":1794949200,"q":{"AAPL":{"t":[1794407400,1794409200,1794411000
       nl.style.zIndex = 2; old.style.zIndex = 1; void nl.offsetWidth; nl.style.transition = "";
       nl.classList.add("on"); front = next;
       setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
-      label(f.k); root.classList.add("has-banner");
+      label(f.k); root.classList.add("has-banner"); root.classList.toggle("stake-hold", !!fo);   /* clear frost bar while the stake is held (Nov 18, 2026) */
     };
     img.src = f.src;
   }
@@ -3564,6 +3564,7 @@ window.PTYPE = (function(){
     else lay.style.backgroundImage = 'url("' + src + '")';
     cap.textContent = f.cap || (CAMS[m].resort + " · " + f.name + " live cam" + (at ? " · " + hm(new Date(at)) : ""));
     root.classList.add("has-banner"); linkTo(f);
+    root.classList.toggle("stake-hold", nightHold() && /stake|snow stick|ruler/i.test(f.name || ""));
   }
   /* waltski.com: load the next cam's current picture; skip cams that don't answer */
   var webDir = 1;
@@ -3759,6 +3760,7 @@ window.PTYPE = (function(){
     links.forEach(function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-cam") === mode ? "true" : "false"); });
     if(save){ try{ localStorage.setItem(KEY, mode); }catch(e){} document.dispatchEvent(new CustomEvent("wsj-cam", {detail: mode})); }
     if(timer){ clearInterval(timer); timer = null; }
+    root.classList.toggle("stake-hold", !c && nightHold());
     idx = -1;
     if(!c){ window.skHdrRadarWant = false; root.classList.remove("hdr-radar"); if(window.skHdrRadar) window.skHdrRadar(false);
       var play = getPlay(); if(play && play.hasAttribute("data-sb-href")){ play.href = play.getAttribute("data-sb-href"); play.title = play.getAttribute("data-sb-title"); } return; }
@@ -6284,6 +6286,8 @@ html:not(.has-banner) .rs-stat .v .rs-wind.ws-y{color:#b58a00;} html:not(.has-ba
 html.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:31; pointer-events:none;}
 html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!important;}   /* also in Show card (Mark, 1:08 p.m.) */
 #lg-slot{display:none;}
+/* Night stake hold (Mark, Nov 18, 2026): while the snow stake is held behind the header, the frost bar is fully clear: no tint, blur or shade */
+html.stake-hold #lg-wrap .lg-frost{background:none!important; -webkit-backdrop-filter:none!important; backdrop-filter:none!important; box-shadow:none!important;}
 html.view-news #lg-wrap .lg-frost{display:none!important;}   /* no frost bar on the Other News page (Mark, Nov 14, 2026, 3:49 p.m.) */
 html.show-image #askbar{display:none!important;}   /* Ask Claude bar hidden while the photo shows (Mark, Nov 14, 2026, 2:35 p.m.) */
 /* Show card (Mark, Nov 14, 2026, 1:58 p.m.): no glass line, no frost, and the old time/temp/wind line above the card is hidden too, so the card
@@ -6961,7 +6965,7 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
         setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
       };
       img.src = probe.src; front = next;
-      root.classList.add("has-banner", "has-video");
+      root.classList.add("has-banner", "has-video"); root.classList.toggle("stake-hold", held);
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
     probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(held) return; if(++fails < l.length) load(); else load.dir = 1; };
