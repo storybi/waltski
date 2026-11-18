@@ -2348,11 +2348,26 @@ var HOLD = {"asof":1794949200,"q":{"AAPL":{"t":[1794407400,1794409200,1794411000
     var d = x.getImageData(0, 0, 48, 27).data, L = []; for(var k = 0; k < d.length; k += 4) L.push(.3 * d[k] + .59 * d[k + 1] + .11 * d[k + 2]); L.sort(function(a, b){ return a - b; });
     var m = 0; L.forEach(function(v){ m += v; }); m /= L.length; return m < 24 && L[Math.floor(L.length * .9)] < 60; }catch(e){ return false; } }
   var blackTries = 0;
-  function paint(i){
-    var f = frames[i]; if(!f) return;
+  /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. (device time) the photo rotation stops and holds the snow stake picture,
+     refreshed every 30 minutes. An arrow tap still steps through the cams; the stake comes back 2 minutes later. */
+  function nightHold(){ var h = new Date().getHours(); return h >= 21 || h < 7; }
+  var STAKE_URL = "https://img.hdrelay.com/frames/09f922af-169d-4949-9bb7-295c6a859daa/default/last.jpg", heldAt = 0;
+  function hold(){
+    if(!nightHold()){ heldAt = 0; return false; }
+    var s = frames.filter(function(f){ return f.k === "stake"; })[0];
+    if(!s && !(window.claude && window.claude.use)) s = {k: "stake", src: STAKE_URL};
+    if(!s) return false;
+    if(heldAt && Date.now() - heldAt < 30*60000) return true;
+    heldAt = Date.now();
+    paint(-1, {k: "stake", src: /^https?:/.test(s.src) ? s.src.split("?")[0] + "?t=" + Date.now() : s.src});
+    return true;
+  }
+  function tick(){ if(document.hidden || hold() || frames.length < 2) return; idx = (idx + 1) % frames.length; paint(idx); }
+  function paint(i, fo){
+    var f = fo || frames[i]; if(!f) return;
     var next = 1 - front, img = new Image();
     img.onload = function(){
-      if(isBlack(img) && frames.length > 1 && blackTries < frames.length){ blackTries++; idx = (i + 1) % frames.length; paint(idx); return; }
+      if(!fo && isBlack(img) && frames.length > 1 && blackTries < frames.length){ blackTries++; idx = (i + 1) % frames.length; paint(idx); return; }
       blackTries = 0;
       /* Smooth crossfade (Mark, Oct 29, 2026): the new photo fades in ON TOP of the old one (no dip to dark), then the old layer is cleared. */
       var nl = L[next], old = L[front];
@@ -2373,8 +2388,8 @@ var HOLD = {"asof":1794949200,"q":{"AAPL":{"t":[1794407400,1794409200,1794411000
         var i = document.querySelector("#cam-" + k + " img"); if(i && i.src) frames.push({k: k, src: i.src});
       });
     }
-    idx = 0; paint(0); size();
-    if(frames.length > 1) timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
+    idx = 0; heldAt = 0; if(!hold()) paint(0); size();
+    if(frames.length > 1 || nightHold()) timer = setInterval(tick, ROTATE);
   }
   /* Next photo button: show the next cam view now, then carry on rotating every 20 seconds from there. */
   function nextPhoto(){
@@ -2389,7 +2404,8 @@ var HOLD = {"asof":1794949200,"q":{"AAPL":{"t":[1794407400,1794409200,1794411000
     if(timer){ clearInterval(timer); timer = null; }
     var d = nextPhoto.dir || 1; nextPhoto.dir = 1;
     idx = (idx + d + frames.length) % frames.length; paint(idx);
-    timer = setInterval(function(){ if(document.hidden) return; idx = (idx + 1) % frames.length; paint(idx); }, ROTATE);
+    if(nightHold()) heldAt = Date.now() - 28*60000;
+    timer = setInterval(tick, ROTATE);
   }
   /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): step the Snowbasin photo set back (-1) or forward (+1) */
   window.skSbBannerStep = function(d){ nextPhoto.dir = d < 0 ? -1 : 1; nextPhoto(); };
@@ -3615,7 +3631,24 @@ window.PTYPE = (function(){
       if(!had && m === mode){ idx = -1; claudeNext(); }
     }, function(){ busy = false; });
   }
-  function tick(){ if(document.hidden || !CAMS[mode] || CAMS[mode].live || (CAMS[mode].video && !inClaude)) return; if(inClaude) claudeNext(); else webNext(0); }
+  /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. a resort with a snow stake cam holds that picture, refreshed every 30 minutes. */
+  function nightHold(){ var h = new Date().getHours(); return h >= 21 || h < 7; }
+  var heldAt = 0, heldM = "";
+  function stakeIdx(c){ for(var i = 0; i < c.frames.length; i++) if(/stake|snow stick|ruler/i.test(c.frames[i].name || "")) return i; return -1; }
+  function holdStake(){
+    var m = mode, c = CAMS[m]; if(!nightHold() || !c || c.live || c.video){ heldAt = 0; return false; }
+    var si = stakeIdx(c); if(si < 0) return false;
+    if(heldAt && heldM === m && Date.now() - heldAt < 30*60000) return true;
+    var f = c.frames[si];
+    if(inClaude){ var x = (set_[m] || []).filter(function(y){ return y.i === si; })[0]; if(!x) return false;
+      heldAt = Date.now(); heldM = m; show("data:image/jpeg;base64," + x.img, f, setAt[m], m); return true; }
+    heldAt = Date.now(); heldM = m;
+    var u = f.img + (f.img.indexOf("?") < 0 ? "?t=" : "&t=") + Date.now(), probe = new Image();
+    probe.onload = function(){ if(probe.naturalWidth > 200) show(u, f, new Date().toISOString(), m); else heldAt = 0; };
+    probe.onerror = function(){ heldAt = 0; };
+    probe.src = u; return true;
+  }
+  function tick(){ if(document.hidden || !CAMS[mode] || CAMS[mode].live || (CAMS[mode].video && !inClaude)) return; if(holdStake()) return; if(inClaude) claudeNext(); else webNext(0); }
   function fit(){
     var fs = lay.querySelectorAll("iframe"); if(!fs.length) return;
     var w = b.offsetWidth || window.innerWidth, h = b.offsetHeight || 300;
@@ -3706,6 +3739,7 @@ window.PTYPE = (function(){
       timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE); return; }
     if(inClaude){ var l = usable(mode); if(!l.length) return; idx = ((idx + d - 1) % l.length + l.length) % l.length; claudeNext(); }
     else { webDir = d; webNext(0); }
+    if(nightHold()){ heldAt = Date.now() - 28*60000; heldM = mode; }
     timer = setInterval(tick, ROTATE);
   };
   function video(c){
@@ -3738,9 +3772,9 @@ window.PTYPE = (function(){
     if(c.live){ lay.style.backgroundImage = ""; if(inClaude){ cap.textContent = c.resort + " \u00b7 live cams play on skiinut.com"; return; } liveRot(c); return; }
     if(inClaude){
       if(!set_[mode]){ try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-set") || "null"); if(sv && sv.set && sv.set.length){ set_[mode] = sv.set; setAt[mode] = sv.at; } }catch(e){} }
-      claudeNext(); fetchSet();
+      heldAt = 0; if(!holdStake()) claudeNext(); fetchSet();
     } else if(c.video){ video(c); return; }
-    else webNext(0);
+    else { heldAt = 0; if(!holdStake()) webNext(0); }
     timer = setInterval(tick, ROTATE);
   }
   links.forEach(function(x){ x.addEventListener("click", function(e){ e.preventDefault(); set(x.getAttribute("data-cam"), true); }); });
@@ -6889,27 +6923,35 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
   var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false, idx = -1, fails = 0;
   L.forEach(function(i){ i.className = "wt-live"; i.alt = ""; i.setAttribute("aria-hidden", "true"); i.decoding = "async"; b.insertBefore(i, b.firstChild); });
   function when(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
-  function list(){
+  function list(all){
     var l = [{src: SNAP, name: "Needles"}];
     ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
     /* Every scenic Snowbasin cam (Mark, Nov 11, 2026): the other HDRelay cams from snowbasin.com's webcam page. */
     [["62101a0b8db58d080b9eac83", "Middle Bowl Base"], ["6192dd615233cdcad76d7dba", "Earl's Plaza"], ["65652b36eb0e282336694064", "Strawberry Patio"], ["621944828db58d080b9eac8b", "Base Area"]].forEach(function(c){ l.push({src: "https://img.hdrelay.com/camera/" + c[0] + "/snapshot", name: c[1]}); });
     /* Snow stake (the snow ruler, 8,000 ft) in the rotation too (Mark, Nov 14, 2026, 5:52 p.m.). */
     l.push({src: "https://img.hdrelay.com/frames/09f922af-169d-4949-9bb7-295c6a859daa/default/last.jpg", name: "Snow stake"});
+    if(all) return l;
     /* Skip pictures the hourly check found all black or covered in text (window.CAM_SKIP, Nov 14, 2026). */
     var sk = window.CAM_SKIP || {}; var ok = l.filter(function(x){ return !sk[x.src]; });
     return ok.length ? ok : l;
   }
+  /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. (device time) the rotation stops on the snow stake picture, refreshed every
+     30 minutes. An arrow tap still steps through the cams; the stake comes back 2 minutes later. */
+  function nightHold(){ var h = new Date().getHours(); return h >= 21 || h < 7; }
+  var heldAt = 0;
   function load(){
     if(busy) return;
-    var l = list(), dd = load.dir || 1; idx = ((idx + dd) % l.length + l.length) % l.length; var f = l[idx];   /* dd: -1 while stepping back with the arrow */
+    var l = list(), dd = load.dir || 1, held = !load.manual && nightHold(); load.manual = false;
+    if(held){ var la = list(true), si = -1; la.forEach(function(x, j){ if(x.name === "Snow stake") si = j; }); if(si >= 0){ l = la; idx = si; } else held = false; }
+    if(!held) idx = ((idx + dd) % l.length + l.length) % l.length;
+    var f = l[idx];   /* dd: -1 while stepping back with the arrow */
     busy = true; var my = load.seq = (load.seq || 0) + 1;   /* a newer load (arrow tap) wins over an older one still loading */
     var next = 1 - front, img = L[next], probe = new Image();
     probe.onload = function(){
       if(my !== load.seq) return;
       busy = false;
-      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); else load.dir = 1; return; }
-      fails = 0; load.dir = 1;
+      if(probe.naturalWidth < 40){ if(held) return; if(++fails < l.length) load(); else load.dir = 1; return; }
+      fails = 0; load.dir = 1; if(held) heldAt = Date.now();
       /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
       var old = L[front];
       img.onload = function(){
@@ -6922,16 +6964,17 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
       root.classList.add("has-banner", "has-video");
       cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
     };
-    probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(++fails < l.length) load(); else load.dir = 1; };
+    probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(held) return; if(++fails < l.length) load(); else load.dir = 1; };
     probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
   }
+  function tick(){ if(document.hidden) return; if(nightHold()){ if(heldAt && Date.now() - heldAt < 30*60000) return; } else heldAt = 0; load(); }
   load();
-  var rot = setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
+  var rot = setInterval(tick, ROTATE);
   /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): previous / next Snowbasin cam, then rotate on from there */
   if(!(window.claude && window.claude.use)) window.skSbLiveStep = function(d){
     var n = list().length; if(n < 2) return false;
-    busy = false; fails = 0; load.dir = d < 0 ? -1 : 1; load();
-    clearInterval(rot); rot = setInterval(function(){ if(!document.hidden) load(); }, ROTATE); return true;
+    busy = false; fails = 0; load.dir = d < 0 ? -1 : 1; load.manual = true; load(); if(nightHold()) heldAt = Date.now() - 28*60000;
+    clearInterval(rot); rot = setInterval(tick, ROTATE); return true;
   };
 })();
 </script>
@@ -7459,61 +7502,6 @@ var COMPOSITE = {"asof":"Wed 4:15 a.m. MT","regions":{"ogden":{"name":"Ogden Val
   if(mq && mq.addEventListener) mq.addEventListener("change", function(){ setTimeout(draw, 200); });
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
   draw(); setTimeout(draw, 1500);
-})();
-</script>
-<script>
-/* Public site: the header rotates through Snowbasin's LIVE cam pictures every 20 seconds (Mark, Oct 26, 2026) — the Needles cam
-   (HD Relay snapshot) plus the Mt. Ogden, John Paul Lodge and Base of Wildcat cams, each freshly loaded when its turn comes, with a
-   crossfade. The dateline's "Watch Live" link (where Next Photo was) opens Snowbasin's webcam page, where the real-time video plays in
-   Snowbasin's own player. If no live picture loads, the rotating cam photos stay. */
-(function(){
-  var SNAP = "https://b15.hdrelay.com/camera/1b6ed87c-f919-4e59-b9cc-7480e3ca31c3/snapshot", LIVE = "https://www.snowbasin.com/the-mountain/web-cams/", ROTATE = 20000;
-  var NAMES = {ogden: "Mt. Ogden", jp: "John Paul Lodge", wildcat: "Base of Wildcat"};
-  var b = document.getElementById("wt-banner"), root = document.documentElement;
-  if(!b) return;
-  var nb = document.getElementById("wt-next");
-  if(nb && nb.previousElementSibling && nb.previousElementSibling.classList.contains("wt-sep2")) nb.previousElementSibling.classList.add("wt-next-sep");
-  var cap = document.createElement("span"); cap.className = "wt-vid-cap"; cap.textContent = "Snowbasin · Needles live cam"; b.appendChild(cap);
-  var sep = document.createElement("span"); sep.className = "wt-sep2 wt-play-sep"; sep.setAttribute("aria-hidden", "true"); sep.textContent = "|";
-  var link = document.createElement("a"); link.className = "wt-next wt-play"; link.textContent = "Watch Live";
-  link.href = LIVE; link.target = "_blank"; link.rel = "noopener"; link.title = "Watch Snowbasin's cams live on Snowbasin's webcam page";
-  if(nb && nb.parentNode){ nb.parentNode.insertBefore(link, nb.nextSibling); nb.parentNode.insertBefore(sep, link); }
-  var L = [document.createElement("img"), document.createElement("img")], front = 0, busy = false, idx = -1, fails = 0;
-  L.forEach(function(i){ i.className = "wt-live"; i.alt = ""; i.setAttribute("aria-hidden", "true"); i.decoding = "async"; b.insertBefore(i, b.firstChild); });
-  function when(){ try{ return new Date().toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
-  function list(){
-    var l = [{src: SNAP, name: "Needles"}];
-    ["ogden", "jp", "wildcat"].forEach(function(k){ var a = document.querySelector("#cam-" + k + " .frame"); if(a && a.href && /^https?:/.test(a.href)) l.push({src: a.href, name: NAMES[k]}); });
-    /* Every scenic Snowbasin cam (Mark, Nov 11, 2026): the other HDRelay cams from snowbasin.com's webcam page (snow stake left out). */
-    [["62101a0b8db58d080b9eac83", "Middle Bowl Base"], ["6192dd615233cdcad76d7dba", "Earl's Plaza"], ["65652b36eb0e282336694064", "Strawberry Patio"], ["621944828db58d080b9eac8b", "Base Area"]].forEach(function(c){ l.push({src: "https://img.hdrelay.com/camera/" + c[0] + "/snapshot", name: c[1]}); });
-    return l;
-  }
-  function load(){
-    if(busy) return;
-    var l = list(); idx = (idx + 1) % l.length; var f = l[idx];
-    busy = true;
-    var next = 1 - front, img = L[next], probe = new Image();
-    probe.onload = function(){
-      busy = false;
-      if(probe.naturalWidth < 40){ if(++fails < l.length) load(); return; }
-      fails = 0;
-      /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
-      var old = L[front];
-      img.onload = function(){
-        img.onload = null;
-        img.style.transition = "none"; img.classList.remove("on"); img.style.zIndex = 2; old.style.zIndex = 1; void img.offsetWidth; img.style.transition = "";
-        img.classList.add("on");
-        setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
-      };
-      img.src = probe.src; front = next;
-      root.classList.add("has-banner", "has-video");
-      cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
-    };
-    probe.onerror = function(){ busy = false; if(++fails < l.length) load(); };
-    probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
-  }
-  load();
-  setInterval(function(){ if(!document.hidden) load(); }, ROTATE);
 })();
 </script>
 <script>

@@ -391,6 +391,8 @@ public_css += SUGGEST_CSS
 # banner arrows). A second, older copy ran a second banner rotator without them, so some Snowbasin cams never showed.
 if "/* Public site: load the Snowbasin cams" in body:
     live_js = ""
+if "/* Public site: the header rotates through Snowbasin's LIVE cam pictures" in body:   # artifact carries the newer one (night stake hold, Nov 18, 2026)
+    video_js = ""
 if "/* SKIINUT Monday outlook subscribe" in body:
     SUGGEST_JS = ""
 page = head + public_css + video_css + "</head>\n<body>\n" + body.strip() + "\n" + live_js + video_js + greet_js + SUGGEST_JS + "</body>\n</html>\n"
