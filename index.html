@@ -6458,13 +6458,15 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       top0 = t1; Hs = Math.max(40, cr.top - 4 - t1); left0 = Math.round(cr.left); area = Math.round(cr.width); ptop = t1; stop = t1 + Hs / .3;
     }
     if(root.classList.contains("lg-card") !== !!cardMode) root.classList.toggle("lg-card", !!cardMode);
-    HLON = !cardMode; if(HLON) hlLoad();   /* today's high / low / icon stack, frost bar only (Nov 16, 9:01 a.m.) */
+    /* sideways phones 8 p.m.-8 a.m.: no high/low stacks and no wind icon, so the numbers can be bigger (Mark, Nov 18, 2026, 4:06 a.m.) */
+    var nightL = !cardMode && mq.matches && !dayHalf();
+    HLON = !cardMode && !nightL; if(HLON) hlLoad();   /* today's high / low / icon stack, frost bar only (Nov 16, 9:01 a.m.) */
     dpr = Math.min(3, window.devicePixelRatio || 2);
     var key = [hm, lt, rt, wd ? wd.s + "/" + Math.round(wd.to) : "", sn, W, Math.round(top0), Math.round(Hs), left0, area, cardMode ? 1 : 0, dayHalf() ? 1 : 0, dpr, ready, HLON ? JSON.stringify(HL) : ""].join("|");
     wrap.style.left = left0 + "px"; wrap.style.top = Math.round(top0 + sy) + "px"; wrap.style.width = area + "px"; wrap.style.height = Math.round(Hs) + "px";
     if(key === lastKey) return; lastKey = key;
-    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di);
-      if(sn != null){ if(a.length > 1) a.di.push(a.length - 1); a.push(gtext(sn + '"', H, +sn > 0 ? TINT["tc-cold"] : null, 0, "24H SNOW")); }   /* 24h new snow in inches (Mark, 8:28 p.m.) */
+    function build(H){ var a = [gtext(hm, H, null, 0, "LOCAL TIME")]; if(lt != null) a.push(temp(lt, H)); var di = a.length - 1; if(rt != null) a.push(temp(rt, H, true)); a.wi = wd && a.length > 1 && !nightL ? a.length - 1 : -1; if(wd) a.push(wind(wd.s, wd.to, H)); a.di = [0]; if(lt != null && rt != null) a.di.push(di);
+      if(sn != null){ if(a.length > 1) a.di.push(a.length - 1); a.push(gtext(sn + '"', H, +sn > 0 ? TINT["tc-cold"] : null, 0, "24HR"));   /* label just "24HR" (Mark, Nov 18, 2026) */ }   /* 24h new snow in inches (Mark, 8:28 p.m.) */
       return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
     var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .504), items, vis; SX = 1;   /* frost bar and its numbers doubled (Mark, Nov 18, 2026, 3:53 a.m.; was .252), still shrunk to fit the width */
