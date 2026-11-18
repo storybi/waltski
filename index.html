@@ -6467,17 +6467,18 @@ html.lg-card #rs-hero .rs-top > .wt-clock{display:none!important;}   /* upright 
       if(sn != null){ if(a.length > 1) a.di.push(a.length - 1); a.push(gtext(sn + '"', H, +sn > 0 ? TINT["tc-cold"] : null, 0, "24H SNOW")); }   /* 24h new snow in inches (Mark, 8:28 p.m.) */
       return a; }   /* dividers: clock | local and local | resort (Mark, 12:47 p.m.) */
     /* about 25% of the photo height, at the bottom of the photo, digits never narrower than 75%, evenly spaced */
-    var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .252), items, vis; SX = 1;
+    var H = cardMode ? Hs / (1 + LGAP + LBL + .3) : Math.min(Hs * .85, (stop - ptop) * .504), items, vis; SX = 1;   /* frost bar and its numbers doubled (Mark, Nov 18, 2026, 3:53 a.m.; was .252), still shrunk to fit the width */
     if(!(H > 4)){ lastKey = ""; return; }   /* layout not settled yet (negative height crashed the degree ring; code clean-up Nov 17, 2026) */   /* 25% shorter (Mark, 12:39 p.m.): about 25% of the photo height (Mark, 11:52 a.m.) */
     function fit(){ for(var k = 0; k < 6; k++){
       items = build(H); vis = 0; items.forEach(function(it){ vis += it.w - 2 * it.px; });
       var need = vis + H * .22 * (items.length + 1); if(need <= area) break;
       var r = area / need * .99; if(SX * r >= .75) SX *= r; else { var s2 = .75 / SX; SX = .75; H *= Math.min(1, r / s2); }
     } }
-    fit();
-    if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; fit(); }
+    /* size factor first, then one fit to the width (Nov 18, 2026: fitting before halving made desktop / upright / daytime digits smaller than meant) */
+    if(!cardMode && (mqP.matches || mqD.matches)){ H *= mqP.matches ? .375 : .5; SX = 1; }
     /* sideways phones / iPads (Mark, 2:27 p.m.; overrides earlier size rules): half size 8 a.m.-8 p.m., full "bedside clock" size the rest of the night */
-    else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; fit(); }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
+    else if(!cardMode && mq.matches && dayHalf()){ H *= .5; SX = 1; }   /* upright: 25% shorter (1:00 p.m.), then half that; desktop: half (Mark, 1:32 p.m.) — more of the photo shows */
+    fit();
     /* numbers closer together (Mark, 8:28 p.m.): the space between items is capped at half a digit height and the group is centered */
     var gap = Math.min((area - vis) / (items.length + 1), mqP.matches ? 1e9 : H * 1.05),   /* upright: spread evenly across the whole frost (Mark, 9:25 p.m.) */   /* spread out a bit more to fill the frost (Mark, 8:35 p.m.; was H * .5) */ base = Math.round(Math.max(H, Hs - H * (LGAP + LBL) - H * .1)), x = (area - vis - gap * (items.length - 1)) / 2, els = [];
     /* upright: the stats sit centered in the frost bar (Mark, 2:27 p.m.) — frost top stays put, the digits and labels move down */
