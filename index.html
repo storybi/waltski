@@ -6287,7 +6287,9 @@ html.lg-on:not(.banner-lock) #lg-wrap{display:block; position:absolute; z-index:
 html.lg-on .wt-clock .wt-clock-t, html.lg-on #wt-pclock{visibility:hidden!important;}   /* also in Show card (Mark, 1:08 p.m.) */
 #lg-slot{display:none;}
 /* Night stake hold (Mark, Nov 18, 2026): while the snow stake is held behind the header, the frost bar is fully clear: no tint, blur or shade */
-html.stake-hold #lg-wrap .lg-frost{background:none!important; -webkit-backdrop-filter:none!important; backdrop-filter:none!important; box-shadow:none!important;}
+@media (orientation:landscape) and (any-pointer:coarse) and (max-height:1100px){   /* landscape only (Mark, Nov 18, 2026, 3:47 a.m.) */
+  html.stake-hold #lg-wrap .lg-frost{background:none!important; -webkit-backdrop-filter:none!important; backdrop-filter:none!important; box-shadow:none!important;}
+}
 html.view-news #lg-wrap .lg-frost{display:none!important;}   /* no frost bar on the Other News page (Mark, Nov 14, 2026, 3:49 p.m.) */
 html.show-image #askbar{display:none!important;}   /* Ask Claude bar hidden while the photo shows (Mark, Nov 14, 2026, 2:35 p.m.) */
 /* Show card (Mark, Nov 14, 2026, 1:58 p.m.): no glass line, no frost, and the old time/temp/wind line above the card is hidden too, so the card
