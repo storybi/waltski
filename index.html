@@ -6087,14 +6087,16 @@ html.clock-night .ski-feed{background:#000; border-color:#111;}
   function closeM(){ mv.classList.remove("on"); }
   b.addEventListener("click", function(){ if(mv.classList.contains("on")) closeM(); else openM(); });
   mv.addEventListener("click", function(e){ var x = e.target.closest("button"); if(!x) return; var v = x.getAttribute("data-v"); closeM(); set(v !== "card", v);
-    try{ localStorage.setItem("skiinut-view", v); localStorage.setItem("skiinut-show-image", v !== "card" ? "1" : "0"); }catch(er){} });
+    try{ sessionStorage.setItem("skiinut-view", v); }catch(er){} });
   document.addEventListener("pointerdown", function(e){ if(mv.classList.contains("on") && !mv.contains(e.target) && e.target !== b) closeM(); }, true);
   document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeM(); });
   window.addEventListener("scroll", function(){ if(mv.classList.contains("on")) placeM(); }, {passive: true});
   window.addEventListener("resize", function(e){ if(busy || !root.classList.contains("show-image")) return; later(); });
   window.addEventListener("orientationchange", function(){ later(); setTimeout(later, 400); });
-  var keep = false, vm = null; try{ vm = localStorage.getItem("skiinut-view"); keep = localStorage.getItem("skiinut-show-image") === "1"; }catch(e){}
-  if(!NAMES[vm]) vm = keep ? "stats" : "card"; keep = vm !== "card";
+  /* Always open in Big stats (Mark, Nov 18, 2026, 8:30 p.m.): every new visit starts in Big stats. A menu pick holds only in that tab
+     (sessionStorage), so the hourly self-reload keeps it, but a fresh open goes back to Big stats. The old localStorage keys are cleared. */
+  var vm = null; try{ vm = sessionStorage.getItem("skiinut-view"); localStorage.removeItem("skiinut-view"); localStorage.removeItem("skiinut-show-image"); }catch(e){}
+  if(!NAMES[vm]) vm = "stats"; var keep = vm !== "card";
   set(keep, vm); if(keep){ setTimeout(fit, 800); setTimeout(fit, 2500); }
 })();
 </script>
