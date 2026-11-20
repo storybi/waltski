@@ -632,6 +632,13 @@ def do_holdings(s, now_mt):
         raw[sym] = {int(d.timestamp()): round(v, 2) for d, v in bars}
         if len(raw[sym]) < 10:
             raise ValueError("short series " + sym)
+    try:  # Anthropic (Mark, Nov 20, 2026): listed Nov 19, 2026; bars before its first trade stay null
+        meta, bars = ychart("ANT", "5d", "30m")
+        a = {int(d.timestamp()): round(v, 2) for d, v in bars}
+        if a:
+            raw["ANT"] = a
+    except Exception as e:  # noqa: BLE001
+        log("  holdings: no ANT", e)
     try:  # Nasdaq Composite benchmark line (optional)
         meta, bars = ychart("^IXIC", "5d", "30m")
         nq = {int(d.timestamp()): round(v, 2) for d, v in bars}
@@ -642,16 +649,39 @@ def do_holdings(s, now_mt):
     base = sorted(raw["AAPL"])
     q = {}
     for sym in list(raw):
-        last = raw[sym][min(raw[sym])]
+        t0 = min(raw[sym])
+        last = raw[sym][t0]
         c = []
         for t in base:
             if t in raw[sym]:
                 last = raw[sym][t]
-            c.append(last)
+            c.append(None if t < t0 and sym == "ANT" else last)
         q[sym] = {"t": base, "c": c}
     s, ok = set_var(s, "HOLD", json.dumps({"asof": base[-1], "q": q}, separators=(",", ":")))
     if ok:
         log("  holdings: %d points" % len(base))
+    return s
+
+
+def do_ant(s, now_mt):
+    """Anthropic stock chart under the Claude section (Mark, Nov 20, 2026) -> var ANT_Q.
+    30-minute bars since the Nov 19, 2026 IPO for the first 20 trading days, then daily closes from the IPO."""
+    if "var ANT_Q = " not in s:
+        return s
+    meta, bars = ychart("ANT", "1mo", "30m")
+    iv = "30m"
+    if len({d.date() for d, v in bars}) > 20:
+        meta, bars = ychart("ANT", "1y", "1d")
+        bars = [(d, v) for d, v in bars if int(d.timestamp()) >= 1795060000]
+        iv = "1d"
+    if len(bars) < 2:
+        return s
+    t = [int(d.timestamp()) for d, v in bars]
+    c = [round(v, 2) for d, v in bars]
+    q = {"asof": t[-1], "ipo": 83.0, "ipo_date": "2026-11-19", "iv": iv, "t": t, "c": c}
+    s, ok = set_var(s, "ANT_Q", json.dumps(q, separators=(",", ":")))
+    if ok:
+        log("  ANT: %d %s bars" % (len(t), iv))
     return s
 
 
@@ -830,7 +860,7 @@ def main():
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ots_cams, do_cam_quality, do_composite):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ant, do_ots_cams, do_cam_quality, do_composite):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
