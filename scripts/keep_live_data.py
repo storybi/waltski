@@ -11,7 +11,7 @@ resort card's football button.
 import re
 import sys
 
-PATS = [r'var SNAP = \{.*?\};', r'var SNAP_AT = ".*?";', r'var SEA_GAME = \{.*?\};', r'var ORE_GAME = \{.*?\};', r'var COMPOSITE = \{.*?\};']   # COMPOSITE: hourly composite snow forecast (Nov 15, 2026)
+PATS = [r'var SNAP = \{.*?\};', r'var SNAP_AT = ".*?";', r'var SEA_GAME = \{.*?\};', r'var ORE_GAME = \{.*?\};', r'var COMPOSITE = \{.*?\};', r'var STAKE_LOG = \{.*?\};']   # COMPOSITE: hourly composite snow forecast (Nov 15, 2026); STAKE_LOG: hourly stake readings (Nov 20, 2026)
 
 
 def keep(base, built):
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     base = open(sys.argv[1], encoding="utf-8").read()
     built = open(sys.argv[2], encoding="utf-8").read()
     open(sys.argv[2], "w", encoding="utf-8").write(keep(base, built))
-    print("keep_live_data: kept SNAP, SNAP_AT, SEA_GAME, ORE_GAME from the base page")
+    print("keep_live_data: kept SNAP, SNAP_AT, SEA_GAME, ORE_GAME, COMPOSITE, STAKE_LOG from the base page")
