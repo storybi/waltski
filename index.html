@@ -4688,7 +4688,7 @@ html:not(.view-news) #ecov{display:none!important;}
   function nowHour(tz){ try{ return +new Date().toLocaleTimeString("en-US", {timeZone: tz, hour: "2-digit", hour12: false}) % 24; }catch(e){ return -1; } }
   /* Hourly snow stake row (Mark, Nov 20, 2026): "an hourly read of the snow stake visible by hour in inches read on the stick".
      From STAKE_LOG (+ the latest STAKE_READ). Each hour gets the last reading taken in it; hours with no new reading carry the
-     previous one (faded) for up to 2 more hours; future hours stay blank. Tint deepens with the snow. */
+     previous one (faded) for up to 3 more hours; future hours stay blank. Tint deepens with the snow. */
   function lp(t, tz){ try{ return [t.toLocaleDateString("en-CA", {timeZone: tz}), +t.toLocaleTimeString("en-US", {timeZone: tz, hour: "2-digit", hour12: false}) % 24]; }catch(e){ return null; } }
   function clk(t, tz){ try{ return t.toLocaleTimeString("en-US", {timeZone: tz, hour: "numeric", minute: "2-digit"}).replace("AM", "a.m.").replace("PM", "p.m."); }catch(e){ return ""; } }
   function stakeHours(k, o, n, nh){
@@ -4702,7 +4702,7 @@ html:not(.view-news) #ecov{display:none!important;}
     var out = [], any = false, j = 0, last = null, end = nh >= 0 ? nh : n - 1;
     for(var i = 0; i < n; i++){
       while(j < reads.length && reads[j][0] <= i){ last = reads[j]; j++; }
-      if(i > end || !last || i - last[0] > 2){ out.push(null); continue; }
+      if(i > end || !last || i - last[0] > 3){ out.push(null); continue; }
       out.push({n: last[1], at: last[2], carry: last[0] !== i}); any = true;
     }
     return any ? out : null;

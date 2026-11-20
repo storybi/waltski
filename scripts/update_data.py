@@ -854,13 +854,47 @@ def do_composite(s, now_mt):
     return s
 
 
+def do_stake_log(s, now_mt):
+    """Hourly snow stake row (Mark, Nov 20, 2026): copy each new stake-cam reading in var STAKE_READ into var STAKE_LOG
+    ({key: [[ISO time read, inches], ...]}, oldest first, last 48 hours). The 48-hour outlook draws it under the chart."""
+    import re as _re
+    mr, ml = _re.search(r'var STAKE_READ = (\{.*?\});', s), _re.search(r'var STAKE_LOG = (\{.*?\});', s)
+    if not mr or not ml:
+        log("  stake log: var not found")
+        return s
+    try:
+        rd, lg = json.loads(mr.group(1)), json.loads(ml.group(1))
+    except Exception as e:  # noqa: BLE001
+        log("  stake log: bad JSON (%s)" % e)
+        return s
+    cut = now_mt - dt.timedelta(hours=48)
+    for k, v in rd.items():
+        if isinstance(v, dict) and v.get("at") and v.get("n") is not None:
+            lst = lg.setdefault(k, [])
+            if not any(e[0] == v["at"] for e in lst):
+                lst.append([v["at"], v["n"]])
+    for k in list(lg):
+        keep = []
+        for e in lg[k]:
+            try:
+                if dt.datetime.fromisoformat(e[0]) >= cut:
+                    keep.append(e)
+            except Exception:  # noqa: BLE001
+                pass
+        keep.sort(key=lambda e: dt.datetime.fromisoformat(e[0]))
+        lg[k] = keep
+    new = "var STAKE_LOG = " + json.dumps(lg, separators=(",", ":")) + ";"
+    log("  stake log: %s" % ", ".join("%s %d" % (k, len(v)) for k, v in lg.items()))
+    return s[:ml.start()] + new + s[ml.end():]
+
+
 def main():
     path = sys.argv[1]
     s = open(path, encoding="utf-8").read()
     before = s
     now_mt = dt.datetime.now(MT)
     log("waltski data refresh", now_mt.strftime("%Y-%m-%d %H:%M MT"))
-    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ant, do_ots_cams, do_cam_quality, do_composite):
+    for fn in (do_ticker, do_markets, do_spacex, do_weather, do_seahawks, do_ducks, do_travis, do_sermon, do_cams, do_ski_resorts, do_wsj_videos, do_holdings, do_ant, do_ots_cams, do_cam_quality, do_composite, do_stake_log):
         try:
             s = fn(s, now_mt)
         except Exception as e:  # noqa: BLE001
