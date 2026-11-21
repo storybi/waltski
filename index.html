@@ -5293,7 +5293,7 @@ html.cam-hi #snow .rwx{margin-bottom:16px!important; border-bottom:1px solid var
 /* Snow stake readings (Mark, Nov 15, 2026): Claude reads each resort's snow stake (snow stick) picture on every daily run and writes
    whole inches here, with the time it read it. The resort card's New 24h uses a reading when it is under 24 hours old;
    otherwise it falls back to the new snow the resort reports (OnTheSnow, in SKI). Keys match window.IKON. */
-var STAKE_READ = {"sb":{"n":1,"at":"2026-11-20T19:10:20-07:00","cam":"24 Hour Total stake"}};
+var STAKE_READ = {"sb":{"n":1,"at":"2026-11-21T01:11:33-07:00","cam":"24 Hour Total stake"}};
 /* Hourly snow stake log (Mark, Nov 20, 2026): every stake-cam reading, [time read (ISO, Mountain offset), inches], newest last, last 48 hours.
    The stake reader tasks append to it; the 48-hour outlook draws it as the stake row. Keep the variable name and one-line form. */
 var STAKE_LOG = {"sb":[["2026-11-19T03:10:09-07:00",0],["2026-11-19T06:16:08-07:00",0],["2026-11-19T08:10:03-07:00",1],["2026-11-19T09:10:11-07:00",2],["2026-11-19T12:10:05-07:00",2],["2026-11-19T15:10:06-07:00",3],["2026-11-19T18:10:23-07:00",3],["2026-11-19T22:10:05-07:00",3],["2026-11-20T01:10:29-07:00",3],["2026-11-20T04:10:06-07:00",5],["2026-11-20T05:10:07-07:00",6],["2026-11-20T07:40:07-07:00",7],["2026-11-20T08:10:10-07:00",8],["2026-11-20T09:10:06-07:00",9],["2026-11-20T10:10:06-07:00",0],["2026-11-20T12:10:11-07:00",1],["2026-11-20T15:40:09-07:00",1],["2026-11-20T19:10:20-07:00",1]]};
