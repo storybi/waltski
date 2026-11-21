@@ -2537,7 +2537,10 @@ var ANT_Q = {"asof":1795208400,"ipo":83.0,"ipo_date":"2026-11-19","iv":"30m","t"
   /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. (device time) the photo rotation stops and holds the snow stake picture,
      refreshed every 30 minutes. An arrow tap still steps through the cams; the stake comes back 2 minutes later. */
   function nightHold(){ var h = new Date().getHours(); return h >= 21 || h < 7; }
-  var STAKE_URL = "https://img.hdrelay.com/frames/09f922af-169d-4949-9bb7-295c6a859daa/default/last.jpg", heldAt = 0;
+  var STAKE_URL = "https://img.hdrelay.com/frames/09f922af-169d-4949-9bb7-295c6a859daa/default/last.jpg", heldAt = 0, curK = "";
+  /* Photo pause (Mark, Nov 21, 2026): see the pause button in the banner arrows script */
+  function pzSb(){ try{ var p = JSON.parse(localStorage.getItem("sk-photo-pause") || "null"); return p && p.m === "sb" && p.n ? p : null; }catch(e){ return null; } }
+  function pzIdx(){ var p = pzSb(); if(!p) return -1; for(var i = 0; i < frames.length; i++) if(frames[i].k === p.n || NAMES[frames[i].k] === p.n) return i; return -1; }
   function hold(){
     if(!nightHold()){ heldAt = 0; return false; }
     var s = frames.filter(function(f){ return f.k === "stake"; })[0];
@@ -2548,7 +2551,7 @@ var ANT_Q = {"asof":1795208400,"ipo":83.0,"ipo_date":"2026-11-19","iv":"30m","t"
     paint(-1, {k: "stake", src: /^https?:/.test(s.src) ? s.src.split("?")[0] + "?t=" + Date.now() : s.src});
     return true;
   }
-  function tick(){ if(document.hidden || hold() || frames.length < 2) return; idx = (idx + 1) % frames.length; paint(idx); }
+  function tick(){ if(document.hidden || pzSb() || hold() || frames.length < 2) return; idx = (idx + 1) % frames.length; paint(idx); }
   function paint(i, fo){
     var f = fo || frames[i]; if(!f) return;
     var next = 1 - front, img = new Image();
@@ -2561,7 +2564,7 @@ var ANT_Q = {"asof":1795208400,"ipo":83.0,"ipo_date":"2026-11-19","iv":"30m","t"
       nl.style.zIndex = 2; old.style.zIndex = 1; void nl.offsetWidth; nl.style.transition = "";
       nl.classList.add("on"); front = next;
       setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
-      label(f.k); root.classList.add("has-banner"); root.classList.toggle("stake-hold", !!fo);   /* clear frost bar while the stake is held (Nov 18, 2026) */
+      label(f.k); curK = f.k; root.classList.add("has-banner"); root.classList.toggle("stake-hold", !!fo);   /* clear frost bar while the stake is held (Nov 18, 2026) */
     };
     img.src = f.src;
   }
@@ -2574,7 +2577,7 @@ var ANT_Q = {"asof":1795208400,"ipo":83.0,"ipo_date":"2026-11-19","iv":"30m","t"
         var i = document.querySelector("#cam-" + k + " img"); if(i && i.src) frames.push({k: k, src: i.src});
       });
     }
-    idx = 0; heldAt = 0; if(!hold()) paint(0); size();
+    idx = 0; heldAt = 0; var pk = pzIdx(); if(pk >= 0){ idx = pk; paint(idx); } else if(!hold()) paint(0); size();
     if(frames.length > 1 || nightHold()) timer = setInterval(tick, ROTATE);
   }
   /* Next photo button: show the next cam view now, then carry on rotating every 20 seconds from there. */
@@ -2595,6 +2598,7 @@ var ANT_Q = {"asof":1795208400,"ipo":83.0,"ipo_date":"2026-11-19","iv":"30m","t"
   }
   /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): step the Snowbasin photo set back (-1) or forward (+1) */
   window.skSbBannerStep = function(d){ nextPhoto.dir = d < 0 ? -1 : 1; nextPhoto(); };
+  window.skSbBannerCur = function(){ return curK ? {m: "sb", n: curK} : null; };
   (function(){ var nb = document.getElementById("wt-next"); if(nb) nb.addEventListener("click", nextPhoto); })();
   function use(list, when){
     frames = list.map(function(b){ return {k: b.k, src: b.src || ("data:image/jpeg;base64," + b.img)}; });
@@ -3738,6 +3742,9 @@ window.PTYPE = (function(){
   }
   function hm(d){ try{ return d.toLocaleTimeString("en-US",{timeZone:"America/Denver",hour:"numeric",minute:"2-digit"}).replace("AM","a.m.").replace("PM","p.m.") + " MT"; }catch(e){ return ""; } }
   var mode = "sb", idx = -1, timer = null, set_ = {}, setAt = {};
+  /* Photo pause (Mark, Nov 21, 2026): see the pause button in the banner arrows script. curI = frame now showing. */
+  var curI = -1, pzAt = 0;
+  function pz(){ try{ var p = JSON.parse(localStorage.getItem("sk-photo-pause") || "null"); return p && p.m === mode && typeof p.i === "number" ? p : null; }catch(e){ return null; } }
   function linkTo(f){ var c = CAMS[mode]; if(!c || !f) return; var play = getPlay(); if(play){ play.href = f.watch; play.title = c.title; } if(own){ own.href = f.watch; own.title = c.title; } }
   function show(src, f, at, m){
     if(m !== mode) return;
@@ -3749,7 +3756,7 @@ window.PTYPE = (function(){
     }
     else lay.style.backgroundImage = 'url("' + src + '")';
     cap.textContent = f.cap || (CAMS[m].resort + " · " + f.name + " live cam" + (at ? " · " + hm(new Date(at)) : ""));
-    root.classList.add("has-banner"); linkTo(f);
+    root.classList.add("has-banner"); linkTo(f); curI = CAMS[m].frames.indexOf(f);
     root.classList.toggle("stake-hold", nightHold() && /stake|snow stick|ruler/i.test(f.name || ""));
   }
   /* waltski.com: load the next cam's current picture; skip cams that don't answer */
@@ -3815,7 +3822,7 @@ window.PTYPE = (function(){
       if(!got.length) return;
       var had = (set_[m] || []).length; set_[m] = got; setAt[m] = at;
       try{ localStorage.setItem("wsj-" + m + "-set", JSON.stringify({at: at, set: got})); }catch(e){}
-      if(!had && m === mode){ idx = -1; claudeNext(); }
+      if(!had && m === mode){ if(!pzShow(true)){ idx = -1; claudeNext(); } }
     }, function(){ busy = false; });
   }
   /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. a resort with a snow stake cam holds that picture, refreshed every 30 minutes. */
@@ -3835,7 +3842,16 @@ window.PTYPE = (function(){
     probe.onerror = function(){ heldAt = 0; };
     probe.src = u; return true;
   }
-  function tick(){ if(document.hidden || !CAMS[mode] || CAMS[mode].live || (CAMS[mode].video && !inClaude)) return; if(holdStake()) return; if(inClaude) claudeNext(); else webNext(0); }
+  function tick(){ if(document.hidden || !CAMS[mode] || CAMS[mode].live || (CAMS[mode].video && !inClaude)) return; if(pz()){ pzShow(false); return; } if(holdStake()) return; if(inClaude) claudeNext(); else webNext(0); }
+  /* paused: show the held picture at once (now) or, while paused, a fresh copy of it every 5 minutes */
+  function pzShow(now){
+    var p = pz(), c = CAMS[mode]; if(!p || !c || c.live || c.video || p.i < 0 || p.i >= c.frames.length) return false;
+    if(!now && Date.now() - pzAt < 5*60000) return true; pzAt = Date.now();
+    if(inClaude){ var l = usable(mode), k = -1; l.forEach(function(x, j){ if(x.i === p.i) k = j; }); if(k < 0) return false; idx = k - 1; claudeNext(); return true; }
+    var m = mode, f = c.frames[p.i], u = f.img + (f.img.indexOf("?") < 0 ? "?t=" : "&t=") + Date.now(), probe = new Image();
+    probe.onload = function(){ if(probe.naturalWidth > 200) show(u, f, new Date().toISOString(), m); };
+    probe.src = u; return true;
+  }
   function fit(){
     var fs = lay.querySelectorAll("iframe"); if(!fs.length) return;
     var w = b.offsetWidth || window.innerWidth, h = b.offsetHeight || 300;
@@ -3912,18 +3928,20 @@ window.PTYPE = (function(){
   }
   function liveRot(c){
     lay.style.backgroundImage = ""; [].forEach.call(lay.querySelectorAll("iframe"), function(o){ o.parentNode.removeChild(o); });
-    li = -1; nextLive(c); timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE);
+    var pp = pz(); li = pp && pp.i >= 0 && pp.i < c.live.length ? pp.i - 1 : -1; nextLive(c); timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c && !pz()) nextLive(c); }, LIVE_ROTATE);
     /* (a stream that fails to play is replaced at once by nextLive itself) */
   }
   window.addEventListener("resize", fit);
   /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): previous (-1) / next (+1) picture or live stream for whatever shows behind the header */
+  window.skCamMode = function(){ return mode; };
+  window.skCamCur = function(){ var c = CAMS[mode]; if(!c) return null; if(c.live) return {m: mode, i: li}; if((c.video && !inClaude) || window.skHdrRadarWant) return {m: mode, i: -1}; return {m: mode, i: curI}; };
   window.skCamStep = function(d){
     d = d < 0 ? -1 : 1; var c = CAMS[mode];
     if(!c){ if(window.skSbLiveStep && window.skSbLiveStep(d)) return; if(window.skSbBannerStep) window.skSbBannerStep(d); return; }
     if((c.video && !inClaude) || window.skHdrRadarWant) return;
     if(timer){ clearInterval(timer); timer = null; }
     if(c.live){ if(inClaude) return; var n = c.live.length; li = ((li + d - 1) % n + n) % n; nextLive(c);
-      timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c) nextLive(c); }, LIVE_ROTATE); return; }
+      timer = setInterval(function(){ if(!document.hidden && CAMS[mode] === c && !pz()) nextLive(c); }, LIVE_ROTATE); return; }
     if(inClaude){ var l = usable(mode); if(!l.length) return; idx = ((idx + d - 1) % l.length + l.length) % l.length; claudeNext(); }
     else { webDir = d; webNext(0); }
     if(nightHold()){ heldAt = Date.now() - 28*60000; heldM = mode; }
@@ -3960,9 +3978,9 @@ window.PTYPE = (function(){
     if(c.live){ lay.style.backgroundImage = ""; if(inClaude){ cap.textContent = c.resort + " \u00b7 live cams play on skiinut.com"; return; } liveRot(c); return; }
     if(inClaude){
       if(!set_[mode]){ try{ var sv = JSON.parse(localStorage.getItem("wsj-" + mode + "-set") || "null"); if(sv && sv.set && sv.set.length){ set_[mode] = sv.set; setAt[mode] = sv.at; } }catch(e){} }
-      heldAt = 0; if(!holdStake()) claudeNext(); fetchSet();
+      heldAt = 0; if(!pzShow(true) && !holdStake()) claudeNext(); fetchSet();
     } else if(c.video){ video(c); return; }
-    else { heldAt = 0; if(!holdStake()) webNext(0); }
+    else { heldAt = 0; if(!pzShow(true) && !holdStake()) webNext(0); }
     timer = setInterval(tick, ROTATE);
   }
   links.forEach(function(x){ x.addEventListener("click", function(e){ e.preventDefault(); set(x.getAttribute("data-cam"), true); }); });
@@ -7202,19 +7220,23 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
   /* Night stake hold (Mark, Nov 18, 2026): 9 p.m.-7 a.m. (device time) the rotation stops on the snow stake picture, refreshed every
      30 minutes. An arrow tap still steps through the cams; the stake comes back 2 minutes later. */
   function nightHold(){ var h = new Date().getHours(); return h >= 21 || h < 7; }
-  var heldAt = 0;
+  var heldAt = 0, curN = "", pzAt = 0;
+  /* Photo pause (Mark, Nov 21, 2026): see the pause button in the banner arrows script */
+  function pzSb(){ try{ var p = JSON.parse(localStorage.getItem("sk-photo-pause") || "null"); return p && p.m === "sb" && p.n ? p : null; }catch(e){ return null; } }
+  function pzIdx(la){ var p = pzSb(); if(!p) return -1; var NM = {ogden: "Mt. Ogden", jp: "John Paul Lodge", wildcat: "Base of Wildcat", stake: "Snow stake"};
+    for(var j = 0; j < la.length; j++) if(la[j].name === p.n || la[j].name === NM[p.n]) return j; return -1; }
   function load(){
     if(busy) return;
-    var l = list(), dd = load.dir || 1, held = !load.manual && nightHold(); load.manual = false;
+    var pk = load.manual ? -1 : pzIdx(list(true)), l = list(), dd = load.dir || 1, held = !load.manual && pk < 0 && nightHold(); load.manual = false;
     if(held){ var la = list(true), si = -1; la.forEach(function(x, j){ if(x.name === "Snow stake") si = j; }); if(si >= 0){ l = la; idx = si; } else held = false; }
-    if(!held) idx = ((idx + dd) % l.length + l.length) % l.length;
+    if(pk >= 0){ l = list(true); idx = pk; } else if(!held) idx = ((idx + dd) % l.length + l.length) % l.length;
     var f = l[idx];   /* dd: -1 while stepping back with the arrow */
     busy = true; var my = load.seq = (load.seq || 0) + 1;   /* a newer load (arrow tap) wins over an older one still loading */
     var next = 1 - front, img = L[next], probe = new Image();
     probe.onload = function(){
       if(my !== load.seq) return;
       busy = false;
-      if(probe.naturalWidth < 40){ if(held) return; if(++fails < l.length) load(); else load.dir = 1; return; }
+      if(probe.naturalWidth < 40){ if(held || pk >= 0) return; if(++fails < l.length) load(); else load.dir = 1; return; }
       fails = 0; load.dir = 1; if(held) heldAt = Date.now();
       /* Smooth crossfade (Mark, Oct 29, 2026): the new picture fades in over the old one, then the old one is cleared. */
       var old = L[front];
@@ -7225,13 +7247,13 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
         setTimeout(function(){ if(L[front] !== old){ old.style.transition = "none"; old.classList.remove("on"); void old.offsetWidth; old.style.transition = ""; } }, 2700);
       };
       img.src = probe.src; front = next;
-      root.classList.add("has-banner", "has-video"); root.classList.toggle("stake-hold", held);
-      cap.textContent = "Snowbasin · " + f.name + " live cam · " + when();
+      root.classList.add("has-banner", "has-video"); root.classList.toggle("stake-hold", held || (pk >= 0 && nightHold() && f.name === "Snow stake"));
+      cap.textContent = "Snowbasin · " + f.name + " live cam · " + when(); curN = f.name;
     };
-    probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(held) return; if(++fails < l.length) load(); else load.dir = 1; };
+    probe.onerror = function(){ if(my !== load.seq) return; busy = false; if(held || pk >= 0) return; if(++fails < l.length) load(); else load.dir = 1; };
     probe.src = f.src + (f.src.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now();
   }
-  function tick(){ if(document.hidden) return; if(nightHold()){ if(heldAt && Date.now() - heldAt < 30*60000) return; } else heldAt = 0; load(); }
+  function tick(){ if(document.hidden) return; if(pzSb()){ if(Date.now() - pzAt >= 5*60000){ pzAt = Date.now(); load(); } return; } if(nightHold()){ if(heldAt && Date.now() - heldAt < 30*60000) return; } else heldAt = 0; load(); }
   load();
   var rot = setInterval(tick, ROTATE);
   /* banner arrows (Mark, Nov 14, 2026, 7:56 p.m.): previous / next Snowbasin cam, then rotate on from there */
@@ -7240,6 +7262,7 @@ html.rotating #rot-cover{opacity:1; visibility:visible; transition:none;}
     busy = false; fails = 0; load.dir = d < 0 ? -1 : 1; load.manual = true; load(); if(nightHold()) heldAt = Date.now() - 28*60000;
     clearInterval(rot); rot = setInterval(tick, ROTATE); return true;
   };
+  if(!(window.claude && window.claude.use)) window.skSbLiveCur = function(){ return curN ? {m: "sb", n: curN} : null; };
 })();
 </script>
 <script>
@@ -7376,6 +7399,10 @@ html:not(.has-banner) .wt-edition select.wt-locpick{background-color:var(--surfa
 .sk-arw-l{left:44px;} .sk-arw-r{right:44px;}   /* smaller again and further in (Mark, 8:16 p.m.) */
 @media (max-width:700px){ .sk-arw{width:28px; height:40px; margin-top:-20px;} .sk-arw svg{width:10px; height:24px; margin-top:8px;} .sk-arw-l{left:22px;} .sk-arw-r{right:22px;} }
 html.hdr-radar .sk-arw{display:none!important;}
+/* pause button between the arrows (Mark, Nov 21, 2026) */
+.sk-arw-p svg{width:14px; height:21px; margin-top:12px;}
+.sk-arw-p.paused svg path{fill:rgba(226,115,58,.82); stroke:rgba(255,255,255,.85);}
+@media (max-width:700px){ .sk-arw-p svg{width:12px; height:18px; margin-top:11px;} }
 /* no arrows on upright phones / iPads or on the Other News page (Mark, 8:35 p.m.) */
 html.view-news .sk-arw{display:none!important;}
 html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view (Mark, 9:25 p.m.) */
@@ -7393,9 +7420,28 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
              r: '<svg viewBox="0 0 40 100" aria-hidden="true"><path d="M3 4h19l16 46-16 46H3l16-46z"/></svg>'};
   function mk(cls, ch, lbl, d){ var x = document.createElement("button"); x.type = "button"; x.className = "sk-arw " + cls; x.innerHTML = SVG[cls.slice(-1)];
     x.setAttribute("aria-label", lbl); x.title = lbl;
-    x.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); if(window.skCamStep) window.skCamStep(d); });
+    x.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); if(window.skPauseSet) window.skPauseSet(null); if(window.skCamStep) window.skCamStep(d); });   /* an arrow tap ends the pause (Mark, Nov 21, 2026) */
     document.body.appendChild(x); return x; }
   var L = mk("sk-arw-l", "‹", "Previous picture", -1), R = mk("sk-arw-r", "›", "Next picture", 1);
+  /* Pause button (Mark, Nov 21, 2026, 7:13 a.m.): sits right between the two arrows. A tap holds the picture that is showing, at any hour
+     (it beats the night stake hold), remembered on this device (localStorage sk-photo-pause = {m: place, i: frame} or {m: "sb", n: cam})
+     so it stays through the hourly reload. While paused it shows an orange play mark; a tap on it, or on either arrow, ends the pause and
+     the normal rotation (and night stake hold) comes back. Each rotator reads the same key. */
+  var PK = "sk-photo-pause";
+  function pget(){ try{ return JSON.parse(localStorage.getItem(PK) || "null"); }catch(e){ return null; } }
+  function curMode(){ return window.skCamMode ? window.skCamMode() : "sb"; }
+  function paused(){ var p = pget(); return !!(p && p.m === curMode()); }
+  var PSVG = {pause: '<svg viewBox="0 0 40 60" aria-hidden="true"><path d="M5 4h11v52H5zM24 4h11v52H24z"/></svg>',
+              play: '<svg viewBox="0 0 40 60" aria-hidden="true"><path d="M6 4l31 26L6 56z"/></svg>'};
+  var P = document.createElement("button"); P.type = "button"; P.className = "sk-arw sk-arw-p"; document.body.appendChild(P);
+  function pPaint(){ var on = paused(); if(P._on === on) return; P._on = on; P.classList.toggle("paused", on); P.innerHTML = on ? PSVG.play : PSVG.pause;
+    var t = on ? "Resume photo rotation" : "Pause on this photo"; P.setAttribute("aria-label", t); P.title = t; P.setAttribute("aria-pressed", on ? "true" : "false"); }
+  window.skPauseSet = function(p){ try{ if(p) localStorage.setItem(PK, JSON.stringify(p)); else localStorage.removeItem(PK); }catch(e){} pPaint(); };
+  P.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation();
+    if(paused()){ window.skPauseSet(null); return; }
+    var c = window.skCamCur && window.skCamCur(); if(!c){ var g = window.skSbLiveCur || window.skSbBannerCur; c = g ? g() : null; }
+    if(c) window.skPauseSet(c); });
+  pPaint();
   var raf = 0;
   function pos(){ raf = 0;
     var r = b.getBoundingClientRect(), vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
@@ -7410,6 +7456,9 @@ html:not(.show-image) .sk-arw{display:none!important;}   /* not on the card view
     var hr = document.getElementById("sk-hrtri"), lx = "";
     if(on && hr && hr.style.visibility !== "hidden" && getComputedStyle(hr).display !== "none"){ var hb = hr.getBoundingClientRect(); if(hb.width > 4 && hb.left < window.innerWidth / 2) lx = Math.round(hb.right + 8) + "px"; }
     if(L.style.left !== lx) L.style.left = lx;
+    /* pause button: same height, centred between the two arrows */
+    pPaint(); P.classList.toggle("on", on);
+    if(on){ P.style.top = y + "px"; var lb = L.getBoundingClientRect(), rb = R.getBoundingClientRect(); P.style.left = Math.round((lb.right + rb.left) / 2 - (P.offsetWidth || 32) / 2) + "px"; }
   }
   function q(){ if(!raf) raf = requestAnimationFrame(pos); }
   window.addEventListener("scroll", q, {passive: true}); window.addEventListener("resize", q); setInterval(pos, 1000); pos();
@@ -7484,7 +7533,11 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
     cv.font = "700 " + F + "px " + ff; var mt = cv.measureText(txt);
     var asc = mt.actualBoundingBoxAscent || F * .72, des = mt.actualBoundingBoxDescent || 0, ink = asc + des;
     var L = mt.actualBoundingBoxLeft || 0, wd = (mt.actualBoundingBoxRight || mt.width) + L;
-    if(small) top = bot - (bot - top) / 3;   /* Small stats: the big hour is 1/3 as tall too (Mark, Nov 18, 2026, 10:12 a.m.) */
+    /* Small stats: the big hour stays as LARGE as in Big stats (Mark, Nov 21, 2026, 7:13 a.m.; it used to shrink to 1/3). Same height, set
+       at the photo's left margin so it ends before the first small stat. */
+    var smallX = -1;
+    if(small){ smallX = Math.max(0, br.left) + Math.max(16, W * .04);
+      var rlim = gs[1] && gs[1].offsetParent ? gs[1].getBoundingClientRect().left - 12 : W * .5; half = Math.max(30, (rlim - smallX) / 2); }
     var hgt = Math.max(20, bot - top), k = hgt / ink;
     if(wd * k > 2 * half) k = 2 * half / wd;                    /* too wide: shrink, keep the bottom on the frost edge */
     /* Hollow hour that fills up through the hour (Mark, Nov 15, 2026, 9:19 p.m., option B "Frosted inside"): a bold outline in the hour's
@@ -7511,7 +7564,7 @@ html.full-image #sk-hrtri{display:none!important;}   /* not in Full image (Mark,
       o.strokeStyle = col; o.lineWidth = lwIn; o.strokeText(txt, tx, ty); o.globalCompositeOperation = "destination-in"; o.fillStyle = "#000"; o.fillText(txt, tx, ty);
       o.globalCompositeOperation = "source-over"; c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(oc, 0, 0); c.restore(); }
     c.strokeStyle = col; c.lineWidth = lw; c.strokeText(txt, tx, ty);                            /* bold outline */
-    el.style.left = Math.round(cx - cw / 2 - sw) + "px"; el.style.top = Math.round(bot - ch - sw) + "px";
+    el.style.left = Math.round(smallX >= 0 ? smallX - sw : cx - cw / 2 - sw) + "px"; el.style.top = Math.round(bot - ch - sw) + "px";
   }
   setInterval(draw, 5000);
   var sraf = 0; window.addEventListener("scroll", function(){ if(!sraf) sraf = requestAnimationFrame(function(){ sraf = 0; draw(); }); }, {passive: true});
